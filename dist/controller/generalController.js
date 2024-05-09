@@ -11,16 +11,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.clientDataUpdate = exports.clientData = exports.insertWorkout = exports.insertClientData = void 0;
 const database_1 = require("../database/database");
-const classes_1 = require("../model/classes");
-const helpers_1 = require("../model/classes/helpers");
+const generalClasses_1 = require("../model/classes/generalClasses");
+const responseClasses_1 = require("../model/classes/responseClasses");
 const errors_1 = require("../errors");
 const insertClientData = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let client;
     try {
         const { body } = req;
         client = yield database_1.pool.connect();
-        yield classes_1.ClientManager.insertClient(client, res, body);
-        helpers_1.ResponseHandler.sendSuccessMessage(res, body);
+        yield new generalClasses_1.ClientManager(client, res).insertClient(body);
+        responseClasses_1.ResponseHandler.sendSuccessMessage(res, body);
     }
     catch (e) {
         (0, errors_1.GENERAL_ERROR_HANDLER)(e, res);
@@ -37,12 +37,12 @@ const insertWorkout = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const { body, params } = req;
         const { id } = params;
         client = yield database_1.pool.connect();
-        if ((yield helpers_1.Helper.verifyWorkout(client, res, id, body)) !== 0) {
-            helpers_1.ResponseHandler.sendExerciseExists(res);
+        if ((yield new generalClasses_1.WorkoutManager(client, res).verifyWorkout(id, body)) !== 0) {
+            responseClasses_1.ResponseHandler.sendExerciseExists(res);
         }
         else {
-            yield classes_1.WorkoutManager.insertWorkout(client, res, id, body);
-            helpers_1.ResponseHandler.sendSuccessMessage(res, body);
+            yield new generalClasses_1.WorkoutManager(client, res).insertWorkout(id, body);
+            responseClasses_1.ResponseHandler.sendSuccessMessage(res, body);
         }
     }
     catch (e) {
@@ -59,12 +59,12 @@ const clientData = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     try {
         const { id } = req.params;
         client = yield database_1.pool.connect();
-        const { rowCount, rows } = yield classes_1.ClientManager.clientData(client, res, id);
+        const { rowCount, rows } = yield new generalClasses_1.ClientManager(client, res).clientData(id);
         if (rowCount === 0) {
-            helpers_1.ResponseHandler.sendIdNotFound(res);
+            responseClasses_1.ResponseHandler.sendIdNotFound(res);
         }
         else {
-            helpers_1.ResponseHandler.sendIdFound(res, rows);
+            responseClasses_1.ResponseHandler.sendIdFound(res, rows);
         }
     }
     catch (e) {
@@ -82,8 +82,8 @@ const clientDataUpdate = (req, res) => __awaiter(void 0, void 0, void 0, functio
         const { id } = req.params;
         const { body } = req;
         client = yield database_1.pool.connect();
-        yield classes_1.ClientManager.clientUpdate(client, id, body);
-        helpers_1.ResponseHandler.sendSuccessMessage(res, body);
+        yield new generalClasses_1.ClientManager(client, res).clientUpdate(id, body);
+        responseClasses_1.ResponseHandler.sendSuccessMessage(res, body);
     }
     catch (e) {
         (0, errors_1.GENERAL_ERROR_HANDLER)(e, res);

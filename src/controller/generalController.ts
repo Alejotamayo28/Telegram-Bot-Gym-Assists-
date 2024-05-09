@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { pool } from '../database/database';
-import { ClientManager, WorkoutManager } from '../model/classes';
-import { ResponseHandler, Helper } from '../model/classes/helpers';
+import { ClientManager, WorkoutManager } from '../model/classes/generalClasses';
+import { ResponseHandler } from '../model/classes/responseClasses';
 import { GENERAL_ERROR_HANDLER } from '../errors';
 import { QueryResult } from 'pg';
 
@@ -10,7 +10,7 @@ export const insertClientData = async (req: Request, res: Response): Promise<voi
     try {
         const { body } = req;
         client = await pool.connect();
-        await ClientManager.insertClient(client, res, body);
+        await new ClientManager(client, res).insertClient(body);
         ResponseHandler.sendSuccessMessage(res, body);
     } catch (e) {
         GENERAL_ERROR_HANDLER(e, res);
@@ -26,10 +26,10 @@ export const insertWorkout = async (req: Request, res: Response): Promise<void> 
         const { body, params } = req;
         const { id } = params;
         client = await pool.connect();
-        if (await Helper.verifyWorkout(client, res, id, body) !== 0) {
+        if (await new WorkoutManager(client, res).verifyWorkout(id, body) !== 0) {
             ResponseHandler.sendExerciseExists(res);
         } else {
-            await WorkoutManager.insertWorkout(client, res, id, body);
+            await new WorkoutManager(client, res).insertWorkout(id, body);
             ResponseHandler.sendSuccessMessage(res, body);
         }
     } catch (e) {
@@ -45,7 +45,7 @@ export const clientData = async (req: Request, res: Response): Promise<void> => 
     try {
         const { id } = req.params;
         client = await pool.connect();
-        const { rowCount, rows }: QueryResult = await ClientManager.clientData(client, res, id);
+        const { rowCount, rows }: QueryResult = await new ClientManager(client, res).clientData(id);
         if (rowCount === 0) {
             ResponseHandler.sendIdNotFound(res);
         } else {
@@ -65,7 +65,7 @@ export const clientDataUpdate = async (req: Request, res: Response): Promise<voi
         const { id } = req.params;
         const { body } = req;
         client = await pool.connect();
-        await ClientManager.clientUpdate(client, id, body);
+        await new ClientManager(client, res).clientUpdate(id, body);
         ResponseHandler.sendSuccessMessage(res, body);
     } catch (e) {
         GENERAL_ERROR_HANDLER(e, res);
