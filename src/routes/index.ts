@@ -1,10 +1,17 @@
 import { Router } from 'express';
-import { insertClientData, insertWorkout, clientData, clientDataUpdate } from '../controller/generalController';
+import { insertClientData, insertWorkout, clientData, clientDataUpdate, clientDeleteData } from '../controller/generalController';
+import { client } from '../routes/Routes'
 
 const router = Router();
 
-router.get("/probando", insertClientData);
-router.get("/probando/:id", insertWorkout);
+router.post(client.CREATE_CLIENT_ROUTE, insertClientData)
+router.get(client.GET_CLIENT_DATA, clientData)
+router.put(client.UPDATE_CLIENT_DATA, clientDataUpdate)
+router.delete("/client/delete/:id", clientDeleteData)
+
+
+
+router.get("/insertar/:id", insertWorkout);
 router.get("/find/:id", clientData);
 router.get("/update/:id", clientDataUpdate);
 

@@ -9,11 +9,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.clientDataUpdate = exports.clientData = exports.insertWorkout = exports.insertClientData = void 0;
+exports.insertWorkout = exports.clientDeleteData = exports.clientDataUpdate = exports.clientData = exports.insertClientData = void 0;
 const database_1 = require("../database/database");
-const generalClasses_1 = require("../model/classes/generalClasses");
+const generalClasses_1 = require("../model/classes/client/generalClasses");
 const responseClasses_1 = require("../model/classes/responseClasses");
 const errors_1 = require("../errors");
+const generalClasses_2 = require("../model/classes/workout/generalClasses");
 const insertClientData = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let client;
     try {
@@ -31,41 +32,16 @@ const insertClientData = (req, res) => __awaiter(void 0, void 0, void 0, functio
     }
 });
 exports.insertClientData = insertClientData;
-const insertWorkout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    let client;
-    try {
-        const { body, params } = req;
-        const { id } = params;
-        client = yield database_1.pool.connect();
-        if ((yield new generalClasses_1.WorkoutManager(client, res).verifyWorkout(id, body)) !== 0) {
-            responseClasses_1.ResponseHandler.sendExerciseExists(res);
-        }
-        else {
-            yield new generalClasses_1.WorkoutManager(client, res).insertWorkout(id, body);
-            responseClasses_1.ResponseHandler.sendSuccessMessage(res, body);
-        }
-    }
-    catch (e) {
-        (0, errors_1.GENERAL_ERROR_HANDLER)(e, res);
-        console.error(e);
-    }
-    finally {
-        client && client.release();
-    }
-});
-exports.insertWorkout = insertWorkout;
 const clientData = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let client;
     try {
         const { id } = req.params;
         client = yield database_1.pool.connect();
         const { rowCount, rows } = yield new generalClasses_1.ClientManager(client, res).clientData(id);
-        if (rowCount === 0) {
+        if (!rowCount)
             responseClasses_1.ResponseHandler.sendIdNotFound(res);
-        }
-        else {
+        if (rowCount)
             responseClasses_1.ResponseHandler.sendIdFound(res, rows);
-        }
     }
     catch (e) {
         (0, errors_1.GENERAL_ERROR_HANDLER)(e, res);
@@ -94,3 +70,41 @@ const clientDataUpdate = (req, res) => __awaiter(void 0, void 0, void 0, functio
     }
 });
 exports.clientDataUpdate = clientDataUpdate;
+const clientDeleteData = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    let client;
+    try {
+        client = yield database_1.pool.connect();
+        const { id } = req.params;
+        yield new generalClasses_1.ClientManager(client, res).deleteClient(id);
+        responseClasses_1.ResponseHandler.sendSuccessMessage(res, id);
+    }
+    catch (e) {
+        (0, errors_1.GENERAL_ERROR_HANDLER)(e, res);
+        console.error(e);
+    }
+    client && client.release();
+});
+exports.clientDeleteData = clientDeleteData;
+const insertWorkout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    let client;
+    try {
+        const { body, params } = req;
+        const { id } = params;
+        client = yield database_1.pool.connect();
+        if ((yield new generalClasses_2.WorkoutManager(client, res).verifyWorkout(id, body)) !== 0) {
+            responseClasses_1.ResponseHandler.sendExerciseExists(res);
+        }
+        else {
+            yield new generalClasses_2.WorkoutManager(client, res).insertWorkout(id, body);
+            responseClasses_1.ResponseHandler.sendSuccessMessage(res, body);
+        }
+    }
+    catch (e) {
+        (0, errors_1.GENERAL_ERROR_HANDLER)(e, res);
+        console.error(e);
+    }
+    finally {
+        client && client.release();
+    }
+});
+exports.insertWorkout = insertWorkout;

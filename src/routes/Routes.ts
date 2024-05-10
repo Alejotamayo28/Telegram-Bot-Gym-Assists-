@@ -3,6 +3,13 @@ export enum GymProgressionRoutes {
     PERFORMANCE_ROUTE = "/performance/",
 }
 
+export enum client {
+    CREATE_CLIENT_ROUTE = "/client/singUp",
+    LOGIN_CLIENT_ROUTE = "/client/login",
+    GET_CLIENT_DATA = "/client/find/:id",
+    UPDATE_CLIENT_DATA = "/client/update/:id"
+}
+
 export enum DataRoutes {
     GET_ALL_ROUTE = "all/",
     GET_ONE_ROUTE = "get/",

@@ -9,9 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.WorkoutManager = exports.ClientManager = void 0;
-const errors_1 = require("../../errors");
-const queriesClasses_1 = require("./queriesClasses");
+exports.ClientManager = void 0;
+const errors_1 = require("../../../errors");
+const clientQueries_1 = require("./clientQueries");
 class ClientManager {
     constructor(client, res) {
         this.client = client;
@@ -20,8 +20,9 @@ class ClientManager {
     insertClient(clientData) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const responseId = yield new queriesClasses_1.ClientQueries(this.client, this.res).postClientQuery(clientData);
-                yield new queriesClasses_1.ClientQueries(this.client, this.res).postClientDataQuery(responseId, clientData);
+                const { nickname, password, age, gender, email, weight, height } = clientData;
+                const responseId = yield this.client.query(clientQueries_1.INSERT_CLIENT_QUERY, [nickname, password]);
+                yield this.client.query(clientQueries_1.INSERT_CLIENT_DATA_QUERY, [responseId.rows[0].id, age, gender, email, weight, height]);
             }
             catch (e) {
                 (0, errors_1.GENERAL_ERROR_HANDLER)(e, this.res);
@@ -31,7 +32,7 @@ class ClientManager {
     clientData(id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const response = yield new queriesClasses_1.ClientQueries(this.client, this.res).getClientData(id);
+                const response = yield this.client.query(clientQueries_1.GET_CLIENT_DATA, [id]);
                 return response;
             }
             catch (e) {
@@ -43,18 +44,31 @@ class ClientManager {
     clientUpdate(id, clientData) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { nickname, password, age, gender, email, weight, height } = clientData;
-                const response = yield new queriesClasses_1.ClientQueries(this.client, this.res).getClientData(id);
+                const { age, gender, email, weight, height } = clientData;
+                const response = yield this.client.query(clientQueries_1.GET_CLIENT_DATA, [id]);
                 const data = {
-                    nickname: nickname !== null && nickname !== void 0 ? nickname : response.rows[0].nickname,
-                    password: password !== null && password !== void 0 ? password : response.rows[0].password,
                     age: age !== null && age !== void 0 ? age : response.rows[0].age,
                     gender: gender !== null && gender !== void 0 ? gender : response.rows[0].gender,
                     email: email !== null && email !== void 0 ? email : response.rows[0].email,
                     weight: weight !== null && weight !== void 0 ? weight : response.rows[0].weight,
                     height: height !== null && height !== void 0 ? height : response.rows[0].height
                 };
-                yield new queriesClasses_1.ClientQueries(this.client, this.res).updateClient(id, data);
+                yield this.client.query(clientQueries_1.UPDATE_CLIENT_DATA, [data.age, data.gender, data.email, data.weight, data.height, id]);
+            }
+            catch (e) {
+                (0, errors_1.GENERAL_ERROR_HANDLER)(e, this.res);
+                console.error(e);
+            }
+        });
+    }
+    deleteClient(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                Promise.all([
+                    yield this.client.query(clientQueries_1.DELETE_CLIENT_DATA, [id]),
+                    yield this.client.query(clientQueries_1.DELETE_CLIENT_RECORDS, [id]),
+                    yield this.client.query(clientQueries_1.DELETE_CLIENT, [id])
+                ]);
             }
             catch (e) {
                 (0, errors_1.GENERAL_ERROR_HANDLER)(e, this.res);
@@ -64,47 +78,3 @@ class ClientManager {
     }
 }
 exports.ClientManager = ClientManager;
-class WorkoutManager {
-    constructor(client, res) {
-        this.client = client;
-        this.res = res;
-    }
-    insertWorkout(id, clientWorkout) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const { day, name, series, reps, kg } = clientWorkout;
-                yield this.client.query(`INSERT INTO workout (id,day,name,series,reps,kg) VALUES ($1,$2,$3,$4,$5,$6)`, [id, day, name, series, reps, kg]);
-            }
-            catch (e) {
-                (0, errors_1.GENERAL_ERROR_HANDLER)(e, this.res);
-                console.error(e);
-            }
-        });
-    }
-    workoutData(id, clientWorkout) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const { day } = clientWorkout;
-                const response = yield this.client.query(`SELECT * FROM workout WHERE id = $1 and day = $2 `, [id, day]);
-                return response;
-            }
-            catch (e) {
-                (0, errors_1.GENERAL_ERROR_HANDLER)(e, this.res);
-            }
-        });
-    }
-    verifyWorkout(id, clientWorkout) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const { day, name } = clientWorkout;
-                const response = yield this.client.query(`SELECT * FROM workout WHERE id = $1 AND DAY = $2 AND NAME = $3`, [id, day, name]);
-                return response.rowCount;
-            }
-            catch (e) {
-                (0, errors_1.GENERAL_ERROR_HANDLER)(e, this.res);
-                return 0;
-            }
-        });
-    }
-}
-exports.WorkoutManager = WorkoutManager;

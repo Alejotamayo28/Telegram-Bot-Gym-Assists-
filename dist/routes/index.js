@@ -2,9 +2,13 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const generalController_1 = require("../controller/generalController");
+const Routes_1 = require("../routes/Routes");
 const router = (0, express_1.Router)();
-router.get("/probando", generalController_1.insertClientData);
-router.get("/probando/:id", generalController_1.insertWorkout);
+router.post(Routes_1.client.CREATE_CLIENT_ROUTE, generalController_1.insertClientData);
+router.get(Routes_1.client.GET_CLIENT_DATA, generalController_1.clientData);
+router.put(Routes_1.client.UPDATE_CLIENT_DATA, generalController_1.clientDataUpdate);
+router.delete("/client/delete/:id", generalController_1.clientDeleteData);
+router.get("/insertar/:id", generalController_1.insertWorkout);
 router.get("/find/:id", generalController_1.clientData);
 router.get("/update/:id", generalController_1.clientDataUpdate);
 // Rutas relacionadas con el ejercicio
