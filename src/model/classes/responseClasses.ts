@@ -8,7 +8,6 @@ export class ResponseHandler {
             data: data
         });
     }
-
     static sendExerciseExists(res: Response): void {
         res.status(409).json({
             success: false,
@@ -16,7 +15,6 @@ export class ResponseHandler {
             data: null
         });
     }
-
     static sendIdNotFound(res: Response): void {
         res.status(404).json({
             success: false,
@@ -24,7 +22,6 @@ export class ResponseHandler {
             data: null
         });
     }
-
     static sendIdFound(res: Response, data: any): void {
         res.status(202).json({
             success: true,

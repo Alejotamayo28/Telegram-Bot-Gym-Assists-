@@ -1,7 +1,7 @@
 import { PoolClient, QueryResult } from 'pg';
 import { Response } from 'express';
-import { GENERAL_ERROR_HANDLER } from '../../../errors';
-import { ClientData } from '../../interface/client';
+import { GENERAL_ERROR_HANDLER } from '../../errors';
+import { ClientData } from '../../model/interface/client';
 import { DELETE_CLIENT, DELETE_CLIENT_DATA, DELETE_CLIENT_RECORDS, GET_CLIENT_DATA, INSERT_CLIENT_DATA_QUERY, INSERT_CLIENT_QUERY, UPDATE_CLIENT_DATA } from './clientQueries';
 
 export class ClientManager {

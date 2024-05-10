@@ -1,16 +1,18 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const generalController_1 = require("../controller/generalController");
 const Routes_1 = require("../routes/Routes");
+const clientController_1 = require("../controller/client/clientController");
+const workoutController_1 = require("../controller/workout/workoutController");
 const router = (0, express_1.Router)();
-router.post(Routes_1.client.CREATE_CLIENT_ROUTE, generalController_1.insertClientData);
-router.get(Routes_1.client.GET_CLIENT_DATA, generalController_1.clientData);
-router.put(Routes_1.client.UPDATE_CLIENT_DATA, generalController_1.clientDataUpdate);
-router.delete("/client/delete/:id", generalController_1.clientDeleteData);
-router.get("/insertar/:id", generalController_1.insertWorkout);
-router.get("/find/:id", generalController_1.clientData);
-router.get("/update/:id", generalController_1.clientDataUpdate);
+router.post(Routes_1.client.CREATE_CLIENT_ROUTE, clientController_1.insertClientData);
+router.get(Routes_1.client.GET_CLIENT_DATA, clientController_1.clientData);
+router.put(Routes_1.client.UPDATE_CLIENT_DATA, clientController_1.clientDataUpdate);
+router.delete("/client/delete/:id", clientController_1.clientDeleteData);
+router.get("/client/workout/data/:id", workoutController_1.workoutData);
+router.get("/insertar/:id", workoutController_1.insertWorkout);
+router.get("/find/:id", clientController_1.clientData);
+router.get("/update/:id", clientController_1.clientDataUpdate);
 // Rutas relacionadas con el ejercicio
 /*
 router.get(`${GymProgressionRoutes.EXERCISES_ROUTE}${DataRoutes.GET_ALL_ROUTE}`, getAllExercisesController);

@@ -1,8 +1,8 @@
 import { PoolClient, QueryResult } from "pg";
-import { GENERAL_ERROR_HANDLER } from "../../../errors";
+import { GENERAL_ERROR_HANDLER } from "../../errors";
 import { Response } from "express";
 import { DELETE_WORKOUT, GET_SINGLE_WORKOUT, GET_WORKOUT_DATA, INSERT_WORKOUT_QUERY, UPDATE_WORKOUT } from "./workoutQueries";
-import { ClientWorkout } from "../../interface/client";
+import { ClientWorkout } from "../../model/interface/client";
 
 export class WorkoutManager {
     constructor(private client: PoolClient, private res: Response) { }
@@ -21,7 +21,7 @@ export class WorkoutManager {
             const { day } = clientWorkout;
             const response: QueryResult = await this.client.query(GET_WORKOUT_DATA,
                 [id, day]);
-            return response;
+            return response
         } catch (e) {
             GENERAL_ERROR_HANDLER(e, this.res);
 

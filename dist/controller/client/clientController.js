@@ -9,18 +9,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.insertWorkout = exports.clientDeleteData = exports.clientDataUpdate = exports.clientData = exports.insertClientData = void 0;
-const database_1 = require("../database/database");
-const generalClasses_1 = require("../model/classes/client/generalClasses");
-const responseClasses_1 = require("../model/classes/responseClasses");
-const errors_1 = require("../errors");
-const generalClasses_2 = require("../model/classes/workout/generalClasses");
+exports.clientDeleteData = exports.clientDataUpdate = exports.clientData = exports.insertClientData = void 0;
+const database_1 = require("../../database/database");
+const errors_1 = require("../../errors");
+const responseClasses_1 = require("../../model/classes/responseClasses");
+const clientManager_1 = require("./clientManager");
 const insertClientData = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let client;
     try {
         const { body } = req;
         client = yield database_1.pool.connect();
-        yield new generalClasses_1.ClientManager(client, res).insertClient(body);
+        yield new clientManager_1.ClientManager(client, res).insertClient(body);
         responseClasses_1.ResponseHandler.sendSuccessMessage(res, body);
     }
     catch (e) {
@@ -37,7 +36,7 @@ const clientData = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     try {
         const { id } = req.params;
         client = yield database_1.pool.connect();
-        const { rowCount, rows } = yield new generalClasses_1.ClientManager(client, res).clientData(id);
+        const { rowCount, rows } = yield new clientManager_1.ClientManager(client, res).clientData(id);
         if (!rowCount)
             responseClasses_1.ResponseHandler.sendIdNotFound(res);
         if (rowCount)
@@ -58,7 +57,7 @@ const clientDataUpdate = (req, res) => __awaiter(void 0, void 0, void 0, functio
         const { id } = req.params;
         const { body } = req;
         client = yield database_1.pool.connect();
-        yield new generalClasses_1.ClientManager(client, res).clientUpdate(id, body);
+        yield new clientManager_1.ClientManager(client, res).clientUpdate(id, body);
         responseClasses_1.ResponseHandler.sendSuccessMessage(res, body);
     }
     catch (e) {
@@ -75,7 +74,7 @@ const clientDeleteData = (req, res) => __awaiter(void 0, void 0, void 0, functio
     try {
         client = yield database_1.pool.connect();
         const { id } = req.params;
-        yield new generalClasses_1.ClientManager(client, res).deleteClient(id);
+        yield new clientManager_1.ClientManager(client, res).deleteClient(id);
         responseClasses_1.ResponseHandler.sendSuccessMessage(res, id);
     }
     catch (e) {
@@ -85,26 +84,3 @@ const clientDeleteData = (req, res) => __awaiter(void 0, void 0, void 0, functio
     client && client.release();
 });
 exports.clientDeleteData = clientDeleteData;
-const insertWorkout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    let client;
-    try {
-        const { body, params } = req;
-        const { id } = params;
-        client = yield database_1.pool.connect();
-        if ((yield new generalClasses_2.WorkoutManager(client, res).verifyWorkout(id, body)) !== 0) {
-            responseClasses_1.ResponseHandler.sendExerciseExists(res);
-        }
-        else {
-            yield new generalClasses_2.WorkoutManager(client, res).insertWorkout(id, body);
-            responseClasses_1.ResponseHandler.sendSuccessMessage(res, body);
-        }
-    }
-    catch (e) {
-        (0, errors_1.GENERAL_ERROR_HANDLER)(e, res);
-        console.error(e);
-    }
-    finally {
-        client && client.release();
-    }
-});
-exports.insertWorkout = insertWorkout;

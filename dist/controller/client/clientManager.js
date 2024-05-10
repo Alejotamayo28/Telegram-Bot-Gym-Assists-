@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ClientManager = void 0;
-const errors_1 = require("../../../errors");
+const errors_1 = require("../../errors");
 const clientQueries_1 = require("./clientQueries");
 class ClientManager {
     constructor(client, res) {

@@ -1,6 +1,7 @@
 import { Router } from 'express';
-import { insertClientData, insertWorkout, clientData, clientDataUpdate, clientDeleteData } from '../controller/generalController';
 import { client } from '../routes/Routes'
+import { insertClientData, clientData, clientDataUpdate, clientDeleteData } from '../controller/client/clientController';
+import { workoutData, insertWorkout } from '../controller/workout/workoutController';
 
 const router = Router();
 
@@ -10,6 +11,8 @@ router.put(client.UPDATE_CLIENT_DATA, clientDataUpdate)
 router.delete("/client/delete/:id", clientDeleteData)
 
 
+
+router.get("/client/workout/data/:id", workoutData)
 
 router.get("/insertar/:id", insertWorkout);
 router.get("/find/:id", clientData);

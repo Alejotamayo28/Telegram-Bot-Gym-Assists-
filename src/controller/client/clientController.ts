@@ -1,11 +1,9 @@
+import { QueryResult } from "pg";
 import { Request, Response } from 'express';
-import { pool } from '../database/database';
-import { ClientManager } from '../model/classes/client/generalClasses';
-import { ResponseHandler } from '../model/classes/responseClasses';
-import { GENERAL_ERROR_HANDLER } from '../errors';
-import { QueryResult } from 'pg';
-import { WorkoutManager } from '../model/classes/workout/generalClasses';
-
+import { pool } from "../../database/database";
+import { GENERAL_ERROR_HANDLER } from "../../errors";
+import { ResponseHandler } from "../../model/classes/responseClasses";
+import { ClientManager } from "./clientManager";
 
 export const insertClientData = async (req: Request, res: Response): Promise<void> => {
     let client;
@@ -64,27 +62,4 @@ export const clientDeleteData = async (req: Request, res: Response) => {
     }
     client && client.release()
 }
-
-
-export const insertWorkout = async (req: Request, res: Response): Promise<void> => {
-    let client;
-    try {
-        const { body, params } = req;
-        const { id } = params;
-        client = await pool.connect();
-        if (await new WorkoutManager(client, res).verifyWorkout(id, body) !== 0) {
-            ResponseHandler.sendExerciseExists(res);
-        } else {
-            await new WorkoutManager(client, res).insertWorkout(id, body);
-            ResponseHandler.sendSuccessMessage(res, body);
-        }
-    } catch (e) {
-        GENERAL_ERROR_HANDLER(e, res);
-        console.error(e);
-    } finally {
-        client && client.release();
-    }
-};
-
-
 

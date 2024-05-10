@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.WorkoutManager = void 0;
-const errors_1 = require("../../../errors");
+const errors_1 = require("../../errors");
 const workoutQueries_1 = require("./workoutQueries");
 class WorkoutManager {
     constructor(client, res) {
