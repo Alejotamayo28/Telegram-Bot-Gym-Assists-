@@ -2,8 +2,8 @@ import { QueryResult } from "pg";
 import { Request, Response } from 'express';
 import { pool } from "../../database/database";
 import { GENERAL_ERROR_HANDLER } from "../../errors";
-import { ResponseHandler } from "../../model/classes/responseClasses";
-import { ClientManager } from "./clientManager";
+import { ResponseHandler } from "../../model/classes/responseManager";
+import { ClientManager } from "../../model/classes/clientManager";
 
 export const insertClientData = async (req: Request, res: Response): Promise<void> => {
     let client;

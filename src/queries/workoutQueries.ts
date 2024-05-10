@@ -1,4 +1,3 @@
-
 export const INSERT_WORKOUT_QUERY = `
 INSERT INTO workout (id, day, name, series, reps, kg) VALUES ($1, $2, $3, $4, $5, $6)`
 

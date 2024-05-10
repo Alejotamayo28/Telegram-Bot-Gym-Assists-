@@ -12,8 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateWorkoutData = exports.deleteWorkoutData = exports.workoutData = exports.insertWorkout = void 0;
 const database_1 = require("../../database/database");
 const errors_1 = require("../../errors");
-const responseClasses_1 = require("../../model/classes/responseClasses");
-const workoutManager_1 = require("./workoutManager");
+const responseManager_1 = require("../../model/classes/responseManager");
+const workoutManager_1 = require("../../model/classes/workoutManager");
 const insertWorkout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let client;
     try {
@@ -21,11 +21,11 @@ const insertWorkout = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const { id } = req.params;
         client = yield database_1.pool.connect();
         if ((yield new workoutManager_1.WorkoutManager(client, res).verifyWorkout(id, body)) !== 0) {
-            responseClasses_1.ResponseHandler.sendExerciseExists(res);
+            responseManager_1.ResponseHandler.sendExerciseExists(res);
         }
         else {
             yield new workoutManager_1.WorkoutManager(client, res).insertWorkout(id, body);
-            responseClasses_1.ResponseHandler.sendSuccessMessage(res, body);
+            responseManager_1.ResponseHandler.sendSuccessMessage(res, body);
         }
     }
     catch (e) {
@@ -44,7 +44,7 @@ const workoutData = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         const { body } = req;
         client = yield database_1.pool.connect();
         const response = yield new workoutManager_1.WorkoutManager(client, res).workoutData(id, body);
-        responseClasses_1.ResponseHandler.sendSuccessMessage(res, response === null || response === void 0 ? void 0 : response.rows);
+        responseManager_1.ResponseHandler.sendSuccessMessage(res, response === null || response === void 0 ? void 0 : response.rows);
     }
     catch (e) {
         (0, errors_1.GENERAL_ERROR_HANDLER)(e, res);
@@ -61,7 +61,7 @@ const deleteWorkoutData = (_a, res_1) => __awaiter(void 0, [_a, res_1], void 0, 
         client = yield database_1.pool.connect();
         const { id } = params;
         yield new workoutManager_1.WorkoutManager(client, res).deleteWorkout(id, body);
-        responseClasses_1.ResponseHandler.sendSuccessMessage(res, body);
+        responseManager_1.ResponseHandler.sendSuccessMessage(res, body);
     }
     catch (e) {
         (0, errors_1.GENERAL_ERROR_HANDLER)(e, res);
@@ -78,7 +78,7 @@ const UpdateWorkoutData = (_b, res_2) => __awaiter(void 0, [_b, res_2], void 0, 
         client = yield database_1.pool.connect();
         const { id } = params;
         yield new workoutManager_1.WorkoutManager(client, res).UpdateWorkout(id, body);
-        responseClasses_1.ResponseHandler.sendSuccessMessage(res, body);
+        responseManager_1.ResponseHandler.sendSuccessMessage(res, body);
     }
     catch (e) {
         (0, errors_1.GENERAL_ERROR_HANDLER)(e, res);

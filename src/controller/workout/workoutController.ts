@@ -1,7 +1,7 @@
 import { pool } from "../../database/database";
 import { GENERAL_ERROR_HANDLER } from "../../errors";
-import { ResponseHandler } from "../../model/classes/responseClasses";
-import { WorkoutManager } from "./workoutManager";
+import { ResponseHandler } from "../../model/classes/responseManager";
+import { WorkoutManager } from "../../model/classes/workoutManager";
 import { Response, Request } from "express";
 
 export const insertWorkout = async (req: Request, res: Response): Promise<void> => {

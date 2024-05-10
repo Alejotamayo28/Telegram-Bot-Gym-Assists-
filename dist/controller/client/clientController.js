@@ -12,15 +12,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.clientDeleteData = exports.clientDataUpdate = exports.clientData = exports.insertClientData = void 0;
 const database_1 = require("../../database/database");
 const errors_1 = require("../../errors");
-const responseClasses_1 = require("../../model/classes/responseClasses");
-const clientManager_1 = require("./clientManager");
+const responseManager_1 = require("../../model/classes/responseManager");
+const clientManager_1 = require("../../model/classes/clientManager");
 const insertClientData = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let client;
     try {
         const { body } = req;
         client = yield database_1.pool.connect();
         yield new clientManager_1.ClientManager(client, res).insertClient(body);
-        responseClasses_1.ResponseHandler.sendSuccessMessage(res, body);
+        responseManager_1.ResponseHandler.sendSuccessMessage(res, body);
     }
     catch (e) {
         (0, errors_1.GENERAL_ERROR_HANDLER)(e, res);
@@ -38,9 +38,9 @@ const clientData = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         client = yield database_1.pool.connect();
         const { rowCount, rows } = yield new clientManager_1.ClientManager(client, res).clientData(id);
         if (!rowCount)
-            responseClasses_1.ResponseHandler.sendIdNotFound(res);
+            responseManager_1.ResponseHandler.sendIdNotFound(res);
         if (rowCount)
-            responseClasses_1.ResponseHandler.sendIdFound(res, rows);
+            responseManager_1.ResponseHandler.sendIdFound(res, rows);
     }
     catch (e) {
         (0, errors_1.GENERAL_ERROR_HANDLER)(e, res);
@@ -58,7 +58,7 @@ const clientDataUpdate = (req, res) => __awaiter(void 0, void 0, void 0, functio
         const { body } = req;
         client = yield database_1.pool.connect();
         yield new clientManager_1.ClientManager(client, res).clientUpdate(id, body);
-        responseClasses_1.ResponseHandler.sendSuccessMessage(res, body);
+        responseManager_1.ResponseHandler.sendSuccessMessage(res, body);
     }
     catch (e) {
         (0, errors_1.GENERAL_ERROR_HANDLER)(e, res);
@@ -75,7 +75,7 @@ const clientDeleteData = (req, res) => __awaiter(void 0, void 0, void 0, functio
         client = yield database_1.pool.connect();
         const { id } = req.params;
         yield new clientManager_1.ClientManager(client, res).deleteClient(id);
-        responseClasses_1.ResponseHandler.sendSuccessMessage(res, id);
+        responseManager_1.ResponseHandler.sendSuccessMessage(res, id);
     }
     catch (e) {
         (0, errors_1.GENERAL_ERROR_HANDLER)(e, res);

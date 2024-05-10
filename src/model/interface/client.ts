@@ -11,10 +11,3 @@ export interface ClientData extends ClientLogin {
     height: number;
 }
 
-export interface ClientWorkout {
-    day: string,
-    name: string,
-    series: number,
-    reps: number[],
-    kg: number
-}
