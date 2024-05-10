@@ -1,30 +1,18 @@
 import { Router } from 'express';
-import { client } from '../routes/Routes'
+import { client, workout } from '../routes/Routes'
 import { insertClientData, clientData, clientDataUpdate, clientDeleteData } from '../controller/client/clientController';
-import { workoutData, insertWorkout } from '../controller/workout/workoutController';
+import { workoutData, insertWorkout, UpdateWorkoutData, deleteWorkoutData } from '../controller/workout/workoutController';
 
 const router = Router();
 
 router.post(client.CREATE_CLIENT_ROUTE, insertClientData)
 router.get(client.GET_CLIENT_DATA, clientData)
 router.put(client.UPDATE_CLIENT_DATA, clientDataUpdate)
-router.delete("/client/delete/:id", clientDeleteData)
+router.delete(client.DELETE_CLIENT_DATA, clientDeleteData)
 
-
-
-router.get("/client/workout/data/:id", workoutData)
-
-router.get("/insertar/:id", insertWorkout);
-router.get("/find/:id", clientData);
-router.get("/update/:id", clientDataUpdate);
-
-// Rutas relacionadas con el ejercicio
-/* 
-router.get(`${GymProgressionRoutes.EXERCISES_ROUTE}${DataRoutes.GET_ALL_ROUTE}`, getAllExercisesController);
-// Rutas relacionadas con el rendimiento
-router.get(`${GymProgressionRoutes.PERFORMANCE_ROUTE}${DataRoutes.GET_ONE_ROUTE}`, getPerformanceController);
-router.post(`${GymProgressionRoutes.PERFORMANCE_ROUTE}${DataRoutes.CREATE_ROUTE}`, createPerformanceController);
-router.patch(`${GymProgressionRoutes.PERFORMANCE_ROUTE}${DataRoutes.UPDATE_ROUTE}`, updatePerformanceController);
- */
+router.post(workout.CREATE_CLIENT_WORKOUT, insertWorkout)
+router.get(workout.GET_CLIENT_WORKOUT_DATA, workoutData)
+router.put(workout.UPDATE_CLIENT_WORKOUT_DATA, UpdateWorkoutData)
+router.delete(workout.DELETE_CLIENT_WORKOUT, deleteWorkoutData)
 
 export default router;

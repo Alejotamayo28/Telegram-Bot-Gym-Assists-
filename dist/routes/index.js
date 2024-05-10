@@ -8,17 +8,9 @@ const router = (0, express_1.Router)();
 router.post(Routes_1.client.CREATE_CLIENT_ROUTE, clientController_1.insertClientData);
 router.get(Routes_1.client.GET_CLIENT_DATA, clientController_1.clientData);
 router.put(Routes_1.client.UPDATE_CLIENT_DATA, clientController_1.clientDataUpdate);
-router.delete("/client/delete/:id", clientController_1.clientDeleteData);
-router.get("/client/workout/data/:id", workoutController_1.workoutData);
-router.get("/insertar/:id", workoutController_1.insertWorkout);
-router.get("/find/:id", clientController_1.clientData);
-router.get("/update/:id", clientController_1.clientDataUpdate);
-// Rutas relacionadas con el ejercicio
-/*
-router.get(`${GymProgressionRoutes.EXERCISES_ROUTE}${DataRoutes.GET_ALL_ROUTE}`, getAllExercisesController);
-// Rutas relacionadas con el rendimiento
-router.get(`${GymProgressionRoutes.PERFORMANCE_ROUTE}${DataRoutes.GET_ONE_ROUTE}`, getPerformanceController);
-router.post(`${GymProgressionRoutes.PERFORMANCE_ROUTE}${DataRoutes.CREATE_ROUTE}`, createPerformanceController);
-router.patch(`${GymProgressionRoutes.PERFORMANCE_ROUTE}${DataRoutes.UPDATE_ROUTE}`, updatePerformanceController);
- */
+router.delete(Routes_1.client.DELETE_CLIENT_DATA, clientController_1.clientDeleteData);
+router.post(Routes_1.workout.CREATE_CLIENT_WORKOUT, workoutController_1.insertWorkout);
+router.get(Routes_1.workout.GET_CLIENT_WORKOUT_DATA, workoutController_1.workoutData);
+router.put(Routes_1.workout.UPDATE_CLIENT_WORKOUT_DATA, workoutController_1.UpdateWorkoutData);
+router.delete(Routes_1.workout.DELETE_CLIENT_WORKOUT, workoutController_1.deleteWorkoutData);
 exports.default = router;
