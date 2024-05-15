@@ -3,6 +3,7 @@ import { Response } from 'express';
 import { GENERAL_ERROR_HANDLER } from '../../errors';
 import { ClientData } from '../interface/client';
 import { DELETE_CLIENT, DELETE_CLIENT_DATA, DELETE_CLIENT_RECORDS, GET_CLIENT_DATA, INSERT_CLIENT_DATA_QUERY, INSERT_CLIENT_QUERY, UPDATE_CLIENT_DATA } from '../../queries/clientQueries';
+import { sendClientEmail } from '../../mail/functions';
 
 export class ClientManager {
     constructor(private client: PoolClient, private res: Response) { }
@@ -11,10 +12,11 @@ export class ClientManager {
             const { nickname, password, age, gender, email, weight, height } = clientData
             const responseId: QueryResult = await this.client.query(INSERT_CLIENT_QUERY,
                 [nickname, password])
+            await sendClientEmail(clientData)
             await this.client.query(INSERT_CLIENT_DATA_QUERY,
                 [responseId.rows[0].id, age, gender, email, weight, height])
         } catch (e) {
-            GENERAL_ERROR_HANDLER(e, this.res);
+            GENERAL_ERROR_HANDLER(e, this.res)
         }
     }
     public async clientData(id: string): Promise<any> {
