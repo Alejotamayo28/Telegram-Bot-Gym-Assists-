@@ -11,3 +11,4 @@ export const verifyGender = (gender: string): boolean => {
     if (Object.values(clientGender).includes(gender as clientGender)) { return true }
     throw new Error('Type your gender (Male/Female/Other)')
 }
+

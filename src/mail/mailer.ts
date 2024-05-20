@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer'
-import { emailData } from './configEmail'
+import { emailData } from './config/configEmail'
 
 export const transporter = nodemailer.createTransport({
     host: emailData.smtp,
@@ -12,6 +12,6 @@ export const transporter = nodemailer.createTransport({
 })
 
 transporter.verify().then(() => {
-    console.log('Ready for send emails')
+    console.log('HTTP request "on"')
 })
 

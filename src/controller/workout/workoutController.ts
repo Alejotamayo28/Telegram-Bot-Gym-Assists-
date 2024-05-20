@@ -4,11 +4,10 @@ import { ResponseHandler } from "../../model/classes/responseManager";
 import { WorkoutManager } from "../../model/classes/workoutManager";
 import { Response, Request } from "express";
 
-export const insertWorkout = async (req: Request, res: Response): Promise<void> => {
+export const insertWorkout = async ({ params, body }: Request, res: Response): Promise<void> => {
     let client;
     try {
-        const { body } = req
-        const { id } = req.params
+        const { id } = params
         client = await pool.connect();
         if (await new WorkoutManager(client, res).verifyWorkout(id, body) !== 0) {
             ResponseHandler.sendExerciseExists(res);
@@ -24,11 +23,10 @@ export const insertWorkout = async (req: Request, res: Response): Promise<void> 
     }
 }
 
-export const workoutData = async (req: Request, res: Response) => {
+export const workoutData = async ({ params, body }: Request, res: Response) => {
     let client
     try {
-        const { id } = req.params
-        const { body } = req
+        const { id } = params
         client = await pool.connect()
         const response = await new WorkoutManager(client, res).workoutData(id, body)
         ResponseHandler.sendSuccessMessage(res, response?.rows)

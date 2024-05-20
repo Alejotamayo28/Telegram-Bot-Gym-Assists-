@@ -1,5 +1,5 @@
 import { check } from "express-validator";
-import { validateResult } from "../helpers/validateHelper";
+import { validateResult } from "./helpers/validateHelper";
 import { Request, Response, NextFunction } from "express";
 import { verifyAge, verifyGender } from "./functions/client";
 

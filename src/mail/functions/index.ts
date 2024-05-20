@@ -1,4 +1,4 @@
-import { emailData } from "../configEmail"
+import { emailData } from "../config/configEmail"
 import { transporter } from "../mailer"
 
 export const sendEmailClient = async (to: string, subject: string, text: string) => {
