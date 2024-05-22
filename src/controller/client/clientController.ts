@@ -1,4 +1,4 @@
-import { QueryResult } from "pg";controllerlclient
+import { QueryResult } from "pg";
 import { Request, Response } from "express";
 import { pool } from "../../database/database";
 import { GENERAL_ERROR_HANDLER } from "../../errors";

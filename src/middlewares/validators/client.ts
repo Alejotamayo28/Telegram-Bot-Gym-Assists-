@@ -32,7 +32,7 @@ export const validateUpdateClientData = [
         return verifyAge(value)
     }),
     check('gender').isString().optional().custom((value, { }) => {
-        return verifyGender
+        return verifyGender(value)
     }),
     check('email').isString().isEmail().optional(),
     check('weight').isNumeric().optional(),
