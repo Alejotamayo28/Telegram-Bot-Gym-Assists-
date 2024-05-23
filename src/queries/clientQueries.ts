@@ -20,4 +20,5 @@ DELETE FROM client WHERE id = $1`
 export const DELETE_CLIENT_RECORDS = `
 DELETE FROM workout WHERE id = $1`
 
-
+export const GET_EMAIL_CLIENT_DATA = `
+SELECT FROM client_data WHERE EMAIL = $1`

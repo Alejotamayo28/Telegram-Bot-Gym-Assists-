@@ -27,4 +27,3 @@ export const validateUpdateWorkout = [
   }),
   check('kg').isNumeric().optional()
 ]
-console.log('hola mundo')

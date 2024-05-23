@@ -4,6 +4,7 @@ import { insertClientData, clientData, clientDataUpdate, clientDeleteData } from
 import { workoutData, insertWorkout, UpdateWorkoutData, deleteWorkoutData } from '../controller/workout/workoutController';
 import { validateCreateClient, validateCreateClientData, validateIdClient, validateUpdateClientData } from '../middlewares/validators/client';
 import { validateCreateWorkout, validateUpdateWorkout } from '../middlewares/validators/workout';
+import { checkJwt, getClientDataTESTING, loginUserTESTING, postClientTESTING } from '../middlewares/jsonWebToken/session';
 
 const router = Router();
 
@@ -16,5 +17,9 @@ router.post(workout.CREATE_CLIENT_WORKOUT, validateIdClient, validateCreateWorko
 router.get(workout.GET_CLIENT_WORKOUT_DATA, validateIdClient, workoutData)
 router.put(workout.UPDATE_CLIENT_WORKOUT_DATA, validateIdClient, validateUpdateWorkout, UpdateWorkoutData)
 router.delete(workout.DELETE_CLIENT_WORKOUT, validateIdClient, deleteWorkoutData)
+
+router.get("/probando/:id", checkJwt, getClientDataTESTING)
+router.post("/creando/", postClientTESTING)
+router.get("/login/", loginUserTESTING) // catch id
 
 export default router;
