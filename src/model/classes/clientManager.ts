@@ -2,7 +2,7 @@ import { PoolClient, QueryResult } from 'pg';
 import { Response } from 'express';
 import { GENERAL_ERROR_HANDLER } from '../../errors';
 import { ClientData } from '../interface/client';
-import { DELETE_CLIENT, DELETE_CLIENT_DATA, DELETE_CLIENT_RECORDS, GET_CLIENT_DATA, GET_EMAIL_CLIENT_DATA, INSERT_CLIENT_DATA_QUERY, INSERT_CLIENT_QUERY, UPDATE_CLIENT_DATA } from '../../queries/clientQueries';
+import { DELETE_CLIENT, DELETE_CLIENT_DATA, DELETE_CLIENT_RECORDS, GET_CLIENT_DATA, INSERT_CLIENT_DATA_QUERY, INSERT_CLIENT_QUERY, UPDATE_CLIENT_DATA } from '../../queries/clientQueries';
 import { sendClientEmail } from '../../mail/functions';
 
 export class ClientManager {
@@ -64,9 +64,9 @@ export class ClientManager {
 
 // Mientras tanto --> cambiar despues 
 
-export const getClientEmail = async (client: PoolClient, res: Response, email: string) => {
+export const getClientNickname = async (client: PoolClient, res: Response, nickname: string) => {
   try {
-    const response = await client.query(GET_EMAIL_CLIENT_DATA, [email])
+    const response = await client.query(`select * from client where nickname = $1`, [nickname])
     return response
   } catch (e) {
     GENERAL_ERROR_HANDLER(e, res)

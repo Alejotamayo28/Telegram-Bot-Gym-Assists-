@@ -1,8 +1,7 @@
 import bcrypt from 'bcryptjs'
 
 export const encrypt = async (textPlan: any) => {
-  const hash = await bcrypt.hash(textPlan, 10)
-  return hash
+  return await bcrypt.hash(textPlan, 10)
 }
 
 export const compare = async (passwordPlain: any, passwordHash: any) => {

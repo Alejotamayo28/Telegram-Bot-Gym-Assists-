@@ -7,7 +7,6 @@ export const generateToken = (email: string) => { // voy a cambiar esto
     expiresIn: "2h",
   })
   return jwt
-
 }
 
 export const verifyToken = (jwt: string) => {
