@@ -1,22 +1,44 @@
 import { PoolClient, QueryResult } from 'pg';
 import { Response } from 'express';
 import { GENERAL_ERROR_HANDLER } from '../../errors';
-import { ClientData } from '../interface/client';
-import { DELETE_CLIENT, DELETE_CLIENT_DATA, DELETE_CLIENT_RECORDS, GET_CLIENT_DATA, INSERT_CLIENT_DATA_QUERY, INSERT_CLIENT_QUERY, UPDATE_CLIENT_DATA } from '../../queries/clientQueries';
-import { sendClientEmail } from '../../mail/functions';
+import { ClientData, ClientLogin } from '../interface/client';
+import { DELETE_CLIENT, DELETE_CLIENT_DATA, DELETE_CLIENT_RECORDS, GET_CLIENT_DATA, GET_CLIENT_NICKNAME, UPDATE_CLIENT_DATA } from '../../queries/clientQueries';
+import { ResponseHandler } from './responseManager';
+import { compare } from 'bcryptjs';
+import { generateToken } from '../../middlewares/jsonWebToken/jwtHelper';
+import { encrypt } from '../../middlewares/jsonWebToken/enCryptHelper';
 
 export class ClientManager {
   constructor(private client: PoolClient, private res: Response) { }
-  public async insertClient(clientData: ClientData) {
+  public async singUpClient(clientData: ClientData) {
     try {
-      const { nickname, password, age, gender, email, weight, height } = clientData
-      const responseId: QueryResult = await this.client.query(INSERT_CLIENT_QUERY,
-        [nickname, password])
-      await sendClientEmail(clientData)
-      await this.client.query(INSERT_CLIENT_DATA_QUERY,
-        [responseId.rows[0].id, age, gender, email, weight, height])
+      const { ...data } = clientData
+      const passwordHash = await encrypt(data.password)
+      const responseId: QueryResult = await this.client.query(`
+      INSERT INTO client (nickname, password) VALUES ($1, $2) RETURNING id`,
+        [data.nickname, passwordHash])
+      await this.client.query(`
+    INSERT INTO client_data (id, age, gender, email, weight, height) VALUES ($1,$2,$3,$4,$5,$6)`,
+        [responseId.rows[0].id, data.age, data.gender, data.email, data.weight, data.height])
+      return this.res.status(200).json({ Message: `Client_Created` })
     } catch (e) {
       GENERAL_ERROR_HANDLER(e, this.res)
+      console.error(e)
+    }
+  }
+  public async loginClient(clientData: ClientLogin) {
+    try {
+      const { nickname, password } = clientData
+      const response: QueryResult = await this.client.query(GET_CLIENT_NICKNAME, [nickname])
+      if (!response.rowCount) return this.res.status(404).json({ Message: ResponseHandler.sendIdNotFound })
+      const checkPassword = await compare(password, response.rows[0].password)
+      if (checkPassword) {
+        const token = generateToken(nickname)
+        return this.res.status(200).json({ id: response.rows[0].id, Token: token })
+      } else return this.res.status(401).json({ Message: "Password_Invalided" })
+    } catch (e) {
+      GENERAL_ERROR_HANDLER(e, this.res)
+      console.error(e)
     }
   }
   public async clientData(id: string): Promise<any> {
