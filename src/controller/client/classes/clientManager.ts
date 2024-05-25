@@ -1,12 +1,13 @@
 import { PoolClient, QueryResult } from 'pg';
 import { Response } from 'express';
-import { GENERAL_ERROR_HANDLER } from '../../errors';
-import { ClientData, ClientLogin } from '../interface/client';
-import * as query from '../../queries/clientQueries';
-import { ResponseClient, ResponseHandler } from './responseManager';
 import { compare } from 'bcryptjs';
-import { generateToken } from '../../middlewares/jsonWebToken/jwtHelper';
-import { encrypt } from '../../middlewares/jsonWebToken/enCryptHelper';
+import { GENERAL_ERROR_HANDLER } from '../../../errors';
+import { encrypt } from '../../../middlewares/jsonWebToken/enCryptHelper';
+import { generateToken } from '../../../middlewares/jsonWebToken/jwtHelper';
+import { ResponseClient } from './responseManager';
+import { ClientData, ClientLogin } from '../../../model/interface/client';
+import * as query from "../../../queries/clientQueries"
+
 
 export class ClientManager {
   constructor(private client: PoolClient, private res: Response) { }
@@ -29,13 +30,13 @@ export class ClientManager {
       const { nickname, password } = clientData
       const response: QueryResult = await this.client.query(query.GET_CLIENT_NICKNAME, [nickname])
       if (!response.rowCount) {
-        return ResponseHandler.sendUserNotFound(this.res)
+        return ResponseClient.clientNotFound(this.res)
       }
       const checkPassword = await compare(password, response.rows[0].password)
       if (checkPassword) {
         const token = generateToken(nickname)
         return ResponseClient.login(this.res, response.rows[0].id, token)
-      } else { 
+      } else {
         return ResponseClient.passwordIncorrect(this.res)
       }
     } catch (e) {

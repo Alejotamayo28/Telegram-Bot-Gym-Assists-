@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { pool } from "../../database/database";
 import { GENERAL_ERROR_HANDLER } from "../../errors";
-import { ClientManager } from "../../model/classes/clientManager";
+import { ClientManager } from "./classes/clientManager";
 
 export const loginClient = async ({ body }: Request, res: Response) => {
   let client
@@ -66,7 +66,7 @@ export const clientDeleteData = async ({ params }: Request, res: Response) => {
     await new ClientManager(client, res).deleteClient(id);
   } catch (e) {
     GENERAL_ERROR_HANDLER(e, res);
-    console.error(e); 
+    console.error(e);
   }
   client && client.release();
 };

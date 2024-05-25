@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from "express";
-import {  verifyToken } from "../jsonWebToken/jwtHelper";
+import { verifyToken } from "../jsonWebToken/jwtHelper";
 import { JwtPayload } from "jsonwebtoken";
 import { GENERAL_ERROR_HANDLER } from "../../errors";
-import { getClientNickname } from "../../model/classes/clientManager";
 import { pool } from "../../database/database";
-import { ResponseHandler } from "../../model/classes/responseManager";
 import { QueryResult } from "pg";
+import { getClientNickname } from "../../controller/client/classes/clientManager";
+import { ResponseClient } from "../../controller/client/classes/responseManager";
 
 interface RequestExt extends Request {
   user?: string | JwtPayload,
@@ -38,7 +38,7 @@ export const userJWT = async ({ body }: Request, res: Response, user: any) => {
     const response = await (getClientNickname(client, res, nickname))
     if (response!.rowCount === 0) {
       return res.status(400).json({
-        ERROR: ResponseHandler.sendUserNotFound(res)
+        ERROR: ResponseClient.clientNotFound(res)
       })
     } else {
       const data: QueryResult = await client.query(`
@@ -62,7 +62,6 @@ export const getClientDataTESTING = async (req: RequestExt, res: Response) => {
     GENERAL_ERROR_HANDLER(e, res)
   }
 }
-
 
 
 

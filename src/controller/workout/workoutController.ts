@@ -1,8 +1,8 @@
 import { pool } from "../../database/database";
 import { GENERAL_ERROR_HANDLER } from "../../errors";
-import { ResponseHandler } from "../../model/classes/responseManager";
-import { WorkoutManager } from "../../model/classes/workoutManager";
 import { Response, Request } from "express";
+import { WorkoutManager } from "./classes/workoutManager";
+import { ResponseWorkout } from "./classes/responseManager";
 
 export const insertWorkout = async ({ params, body }: Request, res: Response,): Promise<void> => {
   let client;
@@ -10,10 +10,10 @@ export const insertWorkout = async ({ params, body }: Request, res: Response,): 
     const { id } = params;
     client = await pool.connect();
     if ((await new WorkoutManager(client, res).verifyWorkout(id, body)) !== 0) {
-      ResponseHandler.sendExerciseExists(res);
+      return ResponseWorkout.workoutAlreadyExists(res)
     } else {
       await new WorkoutManager(client, res).insertWorkout(id, body);
-      ResponseHandler.sendSuccessMessage(res, body);
+      return ResponseWorkout.workoutInsert(res)
     }
   } catch (e) {
     GENERAL_ERROR_HANDLER(e, res);
@@ -28,11 +28,7 @@ export const workoutData = async ({ params, body }: Request, res: Response) => {
   try {
     const { id } = params;
     client = await pool.connect();
-    const response = await new WorkoutManager(client, res).workoutData(
-      id,
-      body,
-    );
-    ResponseHandler.sendSuccessMessage(res, response?.rows);
+    await new WorkoutManager(client, res).workoutData(id, body);
   } catch (e) {
     GENERAL_ERROR_HANDLER(e, res);
     console.error(e);
@@ -47,7 +43,6 @@ export const deleteWorkoutData = async ({ params, body }: Request, res: Response
     client = await pool.connect();
     const { id } = params;
     await new WorkoutManager(client, res).deleteWorkout(id, body);
-    ResponseHandler.sendSuccessMessage(res, body);
   } catch (e) {
     GENERAL_ERROR_HANDLER(e, res);
     console.error(e);
@@ -62,7 +57,6 @@ export const UpdateWorkoutData = async ({ params, body }: Request, res: Response
     client = await pool.connect();
     const { id } = params;
     await new WorkoutManager(client, res).UpdateWorkout(id, body);
-    ResponseHandler.sendSuccessMessage(res, body);
   } catch (e) {
     GENERAL_ERROR_HANDLER(e, res);
     console.error(e);

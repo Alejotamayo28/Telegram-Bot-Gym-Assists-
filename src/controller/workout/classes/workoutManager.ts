@@ -1,8 +1,9 @@
 import { PoolClient, QueryResult } from "pg";
-import { GENERAL_ERROR_HANDLER } from "../../errors";
 import { Response } from "express";
-import { DELETE_WORKOUT, GET_SINGLE_WORKOUT, GET_WORKOUT_DATA, INSERT_WORKOUT_QUERY, UPDATE_WORKOUT } from "../../queries/workoutQueries";
-import { ClientWorkout } from "../interface/workout";
+import { ClientWorkout } from "../../../model/interface/workout";
+import { GENERAL_ERROR_HANDLER } from "../../../errors";
+import { INSERT_WORKOUT_QUERY, GET_WORKOUT_DATA, GET_SINGLE_WORKOUT, UPDATE_WORKOUT, DELETE_WORKOUT } from "../../../queries/workoutQueries";
+import { ResponseWorkout } from "./responseManager";
 
 export class WorkoutManager {
   constructor(private client: PoolClient, private res: Response) { }
@@ -11,6 +12,7 @@ export class WorkoutManager {
       const { day, name, series, reps, kg } = clientWorkout;
       await this.client.query(INSERT_WORKOUT_QUERY,
         [id, day, name, series, reps, kg]);
+      return ResponseWorkout.workoutInsert(this.res)
     } catch (e) {
       GENERAL_ERROR_HANDLER(e, this.res);
       console.error(e)
@@ -19,12 +21,11 @@ export class WorkoutManager {
   public async workoutData(id: string, clientWorkout: ClientWorkout) {
     try {
       const { day } = clientWorkout;
-      const response: QueryResult = await this.client.query(GET_WORKOUT_DATA,
-        [id, day]);
-      return response
+      const response: QueryResult = await this.client.query(GET_WORKOUT_DATA, [id, day]);
+      if (!response.rowCount) return ResponseWorkout.workoutDataNotFound(this.res)
+      return ResponseWorkout.workoutData(this.res, response.rows)
     } catch (e) {
       GENERAL_ERROR_HANDLER(e, this.res);
-
     }
   }
   public async verifyWorkout(id: string, clientWorkout: ClientWorkout) {
@@ -52,6 +53,7 @@ export class WorkoutManager {
       }
       await this.client.query(UPDATE_WORKOUT,
         [data.day, data.name, data.series, data.reps, data.kg, id])
+      return ResponseWorkout.workoutUpdate(this.res, id, day)
     } catch (e) {
       GENERAL_ERROR_HANDLER(e, this.res)
       console.error(e)
@@ -62,6 +64,7 @@ export class WorkoutManager {
       const { day, name } = clientWorkout
       await this.client.query(DELETE_WORKOUT,
         [name, day, id])
+      return ResponseWorkout.workoutDelete(this.res, day, name)
     } catch (e) {
       GENERAL_ERROR_HANDLER(e, this.res)
       console.error(e)

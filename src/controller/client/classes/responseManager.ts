@@ -1,42 +1,6 @@
 import { Response } from 'express';
 
-export class ResponseHandler {
-  static sendSuccessMessage(res: Response, data?: Object): void {
-    res.status(200).json({
-      success: true,
-      message: "Task successfully done",
-      data: data
-    });
-  }
-  static sendExerciseExists(res: Response): void {
-    res.status(409).json({
-      success: false,
-      message: "Exercise already exists",
-      data: null
-    });
-  }
-  static sendUserNotFound(res: Response): void {
-    res.status(404).json({
-      success: false,
-      message: "ID not found",
-      data: null
-    });
-  }
-  static sendIdFound(res: Response, data: any): void {
-    res.status(202).json({
-      success: true,
-      message: "ID found",
-      data: data
-    });
-  }
-  static passwordIncorrect(res: Response): void {
-    res.status(404).json({
-      success: false,
-      message: "Incorrect Password",
-      data: null,
-    })
-  }
-}
+
 export class ResponseClient {
   static login(res: Response, id: number, token: string): void {
     res.status(202).json({
