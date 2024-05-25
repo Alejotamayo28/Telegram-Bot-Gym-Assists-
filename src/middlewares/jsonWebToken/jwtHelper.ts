@@ -1,4 +1,8 @@
 import { sign, verify } from 'jsonwebtoken'
+import dotenv from "dotenv";
+dotenv.config();
+
+
 const JWT_SECRET = process.env.JWT_SECRET!
 
 // Payload es como lo que se puede ver publicamente del usuario

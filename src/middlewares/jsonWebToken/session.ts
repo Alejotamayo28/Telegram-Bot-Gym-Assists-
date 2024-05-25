@@ -38,7 +38,7 @@ export const userJWT = async ({ body }: Request, res: Response, user: any) => {
     const response = await (getClientNickname(client, res, nickname))
     if (response!.rowCount === 0) {
       return res.status(400).json({
-        ERROR: ResponseHandler.sendIdNotFound(res)
+        ERROR: ResponseHandler.sendUserNotFound(res)
       })
     } else {
       const data: QueryResult = await client.query(`

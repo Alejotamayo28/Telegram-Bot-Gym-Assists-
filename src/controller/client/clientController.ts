@@ -1,8 +1,6 @@
-import { QueryResult } from "pg";
 import { Request, Response } from "express";
 import { pool } from "../../database/database";
 import { GENERAL_ERROR_HANDLER } from "../../errors";
-import { ResponseHandler } from "../../model/classes/responseManager";
 import { ClientManager } from "../../model/classes/clientManager";
 
 export const loginClient = async ({ body }: Request, res: Response) => {
@@ -13,6 +11,8 @@ export const loginClient = async ({ body }: Request, res: Response) => {
   } catch (e) {
     GENERAL_ERROR_HANDLER(e, res)
     console.error(e)
+  } finally {
+    client && client.release()
   }
 }
 
@@ -25,6 +25,9 @@ export const singUpClient = async ({ body }: Request, res: Response) => {
     GENERAL_ERROR_HANDLER(e, res)
     console.error(e)
   }
+  finally {
+    client && client.release()
+  }
 }
 
 export const clientData = async ({ params }: Request, res: Response,): Promise<void> => {
@@ -32,9 +35,7 @@ export const clientData = async ({ params }: Request, res: Response,): Promise<v
   try {
     const { id } = params;
     client = await pool.connect();
-    const { rowCount, rows }: QueryResult = await new ClientManager(client, res,).clientData(id);
-    if (!rowCount) ResponseHandler.sendIdNotFound(res);
-    if (rowCount) ResponseHandler.sendIdFound(res, rows);
+    await new ClientManager(client, res,).clientData(id);
   } catch (e) {
     GENERAL_ERROR_HANDLER(e, res);
     console.log(e);
@@ -42,13 +43,13 @@ export const clientData = async ({ params }: Request, res: Response,): Promise<v
     client && client.release();
   }
 };
+
 export const clientDataUpdate = async ({ body, params }: Request, res: Response): Promise<void> => {
   let client;
   try {
     const { id } = params;
     client = await pool.connect();
     await new ClientManager(client, res).clientUpdate(id, body);
-    ResponseHandler.sendSuccessMessage(res, body);
   } catch (e) {
     GENERAL_ERROR_HANDLER(e, res);
     console.log(e);
@@ -56,16 +57,16 @@ export const clientDataUpdate = async ({ body, params }: Request, res: Response)
     client && client.release();
   }
 };
+
 export const clientDeleteData = async ({ params }: Request, res: Response) => {
   let client;
   try {
     client = await pool.connect();
     const { id } = params;
     await new ClientManager(client, res).deleteClient(id);
-    ResponseHandler.sendSuccessMessage(res, id);
   } catch (e) {
     GENERAL_ERROR_HANDLER(e, res);
-    console.error(e); ByteLengthQueuingStrategy
+    console.error(e); 
   }
   client && client.release();
 };

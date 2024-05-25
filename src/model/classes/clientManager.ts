@@ -2,8 +2,8 @@ import { PoolClient, QueryResult } from 'pg';
 import { Response } from 'express';
 import { GENERAL_ERROR_HANDLER } from '../../errors';
 import { ClientData, ClientLogin } from '../interface/client';
-import { DELETE_CLIENT, DELETE_CLIENT_DATA, DELETE_CLIENT_RECORDS, GET_CLIENT_DATA, GET_CLIENT_NICKNAME, UPDATE_CLIENT_DATA } from '../../queries/clientQueries';
-import { ResponseHandler } from './responseManager';
+import * as query from '../../queries/clientQueries';
+import { ResponseClient, ResponseHandler } from './responseManager';
 import { compare } from 'bcryptjs';
 import { generateToken } from '../../middlewares/jsonWebToken/jwtHelper';
 import { encrypt } from '../../middlewares/jsonWebToken/enCryptHelper';
@@ -14,13 +14,11 @@ export class ClientManager {
     try {
       const { ...data } = clientData
       const passwordHash = await encrypt(data.password)
-      const responseId: QueryResult = await this.client.query(`
-      INSERT INTO client (nickname, password) VALUES ($1, $2) RETURNING id`,
+      const responseId: QueryResult = await this.client.query(query.INSERT_CLIENT_QUERY,
         [data.nickname, passwordHash])
-      await this.client.query(`
-    INSERT INTO client_data (id, age, gender, email, weight, height) VALUES ($1,$2,$3,$4,$5,$6)`,
+      await this.client.query(query.INSERT_CLIENT_DATA_QUERY,
         [responseId.rows[0].id, data.age, data.gender, data.email, data.weight, data.height])
-      return this.res.status(200).json({ Message: `Client_Created` })
+      return ResponseClient.SingUp(this.res)
     } catch (e) {
       GENERAL_ERROR_HANDLER(e, this.res)
       console.error(e)
@@ -29,13 +27,17 @@ export class ClientManager {
   public async loginClient(clientData: ClientLogin) {
     try {
       const { nickname, password } = clientData
-      const response: QueryResult = await this.client.query(GET_CLIENT_NICKNAME, [nickname])
-      if (!response.rowCount) return this.res.status(404).json({ Message: ResponseHandler.sendIdNotFound })
+      const response: QueryResult = await this.client.query(query.GET_CLIENT_NICKNAME, [nickname])
+      if (!response.rowCount) {
+        return ResponseHandler.sendUserNotFound(this.res)
+      }
       const checkPassword = await compare(password, response.rows[0].password)
       if (checkPassword) {
         const token = generateToken(nickname)
-        return this.res.status(200).json({ id: response.rows[0].id, Token: token })
-      } else return this.res.status(401).json({ Message: "Password_Invalided" })
+        return ResponseClient.login(this.res, response.rows[0].id, token)
+      } else { 
+        return ResponseClient.passwordIncorrect(this.res)
+      }
     } catch (e) {
       GENERAL_ERROR_HANDLER(e, this.res)
       console.error(e)
@@ -43,9 +45,9 @@ export class ClientManager {
   }
   public async clientData(id: string): Promise<any> {
     try {
-      const response = await this.client.query(GET_CLIENT_DATA,
-        [id])
-      return response
+      const response = await this.client.query(query.GET_CLIENT_DATA, [id])
+      if (response.rowCount === 0) return ResponseClient.clientNotFound(this.res)
+      return ResponseClient.clientData(this.res, response.rows)
     } catch (e) {
       GENERAL_ERROR_HANDLER(e, this.res)
       console.error(e)
@@ -54,7 +56,7 @@ export class ClientManager {
   public async clientUpdate(id: string, clientData: ClientData): Promise<void> {
     try {
       const { age, gender, email, weight, height } = clientData;
-      const response = await this.client.query(GET_CLIENT_DATA,
+      const response = await this.client.query(query.GET_CLIENT_DATA,
         [id])
       const data = {
         age: age ?? response.rows[0].age,
@@ -63,8 +65,9 @@ export class ClientManager {
         weight: weight ?? response.rows[0].weight,
         height: height ?? response.rows[0].height
       };
-      await this.client.query(UPDATE_CLIENT_DATA,
+      await this.client.query(query.UPDATE_CLIENT_DATA,
         [data.age, data.gender, data.email, data.weight, data.height, id])
+      return ResponseClient.clientUpdated(this.res)
     } catch (e) {
       GENERAL_ERROR_HANDLER(e, this.res)
       console.error(e)
@@ -73,18 +76,17 @@ export class ClientManager {
   public async deleteClient(id: any) {
     try {
       Promise.all([
-        await this.client.query(DELETE_CLIENT_DATA, [id]),
-        await this.client.query(DELETE_CLIENT_RECORDS, [id]),
-        await this.client.query(DELETE_CLIENT, [id])
+        await this.client.query(query.DELETE_CLIENT_DATA, [id]),
+        await this.client.query(query.DELETE_CLIENT_RECORDS, [id]),
+        await this.client.query(query.DELETE_CLIENT, [id])
       ])
+      return ResponseClient.clientDeleted(this.res, id)
     } catch (e) {
       GENERAL_ERROR_HANDLER(e, this.res)
       console.error(e)
     }
   }
 }
-
-// Mientras tanto --> cambiar despues 
 
 export const getClientNickname = async (client: PoolClient, res: Response, nickname: string) => {
   try {
