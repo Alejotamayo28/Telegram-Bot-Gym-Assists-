@@ -4,8 +4,8 @@ import { JwtPayload } from "jsonwebtoken";
 import { GENERAL_ERROR_HANDLER } from "../../errors";
 import { pool } from "../../database/database";
 import { QueryResult } from "pg";
-import { getClientNickname } from "../../controller/client/classes/clientManager";
 import { ResponseClient } from "../../controller/client/classes/responseManager";
+import { verifyNickname } from "../../queries/clientQueries";
 
 interface RequestExt extends Request {
   user?: string | JwtPayload,
@@ -35,17 +35,15 @@ export const userJWT = async ({ body }: Request, res: Response, user: any) => {
   try {
     client = await pool.connect()
     const { nickname } = body
-    const response = await (getClientNickname(client, res, nickname))
+    const response = await verifyNickname(client, nickname)
     if (response!.rowCount === 0) {
       return res.status(400).json({
         ERROR: ResponseClient.clientNotFound(res)
       })
     } else {
-      const data: QueryResult = await client.query(`
-      SELECT * FROM client WHERE nickname = $1`, [nickname])
       res.status(200).json({
         JWT: user,
-        userJWT: data.rows
+        userJWT: response.rows
       })
     }
   } catch (e) {

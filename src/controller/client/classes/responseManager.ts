@@ -49,4 +49,11 @@ export class ResponseClient {
       id: id
     })
   }
+  static clientNicknameUsed(res: Response) {
+    res.status(402).json({
+      success: false,
+      message: "Nickname Already Used"
+    })
+
+  }
 }
