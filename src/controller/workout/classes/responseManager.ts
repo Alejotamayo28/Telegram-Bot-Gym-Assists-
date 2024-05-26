@@ -20,20 +20,16 @@ export class ResponseWorkout {
       message: "Workout Data not Found"
     })
   }
-  static workoutUpdate(res: Response, id: any, day: any) {
+  static workoutUpdate(res: Response) {
     res.status(202).json({
       success: true,
       message: "Workout Updated Succesfully",
-      id: id,
-      day: day,
     })
   }
-  static workoutDelete(res: Response, day: any, name: any) {
+  static workoutDelete(res: Response) {
     res.status(202).json({
       success: true,
-      message: "Workout Deleted Succesfully",
-      day: day,
-      name: name
+      message: "Workout Deleted Succesfully"
     })
   }
   static workoutAlreadyExists(res: Response) {

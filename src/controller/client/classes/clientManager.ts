@@ -40,7 +40,7 @@ export class ClientManager {
   }
   public async clientData(id: string): Promise<any> {
     try {
-      const response = await this.client.query(query.GET_CLIENT_DATA, [id])
+      const response = await query.getClientData(this.client, id) 
       if (response.rowCount === 0) return ResponseClient.clientNotFound(this.res)
       return ResponseClient.clientData(this.res, response.rows)
     } catch (e) {

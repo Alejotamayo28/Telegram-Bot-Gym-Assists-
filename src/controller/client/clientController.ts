@@ -10,7 +10,7 @@ export const loginClient = async ({ body }: Request, res: Response) => {
     new ClientManager(client, res).loginClient(body)
   } catch (e) {
     GENERAL_ERROR_HANDLER(e, res)
-    console.error(e)
+    console.error(`Error controller "loginCLient": `, e)
   } finally {
     client && client.release()
   }
@@ -23,7 +23,7 @@ export const singUpClient = async ({ body }: Request, res: Response) => {
     new ClientManager(client, res).singUpClient(body)
   } catch (e) {
     GENERAL_ERROR_HANDLER(e, res)
-    console.error(e)
+    console.error(`Error controller "singUpClient": `, e)
   }
   finally {
     client && client.release()
@@ -38,7 +38,7 @@ export const clientData = async ({ params }: Request, res: Response,): Promise<v
     await new ClientManager(client, res,).clientData(id);
   } catch (e) {
     GENERAL_ERROR_HANDLER(e, res);
-    console.log(e);
+    console.log(`Error controller "clientData": `, e);
   } finally {
     client && client.release();
   }
@@ -52,7 +52,7 @@ export const clientDataUpdate = async ({ body, params }: Request, res: Response)
     await new ClientManager(client, res).clientUpdate(id, body);
   } catch (e) {
     GENERAL_ERROR_HANDLER(e, res);
-    console.log(e);
+    console.log(`Error controller "clientDataUpdate": `, e);
   } finally {
     client && client.release();
   }
@@ -66,7 +66,7 @@ export const clientDeleteData = async ({ params }: Request, res: Response) => {
     await new ClientManager(client, res).deleteClient(id);
   } catch (e) {
     GENERAL_ERROR_HANDLER(e, res);
-    console.error(e);
+    console.error(`Error controller "clientDeleteData": `, e);
   }
   client && client.release();
 };
