@@ -4,10 +4,10 @@ import { validateResult } from "./helpers/validateHelper";
 import { verifyWorkoutDay } from "./functions/workout";
 
 export const validateCreateWorkout = [
-  check('day').exists().isString().notEmpty(),
-  check('name').exists().isString().notEmpty().custom((value, { }) => {
+  check('day').exists().isString().notEmpty().custom((value, { }) => {
     return verifyWorkoutDay(value)
   }),
+  check('name').exists().isString().notEmpty(),
   check('series').exists().isNumeric().notEmpty(),
   check('reps').exists().isArray().notEmpty().custom((value: any[]) => {
     return value.every((num) => typeof num === 'number')

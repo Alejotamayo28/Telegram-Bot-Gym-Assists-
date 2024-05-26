@@ -3,7 +3,6 @@ export interface ClientLogin {
   password: string,
 }
 
-
 export interface ClientData extends ClientLogin {
   age: number;
   gender: string;
