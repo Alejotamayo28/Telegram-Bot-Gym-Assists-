@@ -3,11 +3,10 @@ import { verifyToken } from "../jsonWebToken/jwtHelper";
 import { JwtPayload } from "jsonwebtoken";
 import { GENERAL_ERROR_HANDLER } from "../../errors";
 import { pool } from "../../database/database";
-import { QueryResult } from "pg";
 import { ResponseClient } from "../../controller/client/classes/responseManager";
 import { verifyNickname } from "../../queries/clientQueries";
 
-interface RequestExt extends Request {
+export interface RequestExt extends Request {
   user?: string | JwtPayload,
   nickname?: string
 }
@@ -17,7 +16,6 @@ export const checkJwt = (req: RequestExt, res: Response, next: NextFunction) => 
     const jwtByUser = req.headers.authorization || ''
     const jwt = jwtByUser.split(" ").pop()
     const isUser = verifyToken(`${jwt}`)
-
     if (!isUser || typeof isUser === 'string') {
       res.status(400).json('NO_TIENES_UN_JWT_VALIDO')
     } else {
@@ -51,19 +49,6 @@ export const userJWT = async ({ body }: Request, res: Response, user: any) => {
     console.error(e)
   }
 }
-
-export const getClientDataTESTING = async (req: RequestExt, res: Response) => {
-  try {
-    const { nickname } = req
-    await userJWT(req, res, nickname)
-  } catch (e) {
-    GENERAL_ERROR_HANDLER(e, res)
-  }
-}
-
-
-
-
 
 
 
