@@ -28,7 +28,7 @@ export class ClientManager {
       if (!response.rowCount) return ResponseClient.clientNotFound(this.res)
       const checkPassword = await compare(clientData.password, response.rows[0].password)
       if (checkPassword) {
-        const token = generateToken(clientData.nickname)
+        const token = generateToken(response.rows[0].id,clientData)
         return ResponseClient.login(this.res, response.rows[0].id, token)
       } else {
         return ResponseClient.passwordIncorrect(this.res)

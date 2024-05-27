@@ -1,12 +1,15 @@
 import { sign, verify } from 'jsonwebtoken'
 import dotenv from "dotenv";
+import { ClientLogin } from '../../model/interface/client';
 dotenv.config();
 
 
-
-// Payload es como lo que se puede ver publicamente del usuario
-export const generateToken = (email: string) => { // voy a cambiar esto
-  const jwt = sign({ email }, process.env.JWT_SECRET!, {
+export const generateToken = (id: any, clientData: ClientLogin) => { 
+  const { nickname } = clientData
+  const jwt = sign({
+    id: id,
+    nickname: nickname
+  }, process.env.JWT_SECRET!, {
     expiresIn: "2h",
   })
   return jwt
