@@ -3,15 +3,14 @@ import dotenv from "dotenv";
 import { ClientLogin } from '../../model/interface/client';
 dotenv.config();
 
-
 export const generateToken = (id: any, clientData: ClientLogin) => { 
   const { nickname } = clientData
   const jwt = sign({
     id: id,
     nickname: nickname
   }, process.env.JWT_SECRET!, {
-    expiresIn: "2h",
-  })
+      expiresIn: "2h",
+    })
   return jwt
 }
 

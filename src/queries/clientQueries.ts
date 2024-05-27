@@ -21,7 +21,7 @@ export const insertClientDataQuery = async (client: PoolClient, id: string, clie
     , [id, age, gender, email, weight, height])
 }
 
-export const getClientData = async (client: PoolClient, id: string) => {
+export const getClientData = async (client: PoolClient, id: any) => {
   const response: QueryResult = await client.query(
     `SELECT * FROM client_data WHERE id = $1`,
     [id])

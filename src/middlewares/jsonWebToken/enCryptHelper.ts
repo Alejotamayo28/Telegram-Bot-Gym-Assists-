@@ -11,6 +11,7 @@ export const compare = async (passwordPlain: any, passwordHash: any) => {
 }
 
 export interface RequestExt extends Request {
-  user?: string | JwtPayload,
+  user?:  JwtPayload,
+  id?: any,
   nickname?: string
 }

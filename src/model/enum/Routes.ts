@@ -2,7 +2,7 @@ export enum client {
     CREATE_CLIENT_ROUTE = "/client/singUp/",
     LOGIN_CLIENT_ROUTE = "/client/login/",
     GET_CLIENT_DATA = "/client/find/:id",
-    UPDATE_CLIENT_DATA = "/client/update/:id",
+    UPDATE_CLIENT_DATA = "/client/update/",
     DELETE_CLIENT_DATA = "/client/delete/:id"
 }
 

@@ -3,12 +3,7 @@ import { validateResult } from "./helpers/validateHelper";
 import { Request, Response, NextFunction } from "express";
 import { verifyAge, verifyGender } from "./functions/client";
 
-export const validateIdClient = [
-    check('id').exists().isNumeric(),
-    (req: Request, res: Response, next: NextFunction) => {
-        validateResult(req, res, next)
-    }
-]
+
 export const validateCreateClient = [
     check('nickname').exists().isString().notEmpty(),
     check('password').exists().isString().notEmpty(),

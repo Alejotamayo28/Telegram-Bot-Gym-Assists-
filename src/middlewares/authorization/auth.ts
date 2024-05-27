@@ -1,5 +1,5 @@
 import { NextFunction, Response } from "express";
-import jwt from "jsonwebtoken"
+import jwt, { JwtPayload } from "jsonwebtoken"
 import dotenv from "dotenv";
 import { RequestExt } from "../jsonWebToken/enCryptHelper";
 
@@ -10,11 +10,12 @@ export const authenticateToken = (req: RequestExt, res: Response, next: NextFunc
   if (!token) {
     return res.status(401).json({ error: 'Token de autenticación no proporcionado' });
   }
-  jwt.verify(token, process.env.JWT_SECRET!, (err, user) => {
+  jwt.verify(token, process.env.JWT_SECRET!, (err, decoded) => {
     if (err) {
       return res.status(403).json({ error: 'Token de autenticación inválido' });
     }
-    req.user = user;
+      const userPayload = decoded as RequestExt;
+    req.user = userPayload
     next();
   });
 }
