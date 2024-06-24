@@ -8,7 +8,7 @@ export enum client {
 
 export enum workout {
     CREATE_CLIENT_WORKOUT = "/client/create/workout/:id",
-    GET_CLIENT_WORKOUT_DATA = "/client/find/:id",
-    UPDATE_CLIENT_WORKOUT_DATA = "/client/update/workout/:id",
+    GET_CLIENT_WORKOUT = "/workout/data",
+    UPDATE_CLIENT_WORKOUT = "/client/update/workout/:id",
     DELETE_CLIENT_WORKOUT = "/client/delete/workout/:id"
 }

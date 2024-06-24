@@ -56,7 +56,7 @@ export class WorkoutManager {
   public async deleteWorkout(clientWorkout: ClientWorkout) {
     const user = this.req.user
     try {
-      if(!user) return ResponseClient.clientNotFound(this.res)
+      if (!user) return ResponseClient.clientNotFound(this.res)
       await deleteWorkoutDataQuery(this.client, user.id, clientWorkout)
       return ResponseWorkout.workoutDelete(this.res)
     } catch (e) {
@@ -65,3 +65,4 @@ export class WorkoutManager {
     }
   }
 }
+

@@ -1,16 +1,20 @@
 import express, { Application } from 'express';
 import routes from './routes';
 import bodyParser from 'body-parser';
+import cors from 'cors';
+const app: Application = express();
+const PORT = 4000;
 
-export const app: Application = express();
 
+// Servir archivos estáticos desde el directorio 'public'
+
+
+app.use(cors())
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.json());
 app.use(routes);
-app.use(express.json());
 
-app.listen(4000, () => {
-    console.log(`Server on port: 4000`);
+app.listen(PORT, () => {
+    console.log(`Server on port: ${PORT}`);
 });
 

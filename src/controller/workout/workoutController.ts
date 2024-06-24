@@ -1,6 +1,6 @@
 import { pool } from "../../database/database";
 import { GENERAL_ERROR_HANDLER } from "../../errors";
-import { Response, Request } from "express";
+import { Response} from "express";
 import { WorkoutManager } from "./classes/workoutManager";
 import { RequestExt } from "../../middlewares/jsonWebToken/enCryptHelper";
 

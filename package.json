@@ -4,9 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "concurrently \"tsc --watch\" \"nodemon dist/index.js\" \"node dist/bot/index.js\" ",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node dist/bot/index.js"
+    "dev": "concurrently \"tsc --watch\" \"nodemon dist/index.js\""
   },
   "keywords": [],
   "author": "",
