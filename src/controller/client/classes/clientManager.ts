@@ -10,7 +10,7 @@ import { SingUpClientQuery, deleteClientRecords, getClientData, updateClientData
 
 export class ClientManager {
   constructor(private client: PoolClient, private req: RequestExt, private res: Response) { }
-  public async singUpClient(clientData: ClientData): Promise<void> {
+  public async singUpClient(clientData: ClientData): Promise<void | Response<any>> {
     try {
       const response = await verifyNickname(this.client, clientData)
       if (!response.rowCount) {
@@ -18,14 +18,12 @@ export class ClientManager {
         return ResponseClient.SingUp(this.res)
       } else return ResponseClient.clientNicknameUsed(this.res)
     } catch (e) {
-      GENERAL_ERROR_HANDLER(e, this.res)
-      console.error(`Error singing up client: `, e)
+      return GENERAL_ERROR_HANDLER(e, this.res)
     }
   }
-  public async loginClient(clientData: ClientLogin): Promise<void> {
+  public async loginClient(clientData: ClientLogin): Promise<void | Response<any>> {
     try {
-      const response: QueryResult = await verifyNickname(this.client,
-        clientData)
+      const response: QueryResult = await verifyNickname(this.client, clientData)
       const checkPassword = await compare(clientData.password, response.rows[0].password)
       if (checkPassword) {
         const token = generateToken(response.rows[0].id, clientData)
@@ -34,22 +32,20 @@ export class ClientManager {
         return ResponseClient.passwordIncorrect(this.res)
       }
     } catch (e) {
-      GENERAL_ERROR_HANDLER(e, this.res)
-      console.error(`Error login client: `, e)
+      return GENERAL_ERROR_HANDLER(e, this.res)
     }
   }
-  public async clientData(): Promise<void> {
+  public async clientData(): Promise<void | Response<any>> {
     const user = this.req.user
     try {
       if (!user) return ResponseClient.clientNotFound(this.res)
       const response = await getClientData(this.client, user.id)
       return ResponseClient.clientData(this.res, response.rows)
     } catch (e) {
-      GENERAL_ERROR_HANDLER(e, this.res)
-      console.error(`Error getting client data: `, e)
+      return GENERAL_ERROR_HANDLER(e, this.res)
     }
   }
-  public async clientUpdate(clientData: ClientData): Promise<void> {
+  public async clientUpdate(clientData: ClientData): Promise<void | Response<any>> {
     const user = this.req.user
     try {
       if (!user) return ResponseClient.clientNotFound(this.res)
@@ -65,19 +61,17 @@ export class ClientManager {
       await updateClientData(this.client, user.id, data)
       return ResponseClient.clientUpdated(this.res)
     } catch (e) {
-      GENERAL_ERROR_HANDLER(e, this.res)
-      console.error(`Error updating client data: `, e)
+      return GENERAL_ERROR_HANDLER(e, this.res)
     }
   }
-  public async deleteClient(): Promise<void> {
+  public async deleteClient(): Promise<void | Response<any>> {
     const user = this.req.user
     try {
       if (!user) return ResponseClient.clientNotFound(this.res)
       await deleteClientRecords(this.client, user.id)
       return ResponseClient.clientDeleted(this.res, user.id)
     } catch (e) {
-      GENERAL_ERROR_HANDLER(e, this.res)
-      console.error(`Error deleting client data: `, e)
+      return GENERAL_ERROR_HANDLER(e, this.res)
     }
   }
 }

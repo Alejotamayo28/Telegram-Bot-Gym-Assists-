@@ -9,7 +9,7 @@ import { ResponseClient } from "../../client/classes/responseManager";
 
 export class WorkoutManager {
   constructor(private client: PoolClient, private req: RequestExt, private res: Response) { }
-  public async insertWorkout(clientWorkout: ClientWorkout): Promise<void> {
+  public async insertWorkout(clientWorkout: ClientWorkout): Promise<void | Response<any>> {
     const user = this.req.user
     try {
       if (!user) return ResponseClient.clientNotFound(this.res)
@@ -19,11 +19,10 @@ export class WorkoutManager {
         return ResponseWorkout.workoutInsert(this.res)
       } else return ResponseWorkout.workoutAlreadyExists(this.res)
     } catch (e) {
-      GENERAL_ERROR_HANDLER(e, this.res);
-      console.error(`Error inserting workout: `, e)
+      return GENERAL_ERROR_HANDLER(e, this.res);
     }
   }
-  public async workoutData(clientWorkout: ClientWorkout) {
+  public async workoutData(clientWorkout: ClientWorkout): Promise<void | Response<any>> {
     const user = this.req.user
     try {
       if (!user) return ResponseClient.clientNotFound(this.res)
@@ -31,11 +30,10 @@ export class WorkoutManager {
       if (!response.rowCount) return ResponseWorkout.workoutDataNotFound(this.res)
       return ResponseWorkout.workoutData(this.res, response.rows)
     } catch (e) {
-      GENERAL_ERROR_HANDLER(e, this.res);
-      console.error(`Error getting workout Data: `, e)
+      return GENERAL_ERROR_HANDLER(e, this.res);
     }
   }
-  public async UpdateWorkout(clientWorkout: ClientWorkout) {
+  public async UpdateWorkout(clientWorkout: ClientWorkout): Promise<void | Response<any>> {
     const user = this.req.user
     try {
       if (!user) return ResponseClient.clientNotFound(this.res)
@@ -49,19 +47,17 @@ export class WorkoutManager {
       await updateWorkoutData(this.client, user.id, data)
       return ResponseWorkout.workoutUpdate(this.res)
     } catch (e) {
-      GENERAL_ERROR_HANDLER(e, this.res)
-      console.error(`Error updating workout data: `, e)
+      return GENERAL_ERROR_HANDLER(e, this.res)
     }
   }
-  public async deleteWorkout(clientWorkout: ClientWorkout) {
+  public async deleteWorkout(clientWorkout: ClientWorkout): Promise<void | Response<any>> {
     const user = this.req.user
     try {
       if (!user) return ResponseClient.clientNotFound(this.res)
       await deleteWorkoutDataQuery(this.client, user.id, clientWorkout)
       return ResponseWorkout.workoutDelete(this.res)
     } catch (e) {
-      GENERAL_ERROR_HANDLER(e, this.res)
-      console.error(`Error deleting workout data: `, e)
+      return GENERAL_ERROR_HANDLER(e, this.res)
     }
   }
 }
