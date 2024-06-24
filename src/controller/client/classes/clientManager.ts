@@ -37,11 +37,17 @@ export class ClientManager {
   }
   public async clientData(): Promise<void | Response<any>> {
     const user = this.req.user
+    const timeOut = 5000
+    const timeOutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(`Request timed out`)), timeOut)
+    )
     try {
       if (!user) return ResponseClient.clientNotFound(this.res)
-      const response = await getClientData(this.client, user.id)
+      const response = await Promise.race([
+        getClientData(this.client, user.id), timeOutPromise])
       return ResponseClient.clientData(this.res, response.rows)
-    } catch (e) {
+    } catch (e: any) {
+      if (e.message === `Request timed out`) return this.res.status(504).json({ error: 'Request timed out' });
       return GENERAL_ERROR_HANDLER(e, this.res)
     }
   }
