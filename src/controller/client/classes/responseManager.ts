@@ -23,6 +23,12 @@ export class ResponseClient {
       message: "Incorrect Password"
     })
   }
+  static nicknameIncorrect(res: Response): void {
+    res.status(400).json({
+      succes: false,
+      message: "Incorrect Nickname"
+    })
+  }
   static clientNotFound(res: Response): void {
     res.status(404).json({
       success: false,
