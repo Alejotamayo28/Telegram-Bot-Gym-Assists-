@@ -17,6 +17,12 @@ export class ResponseClient {
       message: "SingUp Succesfully Completed",
     })
   }
+  static passwordInvalid(res: Response): void {
+    res.status(404).json({
+      succes: false,
+      message: "Password Invalid"
+    })
+  }
   static passwordIncorrect(res: Response): void {
     res.status(404).json({
       success: false,

@@ -16,7 +16,8 @@ export class ClientManager {
       if (!response.rowCount) {
         await withTimeout(SingUpClientQuery(this.client, clientData))
         return ResponseClient.SingUp(this.res)
-      } return ResponseClient.clientNicknameUsed(this.res)
+      }
+      return ResponseClient.clientNicknameUsed(this.res)
     } catch (e) {
       if (e instanceof Error && e.message === `Request timed out`) {
         return this.res.status(504).json({ error: `Request timed out` });
