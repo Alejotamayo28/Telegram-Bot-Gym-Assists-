@@ -1,14 +1,14 @@
 export enum client {
-    CREATE_CLIENT_ROUTE = "/client/singUp/",
-    LOGIN_CLIENT_ROUTE = "/client/login/",
-    GET_CLIENT_DATA = "/client/find/:id",
-    UPDATE_CLIENT_DATA = "/client/update/",
-    DELETE_CLIENT_DATA = "/client/delete/:id"
+  REGISTER = "/clients",
+  LOGIN = "/clients/login/",
+  GET_PROFILE = "/clients/me/",
+  UPDATE_PROFILE = "/update/",
+  DELETE_PROFILE = "/client/me/delete/"
 }
 
 export enum workout {
-    CREATE_CLIENT_WORKOUT = "/client/create/workout/:id",
-    GET_CLIENT_WORKOUT = "/workout/data",
-    UPDATE_CLIENT_WORKOUT = "/client/update/workout/:id",
-    DELETE_CLIENT_WORKOUT = "/client/delete/workout/:id"
+  CREATE_WORKOUT = "/client/me/workout/",
+  GET_WORKOUTS = "/client/me/workout",
+  UPDATE_WORKOUT = "/client/me/workout/",
+  DELETE_WORKOUT = "/client/me/workout/"
 }

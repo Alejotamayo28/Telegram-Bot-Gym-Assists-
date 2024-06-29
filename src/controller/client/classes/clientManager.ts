@@ -12,12 +12,8 @@ export class ClientManager {
   constructor(private client: PoolClient, private req: RequestExt, private res: Response) { }
   public async singUpClient(clientData: ClientData): Promise<void | Response<any>> {
     try {
-      const response = await withTimeout(verifyNickname(this.client, clientData))
-      if (!response.rowCount) {
-        await withTimeout(SingUpClientQuery(this.client, clientData))
-        return ResponseClient.SingUp(this.res)
-      }
-      return ResponseClient.clientNicknameUsed(this.res)
+      await withTimeout(SingUpClientQuery(this.client, clientData))
+      return ResponseClient.SingUp(this.res)
     } catch (e) {
       if (e instanceof Error && e.message === `Request timed out`) {
         return this.res.status(504).json({ error: `Request timed out` });
@@ -59,14 +55,16 @@ export class ClientManager {
     const user = this.req.user
     try {
       if (!user) return ResponseClient.clientNotFound(this.res)
-      const { age, gender, email, weight, height } = clientData;
+      const { first_name, last_name, age, gender, email, weight, height } = clientData;
       const response = await withTimeout(getClientData(this.client, user.id))
       const data: Partial<ClientData> = {
+        first_name: first_name ?? response.rows[0].first_name,
+        last_name: last_name ?? response.rows[0].last_name,
         age: age ?? response.rows[0].age,
         gender: gender ?? response.rows[0].gender,
         email: email ?? response.rows[0].email,
         weight: weight ?? response.rows[0].weight,
-        height: height ?? response.rows[0].height
+        height: height ?? response.rows[0].height,
       };
       await withTimeout(updateClientData(this.client, user.id, data))
       return ResponseClient.clientUpdated(this.res)

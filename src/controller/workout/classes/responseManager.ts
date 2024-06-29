@@ -7,8 +7,9 @@ export class ResponseWorkout {
       message: "Workout Inserted Succesfully"
     })
   }
-  static workoutData(res: Response, data: any) {
+  static workoutData(res: Response, data: any, id: any) {
     res.status(202).json({
+      id: id,
       success: true,
       message: "Workout Data",
       data: data
@@ -36,6 +37,12 @@ export class ResponseWorkout {
     res.status(401).json({
       success: false,
       message: "Workout Already Exists"
+    })
+  }
+  static doesNotMatch(res: Response) {
+    res.status(401).json({
+      success: false,
+      message: "The number of reps does not match the number of series"
     })
   }
 }

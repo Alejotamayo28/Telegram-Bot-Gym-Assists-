@@ -14,25 +14,27 @@ export const insertClientQuery = async (client: PoolClient, clientData: ClientLo
   INSERT INTO client (nickname, password) VALUES ($1, $2) RETURNING id`, [nickname, password])
   return response.rows[0].id
 }
-
-export const insertClientDataQuery = async (client: PoolClient, id: string, clientData: ClientData): Promise<void> => {
-  const { age, gender, email, weight, height } = clientData
-  await client.query(` INSERT INTO client_data (id, age, gender, email, weight, height) VALUES ($1, $2, $3, $4, $5, $6)`
-    , [id, age, gender, email, weight, height])
-}
-
 export const getClientData = async (client: PoolClient, id: any) => {
   const response: QueryResult = await client.query(
-    `SELECT * FROM client_data WHERE id = $1`,
+    `SELECT * FROM client_data WHERE client_id = $1`,
     [id])
   return response
 }
-
-export const updateClientData = async (client: PoolClient, id: any, clientData: any) => {
-  const { age, gender, email, weight, height } = clientData
+export const insertClientDataQuery = async (client: PoolClient, id: string, clientData: ClientData): Promise<void> => {
+  const { first_name, last_name, age, gender, email, weight, height } = clientData
+  const date: Date = new Date()
   await client.query(`
-  UPDATE client_data SET age = $1, gender = $2, email = $3, weight = $4, height = $5 WHERE id = $6`,
-    [age, gender, email, weight, height, id])
+  INSERT INTO client_data (client_id, first_name, last_name, age, gender, email, weight, height, created_at, updated_at) 
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+    [id, first_name, last_name, age, gender, email, weight, height, date, date])
+}
+export const updateClientData = async (client: PoolClient, id: any, clientData: any) => {
+  const { first_name, last_name, age, gender, email, weight, height } = clientData
+  const date: Date = new Date()
+  await client.query(`
+  UPDATE client_data SET first_name = $1, last_name = $2, age = $3, gender = $4, email = $5, weight = $6, height = $7,
+  updated_at = $8 WHERE client_id = $9`,
+    [first_name, last_name, age, gender, email, weight, height, date, id])
 }
 
 export const deleteClientRecords = async (client: PoolClient, id: any) => {

@@ -13,6 +13,7 @@ export class WorkoutManager {
     const user = this.req.user
     try {
       if (!user) return ResponseClient.clientNotFound(this.res)
+      if (clientWorkout.reps.length !== clientWorkout.series) return ResponseWorkout.doesNotMatch(this.res)
       const response = await withTimeout(getSingleWorkoutDataQuery(this.client, user.id, clientWorkout))
       if (!response.rowCount) {
         await withTimeout(insertWorkoutQuery(this.client, user.id, clientWorkout))
@@ -31,7 +32,7 @@ export class WorkoutManager {
       if (!user) return ResponseClient.clientNotFound(this.res)
       const response: QueryResult = await withTimeout(getWorkoutDataQuery(this.client, user.id, clientWorkout))
       if (!response.rowCount) return ResponseWorkout.workoutDataNotFound(this.res)
-      return ResponseWorkout.workoutData(this.res, response.rows)
+      return ResponseWorkout.workoutData(this.res, response.rows, user.id)
     } catch (e) {
       if (e instanceof Error && e.message === `Request timed out`) {
         return this.res.status(504).json({ error: `Request timed out` });
@@ -43,9 +44,11 @@ export class WorkoutManager {
     const user = this.req.user
     try {
       if (!user) return ResponseClient.clientNotFound(this.res)
-      const { series, reps, kg } = clientWorkout
+      const { name, day, series, reps, kg } = clientWorkout
       const response: QueryResult = await withTimeout(getSingleWorkoutDataQuery(this.client, user.id, clientWorkout))
       const data: Partial<ClientWorkout> = {
+        name: name ?? response.rows[0].name,
+        day: day ?? response.rows[0].day,
         series: series ?? response.rows[0].series,
         reps: reps ?? response.rows[0].reps,
         kg: kg ?? response.rows[0].kg

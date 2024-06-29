@@ -1,4 +1,5 @@
 import { clientGender } from '../enums/client'
+import { pool } from '../../../database/database'
 
 export const verifyAge = (age: number): boolean => {
   if (age < 8 || age > 100) {
@@ -19,3 +20,13 @@ export const passwordLength = (password: string): boolean => {
   }
   return true
 }
+
+export const nicknameVerificationSingUp = async (nickname: string): Promise<boolean> => {
+  const verifyNickname = await pool.query(`Select * from client where nickname = $1`, [nickname])
+  if (verifyNickname.rowCount != 0) {
+    throw new Error(`Nickname already used`)
+  }
+  return true
+}
+
+

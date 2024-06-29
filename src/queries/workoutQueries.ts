@@ -11,7 +11,7 @@ export const insertWorkoutQuery = async (client: PoolClient, id: any, clientWork
 export const getWorkoutDataQuery = async (client: PoolClient, id: any, clientWorkout: ClientWorkout): Promise<QueryResult> => {
   const { day } = clientWorkout
   const response: QueryResult = await client.query(`
-  SELECT * FROM workout WHERE id = $1 AND day = $2`,
+  SELECT day, name, series, reps, kg FROM workout WHERE id = $1 AND day = $2`,
     [id, day])
   return response
 }
@@ -27,8 +27,8 @@ export const getSingleWorkoutDataQuery = async (client: PoolClient, id: any, cli
 export const updateWorkoutData = async (client: PoolClient, id: any, clientWorkout: any): Promise<void> => {
   const { day, name, series, reps, kg } = clientWorkout
   await client.query(`
-  UPDATE workout SET day = $1, name = $2, series = $3, reps = $4, kg = $5 WHERE id = $6`,
-    [day, name, series, reps, kg, id])
+  UPDATE workout SET series = $1, reps = $2, kg = $3 WHERE id = $4 and day = $5 and name = $6`,
+    [series, reps, kg, id, day, name])
 }
 
 export const deleteWorkoutDataQuery = async (client: PoolClient, id: any, clientWorkout: ClientWorkout): Promise<void> => {

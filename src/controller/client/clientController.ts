@@ -17,6 +17,7 @@ export const loginClient = async (req: RequestExt, res: Response): Promise<void 
   }
 }
 
+
 export const singUpClient = async (req: RequestExt, res: Response): Promise<void | Response<any>> => {
   let client
   try {
