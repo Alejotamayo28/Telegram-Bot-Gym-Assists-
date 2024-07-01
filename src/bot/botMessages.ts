@@ -1,5 +1,8 @@
 import { StringMappingType } from "typescript";
 import { ClientData, ClientLogin } from "../model/interface/client";
+import { PoolClient, QueryResult } from "pg";
+import { getWorkoutAllDataQuery } from "../queries/workoutQueries";
+import { workout } from "../model/enum/Routes";
 
 export const mainPage = () => {
   return `¡Hola! ¿Eres un usuario registrado o te gustaría crear una cuenta?
@@ -104,8 +107,20 @@ export const menuPageDeleteExercise = () => {
 *day exercise_name*`
 }
 
-export const menuPageGetExercises = () => {
-  return `Ejercicios:`
+export const menuPageGetExercises = async (client: PoolClient, id: any) => {
+  let monday = 'Monday: \n'
+  let friday = 'Friday: \n'
+  const response: QueryResult = await getWorkoutAllDataQuery(client, id)
+  response.rows.map(row => {
+    if (row.day === 'monday') {
+      monday += `- Nombre: ${row.name}, series: ${row.series}, repeticiones: {${row.reps}}, peso: ${row.kg}.\n`
+    } else if (row.day === 'friday') {
+      friday += `- Nombre: ${row.name}, series: ${row.series}, repeticiones: {${row.reps}}, peso: ${row.kg}.\n`
+    }
+  }).join('\n')
+  return monday + friday
+
+
 }
 
 export const menuPageGetExercisePerDay = () => {
@@ -116,14 +131,16 @@ export const menuPageGetExercisePerDay = () => {
 
 export class UserSession {
   private userData: ClientLogin
+  private id: number
   constructor() {
     this.userData = {
       nickname: ' ',
       password: ' ',
     }
+    this.id = 0
   }
   setNickname(nickname: string) {
-      
+
     if (typeof nickname === 'string' && nickname.trim() !== '') {
       this.userData.nickname = nickname.trim();
     } else {
@@ -142,6 +159,12 @@ export class UserSession {
   }
   getPassword() {
     return this.userData.password;
+  }
+  setId(id: number) {
+    this.id = id
+  }
+  getId() {
+    return this.id
   }
   getDataLogin() {
     return this.userData

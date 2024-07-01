@@ -3,37 +3,20 @@ import { client, workout } from '../model/enum/Routes'
 import { validateCreateClient, validateCreateClientData, validateLoginClient, validateUpdateClientData } from '../middlewares/validators/client';
 import { validateCreateWorkout, validateUpdateWorkout } from '../middlewares/validators/workout';
 import { authenticateToken } from '../middlewares/authorization/auth';
-import { loginClient, singUpClient, clientData, clientDataUpdate, clientDeleteData } from '../controller/client/clientController';
-import { workoutData, deleteWorkoutData, insertWorkout, UpdateWorkoutData } from '../controller/workout/workoutController';
 import { Twilio } from 'twilio'
-import { body } from 'express-validator';
 import { QueryResult } from 'pg';
 import { pool } from '../database/database';
 import { compare } from 'bcryptjs';
 import { encrypt } from '../middlewares/jsonWebToken/enCryptHelper';
 import dotenv from 'dotenv'
-import { ResponseClient } from '../controller/client/classes/responseManager';
-import { ClientData, ClientLogin } from '../model/interface/client';
-import { insertClientDataQuery, insertClientQuery, verifyNickname, verifyNicknameWhatsapp } from '../queries/clientQueries';
+import { ClientData } from '../model/interface/client';
+import { insertClientDataQuery, insertClientQuery, verifyNickname } from '../queries/clientQueries';
 import { withTimeout } from '../errors';
 import { ClientWorkout } from '../model/interface/workout';
 import { deleteWorkoutDataQuery, getSingleWorkoutDataQuery, getWorkoutAllDataQuery, insertWorkoutQuery, updateWorkoutData } from '../queries/workoutQueries';
 import { UserSession, loginPage, loginPageExample, loginPagePasswordIncorrect, loginPageUserNotFound, mainPage, menuPage, menuPageCreateExercise, menuPageDeleteExercise, menuPageGetExercisePerDay, menuPageGetExercises, menuPageUpdateExercise, menuPageUserNotFound, singUpPage, singUpPageExample, singUpPageUserNotAvailable, userCreatedSuccesfully, userLoginSuccesfully } from '../bot/botMessages';
 
 const router = Router();
-
-// Client Routes
-//router.get(client.LOGIN, validateLoginClient, loginClient)
-//router.post(client.REGISTER, validateCreateClient, validateCreateClientData, singUpClient)
-//router.get(client.GET_PROFILE, authenticateToken, clientData)
-//router.put(client.UPDATE_PROFILE, authenticateToken, validateUpdateClientData, clientDataUpdate)
-//router.delete(client.DELETE_PROFILE, authenticateToken, clientDeleteData)
-// Workout Routes
-
-router.delete(workout.DELETE_WORKOUT, authenticateToken, deleteWorkoutData)
-router.patch(workout.UPDATE_WORKOUT, authenticateToken, validateUpdateWorkout, UpdateWorkoutData)
-router.get(workout.GET_WORKOUTS, authenticateToken, workoutData)
-router.post(workout.CREATE_WORKOUT, authenticateToken, validateCreateWorkout, insertWorkout)
 
 dotenv.config()
 
@@ -62,9 +45,8 @@ const userSession = new UserSession()
 router.post('/webhook', async (req, res) => {
   const clientQuery = await pool.connect()
   const { Body } = req.body;
-
-
   let responseMessage = '';
+
   switch (userState) {
     case 'start':
       if (Body && Body.toLowerCase() === 'hola') {
@@ -74,6 +56,7 @@ router.post('/webhook', async (req, res) => {
         responseMessage = 'No he entendido ese comando. Por favor, escribe "Hola" para comenzar.';
       }
       break;
+
     case 'selectOption':
       if (Body && Body === '1') {
         responseMessage = loginPage()
@@ -116,6 +99,7 @@ router.post('/webhook', async (req, res) => {
         responseMessage = `Formato incorrecto, escribe "hola" para volver a comenzar`
       }
       break
+
     case 'enterCredentialsLogin':
       if (Body && Body.includes(' ')) {
         const [nickname, password] = Body.split(' ');
@@ -127,6 +111,8 @@ router.post('/webhook', async (req, res) => {
           userState = 'start'
           break;
         }
+
+        userSession.setId(response.rows[0].id)
         const checkPassword = await compare(userSession.getPassword(), response.rows[0].password)
         if (!checkPassword) {
           responseMessage = loginPagePasswordIncorrect()
@@ -147,6 +133,7 @@ router.post('/webhook', async (req, res) => {
         responseMessage = 'Opción no válida111. Por favor, selecciona una de las opciones disponibles.';
       }
       break;
+
     case `selectOptionMenu`:
       if (Body && Body === `1`) {
         responseMessage = menuPageCreateExercise()
@@ -158,19 +145,22 @@ router.post('/webhook', async (req, res) => {
         responseMessage = menuPageDeleteExercise()
         userState = `enterCredentialsDeleteExercise`
       } else if (Body && Body === '4') {
-        responseMessage = menuPageGetExercises()
-        userState = `enterCredentialsGetExercises`
+        responseMessage =  await menuPageGetExercises(clientQuery, userSession.getId())
+        break;
       } else if (Body && Body === '5') {
         responseMessage = menuPageGetExercisePerDay()
         userState = `enterCredentialsGetExercisePerDay`
       }
       break
+
     case 'enterCredentialsCreateExercise':
       if (Body && Body.includes(' ')) {
         const [day, name, series, reps, kg] = Body.split(' ');
+        const seriesLength = parseInt(series, 10)
+        const repsLength = reps.replace(/[{}]/g, '').split(',').map(Number);
         const data: ClientWorkout = { day, name, series, reps, kg };
-        console.log (data.series, " ", data.reps.length)
-        if (data.series !== data.reps.length) {
+        console.log(data.series, " ", data.reps.length)
+        if (seriesLength !== repsLength.length) {
           responseMessage = 'La cantidad de series no coincide con la cantidad de repeticiones, vuelve a crear tu ejercicio';
           userState = 'enterCredentialsCreateExercise';
           break;
@@ -221,6 +211,7 @@ router.post('/webhook', async (req, res) => {
         userState = `enterCredentialsUpdateExercise`
       }
       break;
+
     case `enterCredentialsDeleteExercise`:
       if (Body && Body.includes(' ')) {
         const [day, name, series, reps, kg] = Body.split(' ')
@@ -240,29 +231,24 @@ router.post('/webhook', async (req, res) => {
       }
       break;
 
-    case `enterCredentialsGetExercises`:
-      if (Body && Body.trim() !== '') {
-        const verify: QueryResult = await verifyNickname(clientQuery, userSession.getNickname())
-        if (verify.rowCount === 0) {
-          responseMessage = menuPageUserNotFound()
-          userState = `menu`
+    case 'enterCredentialsGetExercises':
+      try {
+        const verify: QueryResult = await verifyNickname(clientQuery, userSession.getNickname());
+        const response: QueryResult = await getWorkoutAllDataQuery(clientQuery, verify.rows[0].id);
+        if (response.rowCount === 0) {
+          responseMessage = 'No se encontraron ejercicios. Vuelve al menú principal.';
+          userState = 'menu';
           break;
         }
-        const response: QueryResult = await getWorkoutAllDataQuery(clientQuery, verify.rows[0].id)
-        responseMessage = `Ejercicios: \n${response.rows.map(row => `- ${row.name}`).join('\n')}`
-      } else {
-        responseMessage = `Opcino no valida.Por favor, vuelve a obtener tu ejercicio`
-        userState = `enterCredentialsGetExercises`
+        const workoutData = response.rows.map(row => `Día: ${row.day}\n- Nombre: ${row.name}`).join('\n');
+        responseMessage = `Ejercicios:\n${workoutData}`;
+        userState = 'menu'; // Volvemos al menú principal después de mostrar los ejercicios
+      } catch (error) {
+        console.error('Error fetching exercises:', error);
+        responseMessage = 'Hubo un error al obtener los ejercicios. Por favor, intenta nuevamente.';
+        userState = 'menu';
       }
       break;
-    case `enterCredentialsGetExercisePerDay`:
-      if (Body && Body.includes(' ')) {
-      } else {
-        responseMessage = `Opcion no valida.Por favor, vuelve a crear tu ejercicio`
-        userState = `enterCredentialsGetExercisePerDay`
-      }
-      break;
-
     default:
       responseMessage = 'Ocurrió un error en la aplicación. Por favor inténtalo más tarde.';
       break;
