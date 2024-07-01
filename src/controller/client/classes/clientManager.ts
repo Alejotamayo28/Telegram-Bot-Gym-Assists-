@@ -6,7 +6,7 @@ import { generateToken } from '../../../middlewares/jsonWebToken/jwtHelper';
 import { ResponseClient } from './responseManager';
 import { ClientData, ClientLogin } from '../../../model/interface/client';
 import { RequestExt } from '../../../middlewares/jsonWebToken/enCryptHelper';
-import { SingUpClientQuery, deleteClientRecords, getClientData, updateClientData, verifyNickname } from '../../../queries/clientQueries';
+import { SingUpClientQuery, deleteClientRecords, getClientData, updateClientData, verifyNickname, verifyNicknameWhatsapp } from '../../../queries/clientQueries';
 
 export class ClientManager {
   constructor(private client: PoolClient, private req: RequestExt, private res: Response) { }
@@ -21,9 +21,10 @@ export class ClientManager {
       return GENERAL_ERROR_HANDLER(e, this.res)
     }
   }
+
   public async loginClient(clientData: ClientLogin): Promise<void | Response<any>> {
     try {
-      const response: QueryResult = await withTimeout(verifyNickname(this.client, clientData))
+      const response: QueryResult = await withTimeout(verifyNickname(this.client, clientData.nickname))
       if (!response.rowCount) return ResponseClient.nicknameIncorrect(this.res)
       const checkPassword = await compare(clientData.password, response.rows[0].password)
       if (checkPassword) {

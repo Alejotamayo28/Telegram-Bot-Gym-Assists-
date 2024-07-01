@@ -1,7 +1,8 @@
 export interface ClientWorkout {
-    day: string,
-    name: string,
-    series: number,
-    reps: number[],
-    kg: number
+  nickname?: string,
+  day: string,
+  name: string,
+  series: number,
+  reps: number[],
+  kg: number
 }

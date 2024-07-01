@@ -1,6 +1,7 @@
 import { PoolClient, QueryResult } from "pg"
 import { ClientLogin, ClientData } from "../model/interface/client"
 import { encrypt } from "../middlewares/jsonWebToken/enCryptHelper"
+import { pool } from "../database/database"
 
 export const SingUpClientQuery = async (client: PoolClient, clientData: ClientData): Promise<void> => {
   const passwordHash = await encrypt(clientData.password)
@@ -8,12 +9,13 @@ export const SingUpClientQuery = async (client: PoolClient, clientData: ClientDa
   await insertClientDataQuery(client, id, clientData)
 }
 
-export const insertClientQuery = async (client: PoolClient, clientData: ClientLogin, password: string): Promise<string> => {
+export const insertClientQuery = async (client: PoolClient, clientData: ClientLogin, password: string) => {
   const { nickname } = clientData
   const response: QueryResult = await client.query(`
   INSERT INTO client (nickname, password) VALUES ($1, $2) RETURNING id`, [nickname, password])
   return response.rows[0].id
 }
+
 export const getClientData = async (client: PoolClient, id: any) => {
   const response: QueryResult = await client.query(
     `SELECT * FROM client_data WHERE client_id = $1`,
@@ -28,6 +30,7 @@ export const insertClientDataQuery = async (client: PoolClient, id: string, clie
   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
     [id, first_name, last_name, age, gender, email, weight, height, date, date])
 }
+
 export const updateClientData = async (client: PoolClient, id: any, clientData: any) => {
   const { first_name, last_name, age, gender, email, weight, height } = clientData
   const date: Date = new Date()
@@ -45,10 +48,16 @@ export const deleteClientRecords = async (client: PoolClient, id: any) => {
   ])
 }
 
-export const verifyNickname = async (client: PoolClient, clientData: ClientLogin) => {
-  const { nickname } = clientData
+export const verifyNickname = async (client: PoolClient, nickname:string) => {
   const response: QueryResult = await client.query(`
   SELECT * FROM client WHERE nickname = $1`, [nickname])
   return response
 }
+export const verifyNicknameWhatsapp = async (nickname: string) => {
+  const response: QueryResult = await pool.query(`
+  SELECT * FROM client WHERE nickname = $1`, [nickname])
+  return response
+}
+
+
 

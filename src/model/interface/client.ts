@@ -11,7 +11,7 @@ export interface ClientData extends ClientLogin {
   email: string;
   weight: number;
   height: number;
-  created_at: string,
-  updated_at: string
+  created_at?: string,
+  updated_at?: string
 }
 

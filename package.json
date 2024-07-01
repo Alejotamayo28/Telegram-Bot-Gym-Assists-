@@ -32,6 +32,7 @@
     "jsonwebtoken": "^9.0.2",
     "node-dependency-injection": "^3.1.2",
     "pg": "^8.11.5",
+    "twilio": "^5.2.1",
     "whatsapp-web.js": "^1.23.0"
   }
 }
