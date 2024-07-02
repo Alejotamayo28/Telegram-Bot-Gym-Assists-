@@ -32,6 +32,13 @@ export const getWorkoutAllDataQuery = async (client: PoolClient, id: any) => {
   return response
 }
 
+export const getWorkoutDataPerDay = async (client: PoolClient, id: any, day: string) => {
+  const response: QueryResult = await client.query(`
+SELECT * FROM workout WHERE id = $1 AND day = $2`,
+    [id, day])
+  return response
+}
+
 
 export const updateWorkoutData = async (client: PoolClient, id: any, clientWorkout: any): Promise<void> => {
   const { day, name, series, reps, kg } = clientWorkout

@@ -1,133 +1,144 @@
-import { StringMappingType } from "typescript";
 import { ClientData, ClientLogin } from "../model/interface/client";
 import { PoolClient, QueryResult } from "pg";
 import { getWorkoutAllDataQuery } from "../queries/workoutQueries";
-import { workout } from "../model/enum/Routes";
 
 export const mainPage = () => {
-  return `¡Hola! ¿Eres un usuario registrado o te gustaría crear una cuenta?
-      
-      - Si ya estás registrado, digita: *1*
-      - Si deseas crear una cuenta, digita: *2*
-      
-      Ejemplos:
-      - Para iniciar sesión, digita: *11*
-      - Para crear una cuenta, digita: *22*`;
+  return `¡Bienvenido! 🌟 ¿Ya tienes una cuenta o te gustaría crear una?
+
+- Para iniciar sesión, escribe: *1*  
+- Para registrarte, escribe: *2*  
+
+Ejemplos:
+
+- Para iniciar sesión, escribe: *11*  
+- Para crear una cuenta, escribe: *22*`
 }
 
 export const loginPage = () => {
-  return `Por favor, ingresa tus datos para iniciar sesión, por ejemplo:
+  return `Por favor, ingresa tus credenciales para iniciar sesión en el siguiente formato:
       
-      *nickname contraseña*`;
+  _nickname contraseña_
+`;
 }
 
 export const singUpPage = () => {
-  return `Para crear una cuenta, por favor proporciona la siguiente información:
-      
-      *nickname contraseña nombre apellido edad género email peso altura*`;
+  return `Para registrarte, por favor proporciona la siguiente información en el formato indicado:
+
+  _nickname contraseña nombre apellido edad género email peso altura_
+`;
 }
 
 export const loginPageExample = () => {
   return `Ejemplo para iniciar sesión:
       
-      *usuario1 contraseña1*
+  _usuario1 contraseña1_
       
-      Recuerda reemplazar los valores de ejemplo con tus datos personales. 
-      Vuelve a escribir "hola" para comenzar de nuevo.`
-
+Recuerda reemplazar los valores de ejemplo con tus credenciales personales.
+Escribe *hola* para comenzar de nuevo.`;
 }
 
 export const singUpPageExample = () => {
-  return `Ejemplo para crear una cuenta:
+  return `Ejemplo para registrarte:
       
-      *usuario2 contraseña2 Juan Pérez 25 masculino juan@example.com 70 175*
+  _usuario2 contraseña2 Juan Pérez 25 masculino juan@example.com 70 175_
       
-      Recuerda reemplazar los valores de ejemplo con tus datos personales. Vuelve a escribir "hola" para comenzar de nuevo.`;
-
+Recuerda reemplazar los valores de ejemplo con tu información personal. 
+Escribe *hola* para comenzar de nuevo.`;
 }
 
 export const loginPageUserNotFound = () => {
-  return `Usuario no encontrado, escribe "Hola" y comienza a crear tu cuenta!`
+  return `Usuario no encontrado. Por favor, escribe *hola* para crear una cuenta nueva.`;
 }
 
 export const loginPagePasswordIncorrect = () => {
-  return `Contrasena incorreceta, vuelve a escribir tu nickname y contrasena`
+  return `Contraseña incorrecta. Por favor, ingresa tu nickname y contraseña nuevamente.`;
 }
 
 export const singUpPageUserNotAvailable = () => {
-  return `Nickname no disponible, vuelve a escribir tus datos personales`
+  return `El nickname no está disponible. Por favor, ingresa tus datos nuevamente utilizando un nickname diferente.`;
 }
 
 export const userCreatedSuccesfully = () => {
-  return `Usuario creado satisfacctoriamente, vuelve a escribir "name" para iniciar session`
+  return `Usuario creado con éxito.
+  
+Escribe *name* para iniciar sesión.
+`;
 }
 
 export const userLoginSuccesfully = (nickname: string) => {
-  return `Usuario logeado satisfactoriamente.
+  return `Inicio de sesión exitoso.
 
-Bienvenido, *${nickname}!*
+¡Bienvenido, _${nickname}_!
 
-Escribe "menu" para ingresar a tu menu de usuario`
+Escribe *menu* para acceder a tu menú de usuario.
+`;
 }
 
 export const menuPage = () => {
-  return `Hola! Este es el menu de usuario:
-- Crear ejercicio, digita: *1*
-- Actualizar ejercicio, digita: *2*
-- Eliminar ejercicio, digita: *3*
-- Obtener ejercicios, digita: *4*
-- Obtener ejercicios por dia, digita *5*
+  return `¡Hola! 🌟 Este es tu menú de usuario:
+- Para crear un ejercicio, escribe: *1*
+- Para actualizar un ejercicio, escribe: *2*
+- Para eliminar un ejercicio, escribe: *3*
+- Para obtener todos los ejercicios, escribe: *4*
+- Para obtener ejercicios por día, escribe: *5*
 
 Ejemplos:
-- Para crear ejercicio, digita *11*:
-- Para actualizar ejercicio, digita *22*:
-- Para eliminar ejercicio, digita *33*:
-- Para obtener ejercicios, digita *44*:
-- Para obtener ejercicios por dia, digita *55*:`
+- Para crear un ejercicio, escribe: *11*
+- Para actualizar un ejercicio, escribe: *22*
+- Para eliminar un ejercicio, escribe: *33*
+- Para obtener todos los ejercicios, escribe: *44*
+- Para obtener ejercicios por día, escribe: *55*`;
 }
+
 export const menuPageUserNotFound = () => {
-  return `Nickname no encontrado. Por favor digita "menu" para volver a tu menu de usuario`
+  return `Nickname no encontrado. Por favor, escribe *menu* para volver a tu menú de usuario.`;
 }
 
 export const menuPageCreateExercise = () => {
-  return `Para crear un ejercicio, por favor proporciona la siguiente informacion:
+  return `Para crear un ejercicio, por favor proporciona la siguiente información:
 
-*day name series {rep1, rep2, rep3} kg*`
+_day name series {rep1, rep2, rep3} kg_
+`;
+}
+
+export const menuPageCreateExerciseExample = () => {
+  return `Ejemplo para crear tu ejercicio:
+
+_lunes press_plano 3 {10,9,6} 10_
+
+Recuerda reemplazar los valores de ejemplo con los datos de tu ejercicio.
+Escribe *menu* para volver a tu menú de usuario.`;
 }
 
 export const menuPageUpdateExercise = () => {
-  return `Para actualizar un ejercicio, por favor proporciona la siguiente informacion:
+  return `Para actualizar un ejercicio, por favor proporciona la siguiente información:
 
-*day name series {rep1, rep2, rep3} kg*`
+_day name series {rep1, rep2, rep3} kg_
+`;
+}
+
+export const menuPageUpdateExerciseExample = () => {
+  return `Ejemplo para actualizar tu ejercicio: 
+
+_lunes press_plano 3 {10,10,10} 100_
+
+Recuerda reemplazar los valores de ejemplo con los datos de tu ejercicio.
+Escribe *menu* para volver a tu menu de usuarios.`;
 }
 
 export const menuPageDeleteExercise = () => {
-  return `Para eliminar un ejercicio, por favor proporciona la siguiente informacion:
+  return `Para eliminar un ejercicio, por favor proporciona la siguiente información:
 
-*day exercise_name*`
-}
-
-export const menuPageGetExercises = async (client: PoolClient, id: any) => {
-  let monday = 'Monday: \n'
-  let friday = 'Friday: \n'
-  const response: QueryResult = await getWorkoutAllDataQuery(client, id)
-  response.rows.map(row => {
-    if (row.day === 'monday') {
-      monday += `- Nombre: ${row.name}, series: ${row.series}, repeticiones: {${row.reps}}, peso: ${row.kg}.\n`
-    } else if (row.day === 'friday') {
-      friday += `- Nombre: ${row.name}, series: ${row.series}, repeticiones: {${row.reps}}, peso: ${row.kg}.\n`
-    }
-  }).join('\n')
-  return monday + friday
-
-
+_day exercise_name_
+`;
 }
 
 export const menuPageGetExercisePerDay = () => {
-  return `Para obtener los ejercicios de un dia especifico, por favor proporciona la siguiente informacion:
-*day*`
-}
+  return `Para obtener los ejercicios de un día específico, por favor proporciona la siguiente información:
 
+_day_
+`;
+}
 
 export class UserSession {
   private userData: ClientLogin

@@ -13,8 +13,9 @@ import { ClientData } from '../model/interface/client';
 import { insertClientDataQuery, insertClientQuery, verifyNickname } from '../queries/clientQueries';
 import { withTimeout } from '../errors';
 import { ClientWorkout } from '../model/interface/workout';
-import { deleteWorkoutDataQuery, getSingleWorkoutDataQuery, getWorkoutAllDataQuery, insertWorkoutQuery, updateWorkoutData } from '../queries/workoutQueries';
-import { UserSession, loginPage, loginPageExample, loginPagePasswordIncorrect, loginPageUserNotFound, mainPage, menuPage, menuPageCreateExercise, menuPageDeleteExercise, menuPageGetExercisePerDay, menuPageGetExercises, menuPageUpdateExercise, menuPageUserNotFound, singUpPage, singUpPageExample, singUpPageUserNotAvailable, userCreatedSuccesfully, userLoginSuccesfully } from '../bot/botMessages';
+import { deleteWorkoutDataQuery, getSingleWorkoutDataQuery, getWorkoutAllDataQuery, getWorkoutDataPerDay, insertWorkoutQuery, updateWorkoutData } from '../queries/workoutQueries';
+import { UserSession, loginPage, loginPageExample, loginPagePasswordIncorrect, loginPageUserNotFound, mainPage, menuPage, menuPageCreateExercise, menuPageCreateExerciseExample, menuPageDeleteExercise, menuPageGetExercisePerDay, menuPageUpdateExercise, menuPageUpdateExerciseExample, singUpPage, singUpPageExample, singUpPageUserNotAvailable, userCreatedSuccesfully, userLoginSuccesfully } from '../bot/botMessages';
+import { menuPageGetExercises } from '../bot/botFuntions';
 
 const router = Router();
 
@@ -145,11 +146,17 @@ router.post('/webhook', async (req, res) => {
         responseMessage = menuPageDeleteExercise()
         userState = `enterCredentialsDeleteExercise`
       } else if (Body && Body === '4') {
-        responseMessage =  await menuPageGetExercises(clientQuery, userSession.getId())
-        break;
+        responseMessage = await menuPageGetExercises(clientQuery, userSession.getId())
+        userState = 'menu'
       } else if (Body && Body === '5') {
         responseMessage = menuPageGetExercisePerDay()
         userState = `enterCredentialsGetExercisePerDay`
+      } else if (Body && Body === '11') {
+        responseMessage = menuPageCreateExerciseExample()
+        userState = 'menu'
+      } else if (Body && Body === '22') {
+        responseMessage = menuPageUpdateExerciseExample()
+        userState = 'menu'
       }
       break
 
@@ -165,13 +172,7 @@ router.post('/webhook', async (req, res) => {
           userState = 'enterCredentialsCreateExercise';
           break;
         }
-        const response: QueryResult = await verifyNickname(clientQuery, userSession.getNickname());
-        if (response.rowCount === 0) {
-          responseMessage = 'Usuario no encontrado, vuelve al menú principal.';
-          userState = 'menu';
-          break;
-        }
-        await insertWorkoutQuery(clientQuery, response.rows[0].id, data);
+        await insertWorkoutQuery(clientQuery, userSession.getId(), data);
         responseMessage = 'Ejercicio creado satisfactoriamente. Digita "menu" para volver al menú de usuario.';
         userState = 'menu';
       } else {
@@ -183,18 +184,12 @@ router.post('/webhook', async (req, res) => {
       if (Body && Body.includes(' ')) {
         const [day, name, series, reps, kg] = Body.split(' ')
         const data: ClientWorkout = { day: day, name: name, series: series, reps: reps, kg: kg }
-        const verify: QueryResult = await verifyNickname(clientQuery, userSession.getNickname())
         if (data.reps.length !== series) {
           responseMessage = `La cantidad de series no coincide con la cantidad de repeticiones, vuelve a actualizar tu ejercicio`
           userState = `enterCredentialsUpdateExercise`
           break;
         }
-        if (verify.rowCount === 0) {
-          responseMessage = menuPageUserNotFound()
-          userState = `menu`
-          break;
-        }
-        const response: QueryResult = await withTimeout(getSingleWorkoutDataQuery(clientQuery, verify.rows[0].id, data))
+        const response: QueryResult = await withTimeout(getSingleWorkoutDataQuery(clientQuery, userSession.getId(), data))
         const dataUpdate: Partial<ClientWorkout> = {
           name: name ?? response.rows[0].name,
           day: day ?? response.rows[0].day,
@@ -202,7 +197,7 @@ router.post('/webhook', async (req, res) => {
           reps: reps ?? response.rows[0].reps,
           kg: kg ?? response.rows[0].kg
         }
-        await updateWorkoutData(clientQuery, verify.rows[0].id, dataUpdate)
+        await updateWorkoutData(clientQuery, userSession.getId(), dataUpdate)
         responseMessage = `Ejercicio actualizado satisfactoriamente, digita "menu" para volver al menu de usuario`
         userState = 'menu' // -------------> Acomodar esto por el bien comun (tener dos opciones, una para seguir, otra para ir al menu
       }
@@ -216,39 +211,25 @@ router.post('/webhook', async (req, res) => {
       if (Body && Body.includes(' ')) {
         const [day, name, series, reps, kg] = Body.split(' ')
         const data: ClientWorkout = { day: day, name: name, series: series, reps: reps, kg: kg }
-        const verify: QueryResult = await verifyNickname(clientQuery, userSession.getNickname())
-        if (verify.rowCount === 0) {
-          responseMessage = menuPageUserNotFound()
-          userState = `menu`
-          break;
-        }
-        await deleteWorkoutDataQuery(clientQuery, verify.rows[0].id, data)
+        await deleteWorkoutDataQuery(clientQuery, userSession.getId(), data)
         responseMessage = `Ejercicio eliminado satisfactoriamente, digita "menu" para volver al menu de usuario`
         userState = 'menu' // -------------> Acomodar esto por el bien comun (tener dos opciones, una para seguir, otra para ir al menu
       } else {
-        responseMessage = `Opcion no valida.Por favor, vuelve a crear tu ejercicio`
+        responseMessage = `Opcion no valida. Por favor, vuelve a crear tu ejercicio`
         userState = `enterCredentialsDeleteExercise`
       }
       break;
-
-    case 'enterCredentialsGetExercises':
-      try {
-        const verify: QueryResult = await verifyNickname(clientQuery, userSession.getNickname());
-        const response: QueryResult = await getWorkoutAllDataQuery(clientQuery, verify.rows[0].id);
-        if (response.rowCount === 0) {
-          responseMessage = 'No se encontraron ejercicios. Vuelve al menú principal.';
-          userState = 'menu';
-          break;
-        }
-        const workoutData = response.rows.map(row => `Día: ${row.day}\n- Nombre: ${row.name}`).join('\n');
-        responseMessage = `Ejercicios:\n${workoutData}`;
-        userState = 'menu'; // Volvemos al menú principal después de mostrar los ejercicios
-      } catch (error) {
-        console.error('Error fetching exercises:', error);
-        responseMessage = 'Hubo un error al obtener los ejercicios. Por favor, intenta nuevamente.';
-        userState = 'menu';
+    case `enterCredentialsGetExercisePerDay`:
+      if (Body) {
+        const day = Body.trim()
+        const response: QueryResult = await getWorkoutDataPerDay(clientQuery, userSession.getId(), day)
+        const data = response.rows.map(row =>
+          `- Nombre: ${row.name}, series: ${row.series}, repeticiones: {${row.reps}}, peso: ${row.kg}.`
+        ).join('\n');
+        responseMessage = `Ejercicios del _${day}_:` + '\n' + data + `\n\n` + `Escribe *menu* para volver a tu menu de usuario.`
+        userState = 'menu'
+        break;
       }
-      break;
     default:
       responseMessage = 'Ocurrió un error en la aplicación. Por favor inténtalo más tarde.';
       break;
