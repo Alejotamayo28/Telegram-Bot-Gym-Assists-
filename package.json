@@ -31,7 +31,9 @@
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "node-dependency-injection": "^3.1.2",
+    "node-telegram-bot-api": "^0.66.0",
     "pg": "^8.11.5",
+    "telegraf": "^4.16.3",
     "twilio": "^5.2.1",
     "whatsapp-web.js": "^1.23.0"
   }

@@ -1,6 +1,4 @@
-import { ClientData, ClientLogin } from "../model/interface/client";
-import { PoolClient, QueryResult } from "pg";
-import { getWorkoutAllDataQuery } from "../queries/workoutQueries";
+import { ClientLogin } from "../model/interface/client";
 
 export const mainPage = () => {
   return `¡Bienvenido! 🌟 ¿Ya tienes una cuenta o te gustaría crear una?
@@ -18,6 +16,8 @@ export const loginPage = () => {
   return `Por favor, ingresa tus credenciales para iniciar sesión en el siguiente formato:
       
   _nickname contraseña_
+
+Escribe *salir* para volver al menu.
 `;
 }
 
@@ -25,6 +25,8 @@ export const singUpPage = () => {
   return `Para registrarte, por favor proporciona la siguiente información en el formato indicado:
 
   _nickname contraseña nombre apellido edad género email peso altura_
+
+Escribe *salir* para volver al menu.
 `;
 }
 

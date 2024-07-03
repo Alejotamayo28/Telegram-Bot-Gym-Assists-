@@ -1,5 +1,5 @@
 import express, { Application } from 'express';
-import routes from './routes';
+import routes, { bot } from './routes';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 const app: Application = express();
@@ -15,6 +15,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(routes);
 
 app.listen(PORT, () => {
-    console.log(`Server on port: ${PORT}`);
+  console.log(`Server on port: ${PORT}`);
+  bot.launch()
 });
 
