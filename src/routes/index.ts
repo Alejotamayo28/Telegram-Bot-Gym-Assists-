@@ -8,9 +8,15 @@ import { UserData } from '../model/interface/client';
 import { verifyNickname } from '../queries/clientQueries';
 import { ClientWorkout } from '../model/interface/workout';
 import { getWorkoutDataPerDay } from '../queries/workoutQueries';
-import { UserSession, menuApiBrazo, menuApiBrazo_Biscep, menuApiBrazo_hombro, menuApiBrazo_triscep, sendMainMenu, sendMainMenuOptions, sendMenu, sendMenuOptions, sendMenupApi } from '../bot/botMessages';
+import { UserSession } from '../bot/botMessages';
 import { Telegraf, Markup } from 'telegraf'
 import { menuPageGetExercises } from '../bot/botFuntions';
+import { sendMainMenu, sendMainMenuOptions } from '../bot/messages/menu/loginSingUp';
+import { menuApiBack, menuApiBrazo, menuApiLeg, sendMenu, sendMenuOptions, sendMenupApi } from '../bot/messages/menu/mainMenu';
+import { menuApiBrazo_Biscep, menuApiBrazo_hombro, menuApiBrazo_triscep } from '../bot/messages/exercises/armMessages';
+import { menuApiChest } from '../bot/messages/exercises/chestMessages';
+import { menuApiBack_EspaldaAlta, menuApiBack_dorsales, menuApiBack_trapecios } from '../bot/messages/exercises/backMessages';
+import { menuApiLeg_cuadriceps, menuApiLeg_femorales, menuApiLeg_gluteo, menuApiLeg_isquiotibialeles } from '../bot/messages/exercises/legMessages';
 
 const router = Router();
 dotenv.config()
@@ -84,25 +90,60 @@ bot.action(`menu_api`, async (ctx) => {
   await sendMenupApi(ctx)
 })
 
-bot.action(`menu_api_brazo`, async (ctx) => {
-  await menuApiBrazo(ctx)
-})
-
-bot.action(`menuApiBrazo_hombro`, async (ctx) => {
-  await menuApiBrazo_hombro(ctx)
-})
-
 bot.action(`menu_principal`, async (ctx) => {
   await sendMenuOptions(ctx)
+})
+
+// BRAZO OPCIONES EJERCICIOS
+bot.action(`menu_api_brazo`, async (ctx) => {
+  await menuApiBrazo(ctx)
 })
 
 bot.action(`menuApiBrazo_biscep`, async (ctx) => {
   await menuApiBrazo_Biscep(ctx)
 })
-
 bot.action(`menuApiBrazo_triscep`, async (ctx) => {
   await menuApiBrazo_triscep(ctx)
 })
+bot.action(`menuApiBrazo_hombro`, async (ctx) => {
+  await menuApiBrazo_hombro(ctx)
+})
+
+//MENU ESPALDA EJERCICIOS 
+bot.action(`menu_api_espalda`, async (ctx) => {
+  await menuApiBack(ctx)
+})
+bot.action(`menuBack_trapecio`, async (ctx) => {
+  await menuApiBack_trapecios(ctx)
+})
+bot.action(`menuBack_espaldaAlta`, async (ctx) => {
+  await menuApiBack_EspaldaAlta(ctx)
+})
+bot.action(`menuBack_dorsales`, async (ctx) => {
+  await menuApiBack_dorsales(ctx)
+})
+
+// MENU PIERNA EJERCICIOS
+bot.action(`menu_api_pierna`, async (ctx) => {
+  await menuApiLeg(ctx)
+})
+bot.action(`menuLeg_cuadricep`, async (ctx) => {
+  await menuApiLeg_cuadriceps(ctx)
+})
+bot.action(`menuLeg_gluteo`, async (ctx) => {
+  await menuApiLeg_gluteo(ctx)
+})
+bot.action(`menuLeg_isquiotibial`, async (ctx) => {
+  await menuApiLeg_isquiotibialeles(ctx)
+})
+bot.action(`menuLeg_femoral`, async (ctx) => {
+  await menuApiLeg_femorales(ctx)
+})
+
+bot.action(`menu_api_pecho`, async (ctx) => {
+  await menuApiChest(ctx)
+})
+
 
 bot.on('text', async (ctx) => {
   const client = await pool.connect();
@@ -271,7 +312,6 @@ bot.on('text', async (ctx) => {
     client.release();
   }
 });
-
 
 
 
