@@ -56,7 +56,6 @@ export const deleteClientRecords = async (client: PoolClient, id: any) => {
 export const verifyNickname = async (client: PoolClient, nickname:string) => {
   const response: QueryResult = await client.query(`
   SELECT * FROM client WHERE nickname = $1`, [nickname])
-  client.release()
   return response
 }
 export const verifyNicknameWhatsapp = async (nickname: string) => {

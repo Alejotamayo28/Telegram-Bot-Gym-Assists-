@@ -15,3 +15,6 @@ export interface ClientData extends ClientLogin {
   updated_at?: string
 }
 
+export interface UserData extends ClientLogin {
+  email: string
+}

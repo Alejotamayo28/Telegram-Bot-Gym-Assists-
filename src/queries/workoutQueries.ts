@@ -4,8 +4,7 @@ import { ClientLogin } from "../model/interface/client"
 
 export const insertWorkoutQuery = async (client: PoolClient, id: any, clientWorkout: ClientWorkout): Promise<void> => {
   const { day, name, series, reps, kg } = clientWorkout
-  await client.query(`
-  INSERT INTO workout (id, day, name, series, reps, kg) VALUES ($1, $2, $3, $4, $5, $6)`,
+  await client.query(` INSERT INTO workout (id, day, name, series, reps, kg) VALUES ($1, $2, $3, $4, $5, $6)`,
     [id, day, name, series, reps, kg])
   client.release()
 }
@@ -40,7 +39,6 @@ export const getWorkoutDataPerDay = async (client: PoolClient, id: any, day: str
   const response: QueryResult = await client.query(`
 SELECT * FROM workout WHERE id = $1 AND day = $2`,
     [id, day])
- client.release()
   return response
 }
 

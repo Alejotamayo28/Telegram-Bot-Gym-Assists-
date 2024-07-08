@@ -2,34 +2,34 @@ import { PoolClient, QueryResult } from "pg"
 import { getWorkoutAllDataQuery } from "../queries/workoutQueries"
 
 export const menuPageGetExercises = async (client: PoolClient, id: any) => {
-  let lunes = '_Lunes_: \n'
-  let martes = '_Martes_:  \n'
-  let miercoles = '_Miercoles_: \n'
-  let jueves = '_Jueves_: \n'
-  let viernes = '_Viernes_: \n'
-  let sabado = '_Sabado_: \n'
-  let domingo = '_Domingo_: \n'
+  let lunes = 'Lunes: \n'
+  let martes = 'Martes:  \n'
+  let miercoles = 'Miercoles: \n'
+  let jueves = 'Jueves: \n'
+  let viernes = 'Viernes: \n'
+  let sabado = 'Sabado: \n'
+  let domingo = 'Domingo: \n'
 
   const response: QueryResult = await getWorkoutAllDataQuery(client, id)
 
   response.rows.map(row => {
     if (row.day === 'lunes') {
-      lunes += `- Nombre: ${row.name}, series: ${row.series}, repeticiones: {${row.reps}}, peso: ${row.kg}.\n`
+      lunes += `${row.name}, repeticiones: {${row.reps}}, peso: ${row.kg}.\n`
     } else if (row.day === 'martes') {
-      martes += `- Nombre: ${row.name}, series: ${row.series}, repeticiones: {${row.reps}}, peso: ${row.kg}.\n`
+      martes += `${row.name}, repeticiones: {${row.reps}}, peso: ${row.kg}.\n`
     } else if (row.day === 'miercoles') {
-      miercoles += `- Nombre: ${row.name}, series: ${row.series}, repeticiones: {${row.reps}}, peso: ${row.kg}.\n`
+      miercoles += `${row.name}, repeticiones: {${row.reps}}, peso: ${row.kg}.\n`
     } else if (row.day === 'jueves') {
-      jueves += `- Nombre: ${row.name}, series: ${row.series}, repeticiones: {${row.reps}}, peso: ${row.kg}.\n`
+      jueves += `${row.name}, repeticiones: {${row.reps}}, peso: ${row.kg}.\n`
     } else if (row.day === 'viernes') {
-      viernes += `- Nombre: ${row.name}, series: ${row.series}, repeticiones: {${row.reps}}, peso: ${row.kg}.\n`
+      viernes += `${row.name}, repeticiones: {${row.reps}}, peso: ${row.kg}.\n`
     } else if (row.day === 'sabado') {
-      sabado += `- Nombre: ${row.name}, series: ${row.series}, repeticiones: {${row.reps}}, peso: ${row.kg}.\n`
+      sabado += `${row.name}, repeticiones: {${row.reps}}, peso: ${row.kg}.\n`
     } else if (row.day === 'domingo') {
-      domingo += `- Nombre: ${row.name}, series: ${row.series}, repeticiones: {${row.reps}}, peso: ${row.kg}.\n`
+      domingo += `${row.name}, repeticiones: {${row.reps}}, peso: ${row.kg}.\n`
     }
   }).join('\n')
-  return lunes + '\n' + martes + '\n' + miercoles + '\n' + jueves + '\n' + viernes + '\n' + sabado + '\n' + domingo + '\n' + `Escribe *menu* para volver a tu menu de usuario.`
+  return lunes + '\n' + martes + '\n' + miercoles + '\n' + jueves + '\n' + viernes + '\n' + sabado + '\n' + domingo + '\n'
 }
 
 

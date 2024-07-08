@@ -30,6 +30,7 @@
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
+    "lodash": "^4.17.21",
     "node-dependency-injection": "^3.1.2",
     "node-telegram-bot-api": "^0.66.0",
     "pg": "^8.11.5",
