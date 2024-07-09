@@ -10,7 +10,7 @@ Actualmente, estamos en la versión beta, y planeo agregar muchas más funciones
       [Markup.button.callback('Agregar ejercicio', 'menu_post_exercise'), Markup.button.callback('Actualizar ejercicio', 'menu_put_exercise')],
       [Markup.button.callback('Obtener ejercicio por día', 'menu_get_exercise_day'), Markup.button.callback('Obtener ejercicios semanales', 'menu_get_exercise')],
       [Markup.button.callback('Eliminar ejercicio', 'menu_delete_exercise')],
-      [Markup.button.callback(`Guia ejercicios`, `menu_api`)]
+      [Markup.button.callback(`Guia ejercicios`, `menuExercises`)]
     ])
   );
 };
@@ -21,7 +21,7 @@ export const sendMenuOptions = async (ctx: any) => {
       [Markup.button.callback('Agregar ejercicio', 'menu_post_exercise'), Markup.button.callback('Actualizar ejercicio', 'menu_put_exercise')],
       [Markup.button.callback('Obtener ejercicio por día', 'menu_get_exercise_day'), Markup.button.callback('Obtener ejercicios semanales', 'menu_get_exercise')],
       [Markup.button.callback('Eliminar ejercicio', 'menu_delete_exercise')],
-      [Markup.button.callback(`Guia ejercicios`, `menu_api`)],
+      [Markup.button.callback(`Guia ejercicios`, `menuExercises`)],
     ])
   );
 };
@@ -29,8 +29,8 @@ export const sendMenuOptions = async (ctx: any) => {
 export const sendMenupApi = async (ctx: any) => {
   return ctx.reply(`Por favor, escoge la parte del cuerpo la cual deseas trabajar: \n`,
     Markup.inlineKeyboard([
-      [Markup.button.callback(`Brazo`, `menu_api_brazo`), Markup.button.callback(`Pecho`, `menu_api_pecho`), Markup.button.callback(`Espalda`, `menu_api_espalda`)],
-      [Markup.button.callback(`Pierna`, `menu_api_pierna`)]
+      [Markup.button.callback(`Brazo`, `Brazo`), Markup.button.callback(`Pecho`, `Pecho`), Markup.button.callback(`Espalda`, `Espalda`)],
+      [Markup.button.callback(`Pierna`, `menuPierna`)]
     ])
   )
 }

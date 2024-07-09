@@ -3,7 +3,6 @@ import { QueryResult } from 'pg';
 import { pool } from '../database/database';
 import { compare } from 'bcryptjs';
 import { encrypt } from '../middlewares/jsonWebToken/enCryptHelper';
-import dotenv from 'dotenv'
 import { UserData } from '../model/interface/client';
 import { verifyNickname } from '../queries/clientQueries';
 import { ClientWorkout } from '../model/interface/workout';
@@ -12,39 +11,22 @@ import { UserSession } from '../bot/botMessages';
 import { Telegraf, Markup } from 'telegraf'
 import { menuPageGetExercises } from '../bot/botFuntions';
 import { sendMainMenu, sendMainMenuOptions } from '../bot/messages/menu/loginSingUp';
-import { menuApiBack, menuApiBrazo, menuApiLeg, sendMenu, sendMenuOptions, sendMenupApi } from '../bot/messages/menu/mainMenu';
-import { menuApiBrazo_Biscep, menuApiBrazo_hombro, menuApiBrazo_triscep } from '../bot/messages/exercises/armMessages';
-import { menuApiChest } from '../bot/messages/exercises/chestMessages';
-import { menuApiBack_EspaldaAlta, menuApiBack_dorsales, menuApiBack_trapecios } from '../bot/messages/exercises/backMessages';
-import { menuApiLeg_cuadriceps, menuApiLeg_femorales, menuApiLeg_gluteo, menuApiLeg_isquiotibialeles } from '../bot/messages/exercises/legMessages';
+import { sendMenu, sendMenuOptions, sendMenupApi } from '../bot/messages/menu/mainMenu';
+import { menuBrazo, menuBrazo_Biscep, menuBrazo_Triscep, menuBrazo_hombro } from '../bot/guide/arm/armMenu';
+import { curlAlternado, curlInclinado, curlMartillo, curlPredicador, fondos, pressFrances, pushdowns } from '../bot/guide/arm/armExercises';
+import { menuPecho, menuPecho_Superior, menuPecho_completo, menuPecho_inferior } from '../bot/guide/chest/chestMenu';
+import { declinadoBarra, declinadoMancuernas, declinadoSmith, inclinadoBarra, inclinadoMancuernas, inclinadoSmith, pressPlano, pressPlano_mancuernas } from '../bot/guide/chest/chestExercises';
+import { userState, userSession } from '../userState';
+import { bot } from '../bot';
 
 const router = Router();
-dotenv.config()
 
-const token = process.env.TELEGRAM_TOKEN;
-export const bot = new Telegraf(token!)
-
-let userState: { [key: number]: any, data: UserData, stage: string, workout: ClientWorkout } = {
-  data: {
-    email: '',
-    nickname: '',
-    password: ''
-  },
-  stage: '',
-  workout: {
-    day: '',
-    name: '',
-    series: 0,
-    reps: [],
-    kg: 0
-  }
-}
-
-const userSession = new UserSession()
 
 bot.start(async (ctx) => {
   await sendMainMenu(ctx)
 });
+
+
 
 bot.action('option_login', async (ctx) => {
   await ctx.reply(`Por favor, digita tu nickname: `)
@@ -86,7 +68,7 @@ bot.action(`menu_delete_exercise`, async (ctx) => {
   userState[ctx.from.id] = { stage: 'menu_delete_exercise_day' }
 })
 
-bot.action(`menu_api`, async (ctx) => {
+bot.action(`menuExercises`, async (ctx) => {
   await sendMenupApi(ctx)
 })
 
@@ -95,53 +77,85 @@ bot.action(`menu_principal`, async (ctx) => {
 })
 
 // BRAZO OPCIONES EJERCICIOS
-bot.action(`menu_api_brazo`, async (ctx) => {
-  await menuApiBrazo(ctx)
+bot.action(`Brazo`, async (ctx) => {
+  await menuBrazo(ctx)
+})
+//BISCEP 
+bot.action(`menuBrazo_biscep`, async (ctx) => {
+  await menuBrazo_Biscep(ctx)
+})
+bot.action(`curl_martillo`, async (ctx) => {
+  await curlMartillo(ctx)
+})
+bot.action(`curl_predicador`, async (ctx) => {
+  await curlPredicador(ctx)
+})
+bot.action(`curl_alternado`, async (ctx) => {
+  await curlAlternado(ctx)
+})
+bot.action(`curl_inclinado`, async (ctx) => {
+  await curlInclinado(ctx)
+})
+//Tricep
+bot.action(`menuBrazo_triscep`, async (ctx) => {
+  await menuBrazo_Triscep(ctx)
 })
 
-bot.action(`menuApiBrazo_biscep`, async (ctx) => {
-  await menuApiBrazo_Biscep(ctx)
+bot.action(`fondos`, async (ctx) => {
+  await fondos(ctx)
 })
-bot.action(`menuApiBrazo_triscep`, async (ctx) => {
-  await menuApiBrazo_triscep(ctx)
+bot.action(`pushdowns`, async (ctx) => {
+  await pushdowns(ctx)
 })
-bot.action(`menuApiBrazo_hombro`, async (ctx) => {
-  await menuApiBrazo_hombro(ctx)
-})
-
-//MENU ESPALDA EJERCICIOS 
-bot.action(`menu_api_espalda`, async (ctx) => {
-  await menuApiBack(ctx)
-})
-bot.action(`menuBack_trapecio`, async (ctx) => {
-  await menuApiBack_trapecios(ctx)
-})
-bot.action(`menuBack_espaldaAlta`, async (ctx) => {
-  await menuApiBack_EspaldaAlta(ctx)
-})
-bot.action(`menuBack_dorsales`, async (ctx) => {
-  await menuApiBack_dorsales(ctx)
+//HOMBRO
+bot.action(`menuBrazo_hombro`, async (ctx) => {
+  await menuBrazo_hombro(ctx)
 })
 
-// MENU PIERNA EJERCICIOS
-bot.action(`menu_api_pierna`, async (ctx) => {
-  await menuApiLeg(ctx)
-})
-bot.action(`menuLeg_cuadricep`, async (ctx) => {
-  await menuApiLeg_cuadriceps(ctx)
-})
-bot.action(`menuLeg_gluteo`, async (ctx) => {
-  await menuApiLeg_gluteo(ctx)
-})
-bot.action(`menuLeg_isquiotibial`, async (ctx) => {
-  await menuApiLeg_isquiotibialeles(ctx)
-})
-bot.action(`menuLeg_femoral`, async (ctx) => {
-  await menuApiLeg_femorales(ctx)
-})
 
-bot.action(`menu_api_pecho`, async (ctx) => {
-  await menuApiChest(ctx)
+
+
+
+// EJERCICIOS PECHO --->
+
+bot.action(`Pecho`, async (ctx) => {
+  await menuPecho(ctx)
+})
+//PECHO SUPERIOR
+bot.action(`menuPecho_superior`, async (ctx) => {
+  await menuPecho_Superior(ctx)
+})
+bot.action(`inclinado_mancuernas`, async (ctx) => {
+  await inclinadoMancuernas(ctx)
+})
+bot.action(`inclinado_smith`, async (ctx) => {
+  await inclinadoSmith(ctx)
+})
+bot.action(`inclinado_barra`, async (ctx) => {
+  await inclinadoBarra(ctx)
+})
+//PECHO INFERIOR
+bot.action(`menuPecho_inferior`, async (ctx) => {
+  await menuPecho_inferior(ctx)
+})
+bot.action(`declinado_mancuernas`, async (ctx) => {
+  await declinadoMancuernas(ctx)
+})
+bot.action(`declinado_smith`, async (ctx) => {
+  await declinadoSmith(ctx)
+})
+bot.action(`decliando_barra`, async (ctx) => {
+  await declinadoBarra(ctx)
+})
+//PECHO COMPLETO
+bot.action(`menuPecho_completo`, async (ctx) => {
+  await menuPecho_completo(ctx)
+})
+bot.action(`press_plano`, async (ctx) => {
+  await pressPlano(ctx)
+})
+bot.action(`press_plano_mancuernas`, async (ctx) => {
+  await pressPlano_mancuernas(ctx)
 })
 
 

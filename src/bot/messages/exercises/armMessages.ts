@@ -26,33 +26,6 @@ Si necesitas más información o una demostración en video, puedes hacer clic e
   );
 }
 
-
-export const menuApiBrazo_Biscep = async (ctx: any) => {
-  return ctx.reply(
-    `Aqui tienes algunos ejercicios para el biscep que puedes realizar:
-
-1. Curl predicador:
-   - Descripcion: Este ejercicio trabaja el biscep en su posicion mas corta.
-   - Instrucciones: Siéntate en un banco predicador y sujeta una barra con las manos separadas al ancho de los hombros. Levanta la barra hacia tus hombros contrayendo los bíceps y luego bájala lentamente a la posición inicial.
-
-2. Curl Inclinado:
-   - Descripción: Este ejercicio se enfoca en la parte larga del bíceps, estirándola más en la posición inicial.
-   - Instrucciones: Siéntate en un banco inclinado con una mancuerna en cada mano y las palmas hacia arriba. Levanta las mancuernas hacia tus hombros contrayendo los bíceps y luego bájalas lentamente
-
-3. Curl Martillo:
-   - Descripción: Trabaja el braquiorradial y los bíceps desde un ángulo diferente.
-   - Instrucciones: De pie, sujeta una mancuerna en cada mano con las palmas hacia el cuerpo. Levanta ambas mancuernas hacia tus hombros manteniendo las palmas enfrentadas y luego bájalas lentamente.
-
-Si necesitas más información o una demostración en video, puedes hacer clic en los botones a continuación:`,
-    Markup.inlineKeyboard([
-      [Markup.button.url('Curl Predicador - Video', 'https://www.youtube.com/watch?v=-Vyt2QdsR7E')],
-      [Markup.button.url('Curl Inclinado - Video', 'https://www.youtube.com/watch?v=soxrZlIl35U')],
-      [Markup.button.url('Curl Martillo - Video', 'https://www.youtube.com/watch?v=zC3nLlEvin4')],
-      [Markup.button.callback(`Menu ejercicios`, `menu_api`), Markup.button.callback(`Menu principal`, `menu_principal`)],
-    ])
-  )
-}
-
 export const menuApiBrazo_triscep = async (ctx: any) => {
   return ctx.reply(
     `Aqui tienes algunos ejercicios para el triscep que puedes realizaar: 

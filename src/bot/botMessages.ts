@@ -1,6 +1,5 @@
 import { Markup } from "telegraf";
 import { ClientLogin } from "../model/interface/client";
-import { bot } from "../routes";
 
 export const mainPage = () => {
   return `¡Bienvenido! 🌟 ¿Ya tienes una cuenta o te gustaría crear una?
