@@ -1,7 +1,8 @@
-import { bot } from "../bot";
-import { sendMainMenu } from "../bot/messages/menu/loginSingUp";
+import './login'
+import './singUp'
+import './methods'
+import './menu'
+import './brazo'
+import './pecho'
+import './start'
 
-
-bot.start(async (ctx) => {
-    await sendMainMenu(ctx)
-});

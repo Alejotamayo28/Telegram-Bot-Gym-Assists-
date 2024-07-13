@@ -1,5 +1,53 @@
 import { PoolClient, QueryResult } from "pg"
 import { getWorkoutAllDataQuery } from "../queries/workoutQueries"
+import { ClientLogin } from "../model/interface/client"
+
+
+export class UserSession {
+  private userData: ClientLogin
+  private id: number
+  constructor() {
+    this.userData = {
+      nickname: ' ',
+      password: ' ',
+    }
+    this.id = 0
+  }
+  setNickname(nickname: string) {
+
+    if (typeof nickname === 'string' && nickname.trim() !== '') {
+      this.userData.nickname = nickname.trim();
+    } else {
+      throw new Error('Nickname inválido');
+    }
+  }
+  getNickname() {
+    return this.userData.nickname;
+  }
+  setPassword(password: string) {
+    if (typeof password === 'string' && password.trim() !== '') {
+      this.userData.password = password.trim();
+    } else {
+      throw new Error('Contraseña inválida');
+    }
+  }
+  getPassword() {
+    return this.userData.password;
+  }
+  setId(id: number) {
+    this.id = id
+  }
+  getId() {
+    return this.id
+  }
+  getDataLogin() {
+    return this.userData
+  }
+  clear() {
+    this.userData.nickname = '';
+    this.userData.password = '';
+  }
+}
 
 export const menuPageGetExercises = async (client: PoolClient, id: any) => {
   let lunes = 'Lunes: \n'

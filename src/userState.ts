@@ -1,4 +1,4 @@
-import { UserSession } from "./bot/botMessages"
+import { UserSession } from "./bot/funtions"
 import { UserData } from "./model/interface/client"
 import { ClientWorkout } from "./model/interface/workout"
 

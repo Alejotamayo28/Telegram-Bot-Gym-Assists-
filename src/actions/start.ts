@@ -1,4 +1,9 @@
 import { Markup } from "telegraf";
+import { bot } from "../bot";
+
+bot.start(async (ctx) => {
+  await sendMainMenu(ctx)
+});
 
 export const sendMainMenu = async (ctx: any) => {
   return await ctx.reply(`¡Hola! Bienvenido a nuestro Asesor Virtual de entrenamiento y acondicionamiento físico.\n
@@ -13,6 +18,7 @@ Por favor, selecciona una de las siguientes opciones para continuar:`, Markup.in
         Markup.button.callback('Ejemplo crear cuenta', 'option_guide_signUp')
       ]));
 }
+
 
 export const sendMainMenuOptions = async (ctx: any) => {
   return await ctx.reply(`Sigue explorando y utilizando las demas funciones de nuestro asistente virutal: \n`, Markup.inlineKeyboard([

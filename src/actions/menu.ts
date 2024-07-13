@@ -1,4 +1,14 @@
-import { Markup } from "telegraf";
+import { Markup } from "telegraf"
+import { bot } from "../bot"
+
+
+bot.action(`menuExercises`, async (ctx) => {
+    await sendMenupApi(ctx)
+})
+
+bot.action(`menu_principal`, async (ctx) => {
+    await sendMenuOptions(ctx)
+})
 
 export const sendMenu = async (ctx: any) => {
   return ctx.reply(`¡Hola! Bienvenido al menú de usuario.
@@ -35,31 +45,4 @@ export const sendMenupApi = async (ctx: any) => {
   )
 }
 
-
-export const menuApiBrazo = async (ctx: any) => {
-  return ctx.reply(`Por favor, escoge la parte especifica del brazo que deseas trabajar: \n`,
-    Markup.inlineKeyboard([
-      [Markup.button.callback(`Hombro`, `menuApiBrazo_hombro`), Markup.button.callback(`Biscep`, `menuApiBrazo_biscep`),
-      Markup.button.callback(`Triscep`, `menuApiBrazo_triscep`)]
-    ])
-  )
-}
-
-export const menuApiBack = async (ctx: any) => {
-  return ctx.reply(`Por favor, escoge la parte especifica de la espalda que deseas trabajar: \n`,
-    Markup.inlineKeyboard([
-      [Markup.button.callback(`Trapecio`, `menuBack_trapecio`), Markup.button.callback(`Espalda Alta`, `menuBack_espaldaAlta`)],
-      [Markup.button.callback(`Dorsales`, `menuBack_dorsales`), Markup.button.callback(`Lumbar`, `menuBack_lumbar`)]
-    ])
-  )
-}
-
-export const menuApiLeg = async (ctx: any) => {
-  return ctx.reply(`Por favor, escoge la parte especifica de la pierna que deseas trabajar: \n`,
-    Markup.inlineKeyboard([
-      [Markup.button.callback(`Gluteo`, `menuLeg_gluteo`), Markup.button.callback(`Cuadriceps`, `menuLeg_cuadricep`)],
-      [Markup.button.callback(`Isquiostibiales`, `menuLeg_isquiotibial`), Markup.button.callback(`Femorales`, `menuLeg_femoral`)]
-    ])
-  )
-}
 
