@@ -3,9 +3,9 @@ import { Context, Markup } from "telegraf";
 
 export class Brazo {
   constructor(private ctx: Context) { }
-  public menu() {
+  public async menu() {
     try {
-      return this.ctx.reply(`Por favor, escoge la parte especifica del brazo que deseas trabajar: \n`,
+      return await this.ctx.reply(`Por favor, escoge la parte especifica del brazo que deseas trabajar: \n`,
         Markup.inlineKeyboard([
           [Markup.button.callback(`Hombro`, `menuBrazo_hombro`), Markup.button.callback(`Biscep`, `menuBrazo_biscep`),
           Markup.button.callback(`Triscep`, `menuBrazo_triscep`)]
@@ -22,7 +22,7 @@ export class Brazo {
         Markup.inlineKeyboard([
           [Markup.button.callback(`Curl martillo`, `martillo`), Markup.button.callback(`Curl predicador`, `predicador`)],
           [Markup.button.callback(`Curl alternado`, `alternado`), Markup.button.callback(`Curl inclinado`, `inclinado`)],
-          [Markup.button.callback(`Menu ejercicios`, `menuExercise`), Markup.button.callback(`Menu principal`, `menu_principal`)],
+          [Markup.button.callback(`Menu ejercicios`, `menuExercises`), Markup.button.callback(`Menu principal`, `menu_principal`)],
         ])
       )
     } catch (e) {

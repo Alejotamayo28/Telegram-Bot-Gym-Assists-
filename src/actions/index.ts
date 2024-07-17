@@ -5,4 +5,5 @@ import './menu'
 import './brazo'
 import './pecho'
 import './start'
-
+import './espalda'
+import './pierna'

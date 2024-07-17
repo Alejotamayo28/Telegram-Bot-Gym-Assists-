@@ -4,7 +4,6 @@ import { Biscep } from "../bot/exercises/brazoBiscep"
 import { Hombro } from "../bot/exercises/brazoHombro"
 import { Triscep } from "../bot/exercises/brazoTriscep"
 import { Brazo } from "../bot/menus/menuBrazo"
-import { curlMartillo, curlPredicador, curlAlternado, curlInclinado, fondos, pushdowns } from "../guide/arm/armExercises"
 
 // BRAZO OPCIONES EJERCICIOS
 bot.action(`Brazo`, async (ctx) => {
