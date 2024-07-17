@@ -2,9 +2,9 @@ import { Context, Markup } from "telegraf";
 import { buttonGuideMenuExercisesPrincipal } from "../inlineButtons.ts/buttons";
 
 export class Superior {
-  constructor(private ctx: Context) { }
-  public async inclinadoMancuernas() {
-    return await this.ctx.reply(`Press Inclinado en Banca con Mancuernas
+   constructor(private ctx: Context) { }
+   public async inclinadoMancuernas() {
+      return await this.ctx.reply(`Press Inclinado en Banca con Mancuernas
 
 1. Posición Inicial:
    - Acuéstate en el banco inclinado (30-45 grados) con los pies firmes en el suelo.
@@ -31,15 +31,15 @@ export class Superior {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
-  public async inclinadoSmith() {
-    return await this.ctx.reply(`Inclinado smith`,
-      buttonGuideMenuExercisesPrincipal
-    )
-  }
-  public async inclinadoBarra() {
-    return await this.ctx.reply(`Press Inclinado con Barra
+      )
+   }
+   public async inclinadoSmith() {
+      return await this.ctx.reply(`Inclinado smith`,
+         buttonGuideMenuExercisesPrincipal
+      )
+   }
+   public async inclinadoBarra() {
+      return await this.ctx.reply(`Press Inclinado con Barra
 
 1. Posición Inicial:
    - Acuéstate en el banco inclinado (30-45) grados con los pies firmes en el suelo.
@@ -66,11 +66,11 @@ export class Superior {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
-  public async inclinadoMaquina() {
-    return await this.ctx.reply(`Inclinado maquina`,
-buttonGuideMenuExercisesPrincipal
-    )
-  }
+      )
+   }
+   public async inclinadoMaquina() {
+      return await this.ctx.reply(`Inclinado maquina`,
+         buttonGuideMenuExercisesPrincipal
+      )
+   }
 }

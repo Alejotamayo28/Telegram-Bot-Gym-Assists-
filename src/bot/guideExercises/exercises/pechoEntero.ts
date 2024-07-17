@@ -2,9 +2,9 @@ import { Context, Markup } from "telegraf";
 import { buttonGuideMenuExercisesPrincipal } from "../inlineButtons.ts/buttons";
 
 export class Completo {
-  constructor(private ctx: Context) { }
-  public planoMancuernas() {
-    return this.ctx.reply(`Press Plano en Banca con Mancuernas.
+   constructor(private ctx: Context) { }
+   public planoMancuernas() {
+      return this.ctx.reply(`Press Plano en Banca con Mancuernas.
 
 1. Posición Inicial:
    - Acuéstate en el banco plano con los pies firmes en el suelo.
@@ -31,10 +31,10 @@ export class Completo {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
-  public async planoBarra() {
-    return await this.ctx.reply(`Press Plano en Banca.
+      )
+   }
+   public async planoBarra() {
+      return await this.ctx.reply(`Press Plano en Banca.
 
 1. Posición Inicial:
    - Acuéstate en el banco plano con los pies firmes en el suelo.
@@ -61,10 +61,10 @@ export class Completo {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
-  public planoMaquina() {
-    return this.ctx.reply(`Press Plano Maquina
+      )
+   }
+   public planoMaquina() {
+      return this.ctx.reply(`Press Plano Maquina
 
 1. Posición Inicial:
    - Acuéstate en el banco plano con los pies firmes en el suelo.
@@ -91,6 +91,6 @@ export class Completo {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
+      )
+   }
 }

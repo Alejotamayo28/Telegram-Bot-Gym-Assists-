@@ -1,6 +1,6 @@
 import { Markup } from "telegraf"
-import { bot } from "../bot"
-import { buttonMenu } from "../bot/inlineButtons.ts/buttons"
+import { bot } from "../../bot"
+import { buttonMenu } from "../guideExercises/inlineButtons.ts/buttons"
 
 
 bot.action(`menuExercises`, async (ctx) => {

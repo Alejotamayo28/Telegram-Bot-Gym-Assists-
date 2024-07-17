@@ -7,9 +7,9 @@ import { encrypt } from "../middlewares/jsonWebToken/enCryptHelper";
 import { verifyNickname } from "../queries/clientQueries";
 import { getWorkoutDataPerDay } from "../queries/workoutQueries";
 import { userState, userSession } from "../userState";
-import { sendMenu, sendMenuOptions } from "../actions/menu";
-import { sendMainMenuOptions } from "../actions/start";
-import { buttonLogin } from "./inlineButtons.ts/buttons";
+import { sendMenu, sendMenuOptions } from "./actions/menu";
+import { sendMainMenuOptions } from "./actions/start";
+import { buttonLogin } from "./guideExercises/inlineButtons.ts/buttons";
 
 
 bot.on('text', async (ctx) => {

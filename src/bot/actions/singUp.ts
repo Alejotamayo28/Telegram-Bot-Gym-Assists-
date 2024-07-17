@@ -1,5 +1,5 @@
-import { bot } from "../bot"
-import { userState } from "../userState"
+import { bot } from "../../bot"
+import { userState } from "../../userState"
 import { sendMainMenuOptions } from "./start"
 
 bot.action('option_signUp', async (ctx) => {

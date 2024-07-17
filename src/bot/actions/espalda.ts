@@ -1,10 +1,10 @@
 import { Context } from "telegraf";
-import { bot } from "../bot";
-import { Espalda } from "../bot/menus/menuEspalda";
-import { EspaldaAlta } from "../bot/exercises/espaldaAlta";
-import { Dorsales } from "../bot/exercises/espaldaDorsales";
-import { Trapecios } from "../bot/exercises/espaldaTrapecios";
-import { Lumbar } from "../bot/exercises/espaldaLumbar";
+import { bot } from "../../bot";
+import { Espalda } from "../guideExercises/menus/menuEspalda";
+import { EspaldaAlta } from "../guideExercises/exercises/espaldaAlta";
+import { Dorsales } from "../guideExercises/exercises/espaldaDorsales";
+import { Trapecios } from "../guideExercises/exercises/espaldaTrapecios";
+import { Lumbar } from "../guideExercises/exercises/espaldaLumbar";
 
 
 bot.action(`Espalda`, async (ctx: Context) => {

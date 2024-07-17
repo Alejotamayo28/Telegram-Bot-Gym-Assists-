@@ -1,9 +1,9 @@
 import { Context } from "telegraf"
-import { bot } from "../bot"
-import { Pecho } from "../bot/menus/menuPecho"
-import { Superior } from "../bot/exercises/pechoSuperior"
-import { Inferior } from "../bot/exercises/pechoInferior"
-import { Completo } from "../bot/exercises/pechoEntero"
+import { bot } from "../../bot"
+import { Pecho } from "../guideExercises/menus/menuPecho"
+import { Superior } from "../guideExercises/exercises/pechoSuperior"
+import { Inferior } from "../guideExercises/exercises/pechoInferior"
+import { Completo } from "../guideExercises/exercises/pechoEntero"
 
 bot.action(`Pecho`, async (ctx: Context) => {
   await new Pecho(ctx).menu()

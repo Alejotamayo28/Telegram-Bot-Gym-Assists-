@@ -1,10 +1,10 @@
-import { Context} from "telegraf";
+import { Context } from "telegraf";
 import { buttonGuideMenuExercisesPrincipal } from "../inlineButtons.ts/buttons";
 
 export class Dorsales {
-  constructor(private ctx: Context) { }
-  public async remoMancuernas() {
-    return await this.ctx.reply(`Remo Mancuernas
+   constructor(private ctx: Context) { }
+   public async remoMancuernas() {
+      return await this.ctx.reply(`Remo Mancuernas
 
 1. Posición Inicial:
    - Coloca una rodilla y una mano en un banco, con la espalda recta y paralela al suelo.
@@ -31,10 +31,10 @@ export class Dorsales {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
-  public async remoMaquina() {
-    return await this.ctx.reply(`Remo Maquina
+      )
+   }
+   public async remoMaquina() {
+      return await this.ctx.reply(`Remo Maquina
 
 1. Posición Inicial:
    - Siéntate en la máquina de remo con los pies firmes en los soportes y las rodillas ligeramente flexionadas.
@@ -61,10 +61,10 @@ export class Dorsales {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
-  public async remoBarra() {
-    return this.ctx.reply(`Remo Barra
+      )
+   }
+   public async remoBarra() {
+      return this.ctx.reply(`Remo Barra
 
 1. Posición Inicial:
    - De pie, con los pies a la altura de los hombros y las rodillas ligeramente flexionadas.
@@ -91,6 +91,6 @@ export class Dorsales {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
+      )
+   }
 }

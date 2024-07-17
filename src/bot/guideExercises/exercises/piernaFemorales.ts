@@ -2,9 +2,9 @@ import { Context } from "telegraf";
 import { buttonGuideMenuExercisesPrincipal } from "../inlineButtons.ts/buttons";
 
 export class Femorales {
-  constructor(private ctx: Context) { }
-  public async curlSentado() {
-    return await this.ctx.reply(`Curl Sentado
+   constructor(private ctx: Context) { }
+   public async curlSentado() {
+      return await this.ctx.reply(`Curl Sentado
 
 1. Posición Inicial:
    - Siéntate en la máquina de curl femoral con las piernas extendidas y colocadas debajo de los rodillos acolchados.
@@ -31,10 +31,10 @@ export class Femorales {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
-  public async curlAcostado() {
-    return await this.ctx.reply(`Curl Acostado
+      )
+   }
+   public async curlAcostado() {
+      return await this.ctx.reply(`Curl Acostado
 
 1. Posición Inicial:
    - Acuéstate boca abajo en una máquina de curl femoral con los tobillos debajo de los rodillos acolchados.
@@ -61,10 +61,10 @@ export class Femorales {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
-  public async pesoMuertoRumano() {
-    return await this.ctx.reply(`Peso Muerto Rumano
+      )
+   }
+   public async pesoMuertoRumano() {
+      return await this.ctx.reply(`Peso Muerto Rumano
 
 1. Posición Inicial:
    - Sujeta una barra con un agarre prono (palmas hacia abajo) a la anchura de los hombros.
@@ -92,6 +92,6 @@ export class Femorales {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
+      )
+   }
 }

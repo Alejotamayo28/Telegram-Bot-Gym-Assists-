@@ -2,9 +2,9 @@ import { Context, Markup } from "telegraf";
 import { buttonGuideMenuExercisesPrincipal } from "../inlineButtons.ts/buttons";
 
 export class Trapecios {
-  constructor(private ctx: Context) { }
-  public async encogimientoMancuernas() {
-    return await this.ctx.reply(`Encogimineto Mancuernas
+   constructor(private ctx: Context) { }
+   public async encogimientoMancuernas() {
+      return await this.ctx.reply(`Encogimineto Mancuernas
 
 1. Posición Inicial:
    - Sujeta una mancuerna en cada mano con un agarre neutro (palmas hacia el cuerpo).
@@ -31,10 +31,10 @@ export class Trapecios {
 
 ¡Buena suerte y entrena seguro
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
-  public async encogiminetoBarra() {
-    return await this.ctx.reply(`Encogimineto Barra
+      )
+   }
+   public async encogiminetoBarra() {
+      return await this.ctx.reply(`Encogimineto Barra
 
 1. Posición Inicial:
    - Sujeta una barra con un agarre prono (palmas hacia abajo) a la anchura de los hombros.
@@ -61,10 +61,10 @@ export class Trapecios {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
-  public async remoMenton() {
-    return await this.ctx.reply(`Remo Menton
+      )
+   }
+   public async remoMenton() {
+      return await this.ctx.reply(`Remo Menton
 
 1. Posición Inicial:
    - Sujeta una barra con un agarre prono (palmas hacia abajo) a la anchura de los hombros.
@@ -91,6 +91,6 @@ export class Trapecios {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
+      )
+   }
 }

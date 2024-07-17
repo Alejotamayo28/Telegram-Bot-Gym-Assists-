@@ -1,7 +1,7 @@
-import { bot } from "../bot"
-import { menuPageGetExercises } from "../bot/funtions"
-import { pool } from "../database/database"
-import { userState } from "../userState"
+import { bot } from "../../bot"
+import { menuPageGetExercises } from "../funtions"
+import { pool } from "../../database/database"
+import { userState } from "../../userState"
 import { sendMenuOptions } from "./menu"
 
 bot.action(`menu_post_exercise`, async (ctx) => {

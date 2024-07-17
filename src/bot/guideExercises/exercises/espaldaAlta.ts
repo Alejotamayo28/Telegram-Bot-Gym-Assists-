@@ -2,9 +2,9 @@ import { Context, Markup } from "telegraf";
 import { buttonGuideMenuExercisesPrincipal } from "../inlineButtons.ts/buttons";
 
 export class EspaldaAlta {
-  constructor(private ctx: Context) { }
-  public jalonPecho() {
-    return this.ctx.reply(`Jalon al Pecho
+   constructor(private ctx: Context) { }
+   public jalonPecho() {
+      return this.ctx.reply(`Jalon al Pecho
 
 1. Posición Inicial:
    - Siéntate en una máquina de polea alta con una barra ancha.
@@ -31,10 +31,10 @@ export class EspaldaAlta {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
-  public dominadas() {
-    return this.ctx.reply(`Dominadas
+      )
+   }
+   public dominadas() {
+      return this.ctx.reply(`Dominadas
 
 1. Posición Inicial:
    - Agarra una barra con las palmas mirando hacia adelante y las manos un poco más abiertas que la anchura de los hombros.
@@ -60,6 +60,6 @@ export class EspaldaAlta {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
+      )
+   }
 }

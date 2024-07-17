@@ -1,9 +1,9 @@
 import { Context } from "telegraf";
-import { bot } from "../bot";
-import { Pierna } from "../bot/menus/menuPierna";
-import { Cuadriceps } from "../bot/exercises/piernaCuadriceps";
-import { Gluteos } from "../bot/exercises/piernaGluteos";
-import { Femorales } from "../bot/exercises/piernaFemorales";
+import { bot } from "../../bot";
+import { Pierna } from "../guideExercises/menus/menuPierna";
+import { Cuadriceps } from "../guideExercises/exercises/piernaCuadriceps";
+import { Gluteos } from "../guideExercises/exercises/piernaGluteos";
+import { Femorales } from "../guideExercises/exercises/piernaFemorales";
 
 bot.action(`Pierna`, async (ctx: Context) => {
   await new Pierna(ctx).menu()

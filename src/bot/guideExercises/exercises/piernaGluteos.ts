@@ -2,9 +2,9 @@ import { Context, Markup } from "telegraf";
 import { buttonGuideMenuExercisesPrincipal } from "../inlineButtons.ts/buttons";
 
 export class Gluteos {
-  constructor(private ctx: Context) { }
-  public async sentadilla() {
-    return await this.ctx.reply(`Sentadilla
+   constructor(private ctx: Context) { }
+   public async sentadilla() {
+      return await this.ctx.reply(`Sentadilla
 
 1. Posición Inicial:
    - Coloca una barra sobre los trapecios, con los pies a la anchura de los hombros.
@@ -31,9 +31,9 @@ export class Gluteos {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal)
-  }
-  public async puenteGluteo() {
-    return await this.ctx.reply(`Puente de Glueteo
+   }
+   public async puenteGluteo() {
+      return await this.ctx.reply(`Puente de Glueteo
 
 1. Posición Inicial:
    - Acuéstate boca arriba con las rodillas dobladas y los pies apoyados en el suelo, separados a la anchura de las caderas.
@@ -60,9 +60,9 @@ export class Gluteos {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal)
-  }
-  public async patada() {
-    return await this.ctx.reply(`Patada de Gluteo
+   }
+   public async patada() {
+      return await this.ctx.reply(`Patada de Gluteo
 
 1. Posición Inicial:
    - Colócate a cuatro patas en el suelo con las manos directamente debajo de los hombros y las rodillas debajo de las caderas.
@@ -89,9 +89,9 @@ export class Gluteos {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal)
-  }
-  public async estocadas() {
-    return await this.ctx.reply(`Estocadas
+   }
+   public async estocadas() {
+      return await this.ctx.reply(`Estocadas
 
 1. Posición Inicial:
    - Colócate de pie con los pies juntos.
@@ -118,6 +118,6 @@ export class Gluteos {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
+      )
+   }
 }

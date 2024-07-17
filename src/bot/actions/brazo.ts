@@ -1,9 +1,9 @@
 import { Context } from "telegraf"
-import { bot } from "../bot"
-import { Biscep } from "../bot/exercises/brazoBiscep"
-import { Hombro } from "../bot/exercises/brazoHombro"
-import { Triscep } from "../bot/exercises/brazoTriscep"
-import { Brazo } from "../bot/menus/menuBrazo"
+import { bot } from "../../bot"
+import { Biscep } from "../guideExercises/exercises/brazoBiscep"
+import { Hombro } from "../guideExercises/exercises/brazoHombro"
+import { Triscep } from "../guideExercises/exercises/brazoTriscep"
+import { Brazo } from "../guideExercises/menus/menuBrazo"
 
 // BRAZO OPCIONES EJERCICIOS
 bot.action(`Brazo`, async (ctx) => {

@@ -8,7 +8,7 @@ const PORT = 4000;
 
 // Servir archivos estáticos desde el directorio 'public'
 import { bot } from './bot';
-import './actions'
+import './bot/actions'
 import './bot/index'
 
 

@@ -2,9 +2,9 @@ import { Context, Markup } from "telegraf";
 import { buttonGuideMenuExercisesPrincipal } from "../inlineButtons.ts/buttons";
 
 export class Cuadriceps {
-  constructor(private ctx: Context) { }
-  public async sentadilla() {
-    return await this.ctx.reply(`Sentadilla
+   constructor(private ctx: Context) { }
+   public async sentadilla() {
+      return await this.ctx.reply(`Sentadilla
 
 1. Posición Inicial:
    - Coloca una barra sobre los trapecios, con los pies a la anchura de los hombros.
@@ -31,10 +31,10 @@ export class Cuadriceps {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
-  public async extensiones() {
-    return await this.ctx.reply(`Extensiones Cuadriceps
+      )
+   }
+   public async extensiones() {
+      return await this.ctx.reply(`Extensiones Cuadriceps
 
 1. Posición Inicial:
    - Siéntate en la máquina de extensiones de cuadríceps con la espalda apoyada en el respaldo.
@@ -61,10 +61,10 @@ export class Cuadriceps {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
-  public async prensa() {
-    return await this.ctx.reply(`Prensa
+      )
+   }
+   public async prensa() {
+      return await this.ctx.reply(`Prensa
 
 1. Posición Inicial:
    - Siéntate en la máquina de prensa con la espalda apoyada en el respaldo.
@@ -90,13 +90,13 @@ export class Cuadriceps {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
-  public async variantes() {
-    return await this.ctx.reply(`Variantes
+      )
+   }
+   public async variantes() {
+      return await this.ctx.reply(`Variantes
     
 
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
+      )
+   }
 }

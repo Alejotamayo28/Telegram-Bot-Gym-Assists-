@@ -3,9 +3,9 @@ import { buttonGuideMenuExercisesPrincipal } from "../inlineButtons.ts/buttons";
 
 
 export class Biscep {
-  constructor(private ctx: Context) { }
-  public async martillo() {
-    return this.ctx.reply(`Curl Martillo
+   constructor(private ctx: Context) { }
+   public async martillo() {
+      return this.ctx.reply(`Curl Martillo
 
 1. Posición Inicial:
    - De pie, con los pies a la altura de los hombros.
@@ -32,10 +32,10 @@ export class Biscep {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
-  public async predicador() {
-    return await this.ctx.reply(`Curl Predicador
+      )
+   }
+   public async predicador() {
+      return await this.ctx.reply(`Curl Predicador
 
 1. Posición Inicial:
    - Siéntate en el banco predicador y coloca la parte superior de tus brazos sobre el soporte.
@@ -62,10 +62,10 @@ export class Biscep {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
-  public async alternado() {
-    return await this.ctx.reply(`Curl Alternado
+      )
+   }
+   public async alternado() {
+      return await this.ctx.reply(`Curl Alternado
 
 1. Posición Inicial:
    - De pie, con los pies a la altura de los hombros.
@@ -92,10 +92,10 @@ export class Biscep {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
-  public async inclinado() {
-    return await this.ctx.reply(`Curl inclinado
+      )
+   }
+   public async inclinado() {
+      return await this.ctx.reply(`Curl inclinado
 
 1. Posición Inicial:
    - Siéntate en un banco inclinado (45 grados) con los pies firmes en el suelo.
@@ -122,6 +122,6 @@ export class Biscep {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
+      )
+   }
 }

@@ -3,9 +3,9 @@ import { buttonGuideMenuExercisesPrincipal } from "../inlineButtons.ts/buttons";
 
 
 export class Triscep {
-  constructor(private ctx: Context) { }
-  public async pressFrances() {
-    return await this.ctx.reply(`Press Frances
+   constructor(private ctx: Context) { }
+   public async pressFrances() {
+      return await this.ctx.reply(`Press Frances
 
 1. Posición Inicial:
    - Acuéstate en un banco plano con los pies firmes en el suelo.
@@ -32,14 +32,14 @@ export class Triscep {
 
 ¡Buena suerte y entrena seguro!
 `,
-      Markup.inlineKeyboard([
-        [Markup.button.callback(`Menu ejercicios`, `menuExercises`), Markup.button.callback(`Menu principal`, `menu_principal`)]
-      ])
+         Markup.inlineKeyboard([
+            [Markup.button.callback(`Menu ejercicios`, `menuExercises`), Markup.button.callback(`Menu principal`, `menu_principal`)]
+         ])
 
-    )
-  }
-  public async fondos() {
-    return await this.ctx.reply(`Fondos
+      )
+   }
+   public async fondos() {
+      return await this.ctx.reply(`Fondos
 
 1. Posición Inicial:
    - Sujeta las barras paralelas con los brazos extendidos y el cuerpo recto.
@@ -65,10 +65,10 @@ export class Triscep {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
-  public async pushdowns() {
-    return await this.ctx.reply(`Pushdownds
+      )
+   }
+   public async pushdowns() {
+      return await this.ctx.reply(`Pushdownds
 
 1. Posición Inicial:
    - Colócate frente a una polea alta con una barra recta o cuerda.
@@ -95,10 +95,10 @@ export class Triscep {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
-  public async trasNuca() {
-    return await this.ctx.reply(`Pushdowns Tras Nuca
+      )
+   }
+   public async trasNuca() {
+      return await this.ctx.reply(`Pushdowns Tras Nuca
 
 1. Posición Inicial:
    - Colócate frente a una polea alta con una cuerda.
@@ -125,6 +125,6 @@ export class Triscep {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
+      )
+   }
 }

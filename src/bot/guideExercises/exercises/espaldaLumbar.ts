@@ -3,9 +3,9 @@ import { buttonGuideMenuExercisesPrincipal } from "../inlineButtons.ts/buttons";
 import { BulkHostedNumberOrderListInstance } from "twilio/lib/rest/numbers/v2/bulkHostedNumberOrder";
 
 export class Lumbar {
-  constructor(private ctx: Context) { }
-  public async pesoMuerto() {
-    return await this.ctx.reply(`Peso Muerto
+   constructor(private ctx: Context) { }
+   public async pesoMuerto() {
+      return await this.ctx.reply(`Peso Muerto
 1. Posición Inicial:
    - Coloca los pies a la altura de los hombros.
    - Mantén la barra cerca de las espinillas, con una postura neutra y la espalda recta.
@@ -32,10 +32,10 @@ export class Lumbar {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
-  public async hiperextensiones() {
-    return await this.ctx.reply(`Hiperextensiones
+      )
+   }
+   public async hiperextensiones() {
+      return await this.ctx.reply(`Hiperextensiones
 
 1. **Posición Inicial**:
    - Colócate en la máquina de hiperextensiones con las caderas apoyadas en el borde del cojín.
@@ -62,10 +62,10 @@ export class Lumbar {
 ¡Buena suerte y entrena seguro!
 
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
-  public async buenosDias() {
-    return await this.ctx.reply(`Buenos Dias
+      )
+   }
+   public async buenosDias() {
+      return await this.ctx.reply(`Buenos Dias
 
 1. Posición Inicial:
    - Coloca una barra sobre los trapecios, como en una sentadilla trasera.
@@ -92,6 +92,6 @@ export class Lumbar {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
+      )
+   }
 }

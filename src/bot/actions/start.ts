@@ -1,5 +1,5 @@
 import { Markup } from "telegraf";
-import { bot } from "../bot";
+import { bot } from "../../bot";
 
 bot.start(async (ctx) => {
   await sendMainMenu(ctx)

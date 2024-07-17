@@ -2,9 +2,9 @@ import { Context, Markup } from "telegraf";
 import { buttonGuideMenuExercisesPrincipal } from "../inlineButtons.ts/buttons";
 
 export class Hombro {
-  constructor(private ctx: Context) { }
-  public async pressMilitar() {
-    return await this.ctx.reply(`Press Militar
+   constructor(private ctx: Context) { }
+   public async pressMilitar() {
+      return await this.ctx.reply(`Press Militar
 
 1. Posición Inicial:
    - Sentado, con los pies firmes en el suelo.
@@ -31,10 +31,10 @@ export class Hombro {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
-  public async vuelosLaterales() {
-    return await this.ctx.reply(`Vuelos Laterales
+      )
+   }
+   public async vuelosLaterales() {
+      return await this.ctx.reply(`Vuelos Laterales
 
 1. Posición Inicial:
    - De pie, con los pies a la altura de los hombros.
@@ -61,10 +61,10 @@ export class Hombro {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
-  public async peckDeckInvertido() {
-    return await this.ctx.reply(`Peck Deck Invertido
+      )
+   }
+   public async peckDeckInvertido() {
+      return await this.ctx.reply(`Peck Deck Invertido
 
 1. Posición Inicial:
    - Siéntate en la máquina Peck Deck con el pecho apoyado en el respaldo.
@@ -91,7 +91,7 @@ export class Hombro {
 
 ¡Buena suerte y entrena seguro!
 `, buttonGuideMenuExercisesPrincipal
-    )
-  }
+      )
+   }
 
 }
