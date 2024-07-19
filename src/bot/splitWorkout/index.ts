@@ -1,4 +1,4 @@
-import { Context, Markup } from "telegraf";
+import { Context } from "telegraf";
 import { menuPrincipalSplits, splitWorkoutButtons, splitsButton } from "./inlineButtons";
 
 export class SplitWorkout {

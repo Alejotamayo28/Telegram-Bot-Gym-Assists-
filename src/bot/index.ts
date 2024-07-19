@@ -1,11 +1,8 @@
 import { compare } from "bcryptjs";
 import { QueryResult } from "pg";
-import { Markup } from "telegraf";
 import { bot } from "../bot";
 import { pool } from "../database/database";
 import { encrypt } from "../middlewares/jsonWebToken/enCryptHelper";
-import { verifyNickname } from "../queries/clientQueries";
-import { getWorkoutDataPerDay } from "../queries/workoutQueries";
 import { userState, userSession } from "../userState";
 import { sendMenu, sendMenuOptions } from "./actions/menu";
 import { sendMainMenuOptions } from "./actions/start";
@@ -54,7 +51,7 @@ bot.on('text', async (ctx) => {
 
 
         case 'login_nickname':
-          const response: QueryResult = await verifyNickname(client, userMessage)
+          const response: QueryResult = await client.query(`SELECT * FROM client WHERE nickname = $1`, [userMessage])
           if (!response.rowCount) {
             await ctx.reply(`Usuario no encontrado, vuelve a escribir tu nickname`)
             userState[userId].stage = 'login_nickname'
@@ -139,7 +136,7 @@ bot.on('text', async (ctx) => {
 
         case 'menu_get_weekly':
           userState[userId].day = userMessage.toLowerCase()
-          const responseGet_day: QueryResult = await getWorkoutDataPerDay(client, userId, userState[userId].day)
+          const responseGet_day: QueryResult = await client.query(`SELECT * FROM workout WHERE id = $1 AND day = $2`, [userId, userState[userId].day])
           if (!responseGet_day.rowCount) {
             await ctx.reply(`No se encontraron ejercicios del dia ${userMessage}`)
             await sendMenuOptions(ctx)

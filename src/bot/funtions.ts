@@ -1,5 +1,4 @@
 import { PoolClient, QueryResult } from "pg"
-import { getWorkoutAllDataQuery } from "../queries/workoutQueries"
 import { ClientLogin } from "../model/interface/client"
 
 
@@ -58,7 +57,7 @@ export const menuPageGetExercises = async (client: PoolClient, id: any) => {
   let sabado = 'Sabado: \n'
   let domingo = 'Domingo: \n'
 
-  const response: QueryResult = await getWorkoutAllDataQuery(client, id)
+  const response: QueryResult = await client.query(`SELECT * FROM workout WHERE id = $1`, [id])
 
   response.rows.map(row => {
     if (row.day === 'lunes') {
