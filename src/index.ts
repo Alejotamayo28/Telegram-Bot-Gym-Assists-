@@ -6,9 +6,9 @@ const PORT = 4000;
 
 
 // Servir archivos estáticos desde el directorio 'public'
-import { bot } from './bot';
 import './bot/actions'
 import './bot/index'
+import { bot } from './telegram/bot';
 
 
 app.use(cors())
@@ -19,7 +19,7 @@ app.listen(PORT, () => {
   console.log(`Server on port: ${PORT}`)
   bot.launch().then(() => {
     console.log(`Bot launched`)
-  }).catch((err) => {
+  }).catch((err: Error) => {
     console.error(err)
   })
 });

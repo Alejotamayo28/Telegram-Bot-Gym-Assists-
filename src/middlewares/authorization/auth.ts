@@ -1,5 +1,5 @@
 import { NextFunction, Response } from "express";
-import jwt, { JwtPayload } from "jsonwebtoken"
+import jwt from "jsonwebtoken"
 import dotenv from "dotenv";
 import { RequestExt } from "../jsonWebToken/enCryptHelper";
 

@@ -1,21 +1,23 @@
-import { UserSession } from "./bot/funtions"
-import { UserData } from "./model/interface/client"
-import { ClientWorkout } from "./model/interface/workout"
+import { UserSession } from "./bot/functions"
+import { UserData } from "./model/client"
+import { ClientWorkout } from "./model/workout"
 
-export let userState: { [key: number]: any, data: UserData, stage: string, workout: ClientWorkout } = {
-    data: {
-        email: '',
-        nickname: '',
-        password: ''
-    },
-    stage: '',
-    workout: {
-        day: '',
-        name: '',
-        series: 0,
-        reps: [],
-        kg: 0
-    }
+export let userState: { [key: number]: any, data: UserData, stage: string, startMessage: number, workout: ClientWorkout } = {
+  data: {
+    email: '',
+    nickname: '',
+    password: ''
+  },
+  startMessage: 0,
+  stage: '',
+  workout: {
+    day: '',
+    name: '',
+    series: 0,
+    reps: [],
+    kg: 0,
+    nickname: ""
+  }
 }
 
 export const userSession = new UserSession()
