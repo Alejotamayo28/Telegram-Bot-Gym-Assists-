@@ -24,4 +24,3 @@ export const menuPrincipalSplits = Markup.inlineKeyboard([
   Markup.button.callback(`menu Split`, `splitWorkout`)]
 ])
 
-

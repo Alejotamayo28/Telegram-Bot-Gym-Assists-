@@ -1,5 +1,6 @@
 import { PoolClient, QueryResult } from "pg"
 import { ClientLogin } from "../../model/client"
+import { workoutOutput } from "../../model/workout"
 
 
 export class UserSession {
@@ -99,4 +100,14 @@ const validateDays = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'saba
 
 export const verifyDay = (day: string) => {
   return validateDays.includes(day)
+}
+
+export const verifyExerciseOutput = (workout: workoutOutput) => {
+  return `Confirmacion de ejercicio: 
+Dia: ${workout.day}.
+Nombre: ${workout.name}.
+Repeticiones: ${workout.reps}.
+Peso: ${workout.kg}.
+
+Escribe 'si' para agregar el ejercicio, 'no' para no agregarlo.`
 }

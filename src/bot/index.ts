@@ -7,7 +7,8 @@ import { sendMenuFunctions } from "../telegram/menus/userMenu";
 import { buttonLogin } from "../services/guideExercises/inlineButtons.ts/buttons";
 import { bot } from "../telegram/bot";
 import { mainMenuPage } from "../telegram/mainMenu";
-import { verifyDay } from "./functions";
+import { verifyDay, verifyExerciseOutput } from "./functions";
+import { workoutOutput } from "../model/workout";
 
 
 bot.on('text', async (ctx) => {
@@ -115,14 +116,8 @@ bot.on('text', async (ctx) => {
 
         case `menu_post_exercise_verification`:
           userState[userId].kg = userMessage
-          const { day, name, reps, kg } = userState[userId]
-
-          ctx.reply(`
-Confirmacion de ejercicio: 
-Dia: ${day}.
-Nombre: ${name}.
-Repeticisones: ${reps}.
-Peso: ${kg}.`)
+          const { day, name, reps, kg }: workoutOutput = userState[userId]
+          ctx.reply(verifyExerciseOutput({ day, name, reps, kg }))
           break
 
 
