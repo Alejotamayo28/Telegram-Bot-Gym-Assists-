@@ -22,9 +22,12 @@ export interface UserData extends ClientLogin {
 
 
 
-type getClientData = ClientData
-type createClientData = ClientData
-type updateClientData = Partial<ClientData>
-type deleteClientData = Pick<ClientData, "id">
+export interface Client {
+  id: number,
+  nickname: string,
+  password: string,
+  email: string
+}
+
 
 

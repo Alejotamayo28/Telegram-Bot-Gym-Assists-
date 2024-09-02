@@ -7,7 +7,7 @@
     "dev": "concurrently \"tsc --watch\" \"nodemon dist/index.js\""
   },
   "keywords": [],
-  "author": "",
+  "author": "Alejandro Vergara Tamayo",
   "license": "ISC",
   "devDependencies": {
     "@types/cors": "^2.8.17",

@@ -1,7 +1,8 @@
 import { PoolClient, QueryResult } from "pg"
 import { ClientLogin } from "../../model/client"
 import { workoutOutput } from "../../model/workout"
-
+import { escapeMarkdown } from "./markdownV2"
+import { Context, Telegraf } from "telegraf"
 
 export class UserSession {
   private userData: ClientLogin
@@ -48,7 +49,7 @@ export class UserSession {
     this.userData.password = '';
   }
 }
-export const menuPageGetExercises = async (client: PoolClient, id: any) => {
+export const menuPageGetExercises = async (client: PoolClient, id: number) => {
   const daysOfWeek = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
   const exercisesByDay: Record<string, { name: string, reps: string, kg: number }[]> = Object.fromEntries(daysOfWeek.map(day => [day, []]));
 
@@ -59,12 +60,10 @@ export const menuPageGetExercises = async (client: PoolClient, id: any) => {
 
   response.rows.forEach(row => {
     const { day, name, reps, kg } = row;
-    const normalizedDay = day.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-    if (exercisesByDay.hasOwnProperty(normalizedDay)) {
-      exercisesByDay[normalizedDay].push({ name, reps, kg });
+    if (exercisesByDay.hasOwnProperty(day)) {
+      exercisesByDay[day].push({ name, reps, kg });
     } else {
-      console.log(`Día no reconocido: ${day}`);
     }
   });
   return daysOfWeek
@@ -96,18 +95,33 @@ export const menuPageGetExercises = async (client: PoolClient, id: any) => {
     .join('\n\n');
 };
 
-const validateDays = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']
+
+
+
+export const validateDays = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']
 
 export const verifyDay = (day: string) => {
   return validateDays.includes(day)
 }
 
 export const verifyExerciseOutput = (workout: workoutOutput) => {
-  return `Confirmacion de ejercicio: 
-Dia: ${workout.day}.
-Nombre: ${workout.name}.
-Repeticiones: ${workout.reps}.
-Peso: ${workout.kg}.
+  return `*Confirmación de ejercicio:*
 
-Escribe 'si' para agregar el ejercicio, 'no' para no agregarlo.`
+🗓 *Día:* ${escapeMarkdown(workout.day!)}
+💪 *Nombre:* ${escapeMarkdown(workout.name!)}
+🔢 *Repeticiones:* ${escapeMarkdown(workout.reps!.toString())}
+⚖️ *Peso:* ${escapeMarkdown(workout.kg!.toString())} kg
+
+_Escoge alguna de las siguientes opciones para continuar\\!_`
+}
+
+export const errorMessage = (userStage: string) => {
+  return `Error during ${userStage} process: `
+}
+
+export const errorMessageCtx = `Hubo un problema. Por favor, intenta nuevamente`
+
+export const errorState = async (error: Error, userStage: string, ctx: Context) => {
+  console.error(errorMessage(userStage), error)
+  await ctx.reply(errorMessageCtx)
 }
