@@ -4,9 +4,18 @@ import { handleExerciseNotFound } from "../updateExercise";
 import { ClientWorkout, workoutOutput } from "../../../model/workout";
 import { pool } from "../../../database/database";
 import { Context } from "telegraf";
+import { deleteLastMessage } from "..";
+import { handleIncorrectDayInput, verifyDayInput } from "../addExercise";
+import { sendMenuFunctions } from "../../../telegram/menus/userMenu";
 
 export const handleGetDailyExercises = async (ctx: Context, userMessage: string,
   userId: number) => {
+  await deleteLastMessage(ctx)
+  if (!verifyDayInput(userMessage)) {
+    await handleIncorrectDayInput(ctx, userId)
+    await ctx.deleteMessage()
+    return
+  }
   const client = await pool.connect()
   userState[ctx.from!.id] = {
     ...userState[userId],
@@ -24,15 +33,17 @@ export const handleGetDailyExercises = async (ctx: Context, userMessage: string,
   await ctx.reply(`*${day}:*\\\n ${formattedOutput}`, {
     parse_mode: `MarkdownV2`
   })
+  await sendMenuFunctions(ctx)
 }
 
 export const handleOutputDailyExercise = (data: QueryResult<Partial<ClientWorkout>>) => {
   let result = ""
-  data.rows.map((i: workoutOutput) => {
+  data.rows.map((i: any) => {
+    let kg: number = i.kg
     result += `
 _Nombre:_ ${i.name}
 _Reps:_ ${i.reps}
-_Peso:_ ${Math.trunc(i.kg!)}\n`
+_Peso:_ ${Math.trunc(kg)}\n`
   })
   return result
 }

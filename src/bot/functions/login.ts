@@ -1,10 +1,11 @@
 import { PoolClient, QueryResult } from "pg";
-import { Client } from "../../model/client";
-import { userSession, userState } from "../../userState";
+import { Client, userStateData } from "../../model/client";
+import { UserStateManager, updateUserState, userSession, userState } from "../../userState";
 import { Context } from "telegraf";
 import { compare } from "bcryptjs";
 import { mainMenuPage } from "../../telegram/mainMenu";
 import { bot } from "..";
+import { deleteLastMessage } from ".";
 
 export const findUserByNickname = async (client: PoolClient, nickname: string): Promise<Client | undefined> => {
   const response: QueryResult = await client.query(
@@ -14,13 +15,12 @@ export const findUserByNickname = async (client: PoolClient, nickname: string): 
 
 export const handleUserNotFound = async (ctx: Context, userId: number) => {
   await ctx.reply(`Usario no encontrado, vuelve a escribir tu nickname: .`)
-  userState[userId] = { ...userState[userId], stage: 'login_nickname' }
+  updateUserState(userId, { stage: `login_nickname` })
 }
 
 export const handleLoginNickname = async (ctx: Context, userId: number, userMessage: string, client: PoolClient) => {
   await ctx.deleteMessage(ctx.message!.message_id - 1)
-  userState[userId] = { ...userState[userId], nickname: userMessage }
-  const user = await findUserByNickname(client, userState[userId].nickname)
+  const user = await findUserByNickname(client, userMessage)
   if (!user) {
     await handleUserNotFound(ctx, userId)
     await ctx.deleteMessage()
@@ -28,22 +28,15 @@ export const handleLoginNickname = async (ctx: Context, userId: number, userMess
   }
   await ctx.deleteMessage();
   userSession.setPassword(user!.password);
-  userState[userId] = { ...userState[userId], stage: 'login_password' };
+  updateUserState(userId, { stage: 'login_password' })
   await ctx.reply('Por favor, proporciona tu contraseña');
 }
 
-export const verifyPassword = async (inputPassword: string, storedPassword: string) => {
-  return compare(inputPassword, storedPassword)
-}
-
-export const handleIncorrectPassword = async (ctx: Context, userId: number) => {
-  await ctx.reply('Contraseña incorrecta, vuelve a escribirla!');
-  userState[userId] = { ...userState[userId], stage: 'login_password' };
-}
 export const handleLoginPassword = async (ctx: Context, userId: number, userMessage: string) => {
-  ctx.deleteMessage(ctx.message!.message_id - 1)
-  userState[userId] = { ...userState[userId], password: userMessage }
-  const isPasswordIncorrect = await verifyPassword(userState[userId].password, userSession.getPassword())
+  await deleteLastMessage(ctx)
+  const userManager = new UserStateManager<userStateData>(userId)
+  userManager.updateData({ password: userMessage })
+  const isPasswordIncorrect = await verifyPassword(userManager.getUserData().password, userSession.getPassword())
   if (!isPasswordIncorrect) {
     await handleIncorrectPassword(ctx, userId)
     await ctx.deleteMessage()
@@ -54,5 +47,11 @@ export const handleLoginPassword = async (ctx: Context, userId: number, userMess
   await mainMenuPage(bot, ctx)
 }
 
+export const verifyPassword = async (inputPassword: string, storedPassword: string) => {
+  return compare(inputPassword, storedPassword)
+}
 
-
+export const handleIncorrectPassword = async (ctx: Context, userId: number) => {
+  await ctx.reply('Contraseña incorrecta, vuelve a escribirla!');
+  updateUserState(userId, { stage: 'login_password' })
+}

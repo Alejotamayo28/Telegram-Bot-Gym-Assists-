@@ -19,7 +19,6 @@ export type MyContext =
   | NarrowedContext<Context<Update>, Update.CallbackQueryUpdate>;
 
 
-
 bot.on(message("text"), async ctx => {
   const client = await pool.connect();
   const userId = ctx.from!.id;
@@ -42,7 +41,6 @@ bot.on(message("text"), async ctx => {
             await handleError(error, userState[userId].stage, ctx)
           }
           break;
-
 
         case 'signUp_email':
           try {

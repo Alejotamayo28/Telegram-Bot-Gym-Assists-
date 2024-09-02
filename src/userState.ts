@@ -1,36 +1,35 @@
 import { UserSession } from "./bot/functions"
-import { UserData } from "./model/client"
+import {  userStateData } from "./model/client"
 import { ClientWorkout } from "./model/workout"
+import { merge } from 'lodash'
 
 
 export let userState: { [key: number]: any } = {}
-
 export const userSession = new UserSession()
 
+
 export interface User {
-  data: UserData,
+  data: userStateData,
   stage: string,
   lastMessageId: number,
   workout: ClientWorkout
 }
-
-interface UserState {
-  [key: number]: User
-}
-export let userState1: UserState = {}
-
-export function initializeUserState(userId: number): void {
-  userState1[userId] = {
-    data: { email: '', nickname: '', password: '' },
-    stage: '',
-    lastMessageId: 0,
-    workout: { day: '', name: '', series: 0, reps: [], kg: 0, nickname: '' }
-  };
-}
-
 export function updateUserState(userId: number, newState: Partial<User>): void {
-  if (!userState1[userId]) {
-    initializeUserState(userId);
+  userState[userId] = { ...userState[userId], ...newState }
+}
+
+export class UserStateManager<T> {
+  constructor(private userId: number) { }
+  updateData(newData: T, nextStage?: string) {
+    userState[this.userId].data = merge({}, userState[this.userId].data, newData);
+    if (nextStage) {
+      userState[this.userId].stage = nextStage
+    }
   }
-  userState1[userId] = { ...userState[userId], ...newState }
+  getUserData() {
+    return userState[this.userId].data
+  }
+  getStage() {
+    return userState[this.userId].stage
+  }
 }

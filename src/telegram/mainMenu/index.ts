@@ -7,7 +7,6 @@ import { sendSplitMenu } from "../menus/splitMenu"
 import { guideExercisesMenu } from "../menus/guide/body"
 import { handleGetWeeklyExercises } from "../../bot/functions/getExercise/weekly"
 import { sendMenuFunctions } from "../menus/userMenu"
-import { message } from "telegraf/filters"
 
 export const mainMenuPage = async (bot: Telegraf, ctx: Context) => {
   await ctx.reply(MAIN_MENU_MESSAGE, inlineKeyboardMenu)
@@ -18,17 +17,13 @@ export const mainMenuPage = async (bot: Telegraf, ctx: Context) => {
   })
 
   bot.action(UPDATE_EXERCISE_CALLBACK, async (ctx: Context) => {
-    await ctx.reply(`Por favooor, digita el dia en donde realizaste el ejercicio a actualizar`)
+    await ctx.reply(`Por favor, digita el dia en donde realizaste el ejercicio a actualizar`)
     userState[ctx.from!.id] = { stage: 'menu_put_exercise_day' }
   })
 
   bot.action(GET_EXERCISE_DAY_CALLBACK, async ctx => {
     await ctx.reply(`Por favor, digita el dia para buscar tus ejercicios: `)
-    bot.on(message("text"), async ctx => {
-
-    })
-
-    //userState[ctx.from!.id] = { stage: 'menu_get_weekly' }
+    userState[ctx.from!.id] = { stage: 'menu_get_weekly' }
   })
 
   bot.action(GET_EXERCISE_WEEK_CALLBACK, async (ctx: Context) => {

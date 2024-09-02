@@ -20,6 +20,7 @@ export interface UserData extends ClientLogin {
   email: string
 }
 
+export type userStateData = Partial<UserData>
 
 
 export interface Client {
