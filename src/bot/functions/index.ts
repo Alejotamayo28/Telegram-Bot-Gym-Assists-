@@ -1,5 +1,5 @@
 import { PoolClient, QueryResult } from "pg"
-import { ClientLogin } from "../../model/client"
+import { ClientLogin, UserData } from "../../model/client"
 import { workoutOutput } from "../../model/workout"
 import { escapeMarkdown } from "./markdownV2"
 import { Context, Telegraf } from "telegraf"
@@ -122,6 +122,17 @@ export const verifyExerciseOutput = (workout: workoutOutput) => {
 
 _Escoge alguna de las siguientes opciones para continuar\\!_`
 }
+
+export const verifySignUpOutput = (data: UserData) => {
+  return `*Confirmación de cuenta:*
+
+🗓 *Nickname:* ${escapeMarkdown(data.nickname!)}
+💪 *Contrasena:* ${escapeMarkdown(data.password!)}
+🔢 *Email:* ${escapeMarkdown(data.email)}
+
+_Escoge alguna de las siguientes opciones para continuar\\!_`
+}
+
 
 export const errorMessage = (userStage: string) => {
   return `Error during ${userStage} process: `

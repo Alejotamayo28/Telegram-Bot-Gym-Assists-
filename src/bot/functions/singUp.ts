@@ -3,9 +3,10 @@ import { UserStateManager, updateUserState, userState } from "../../userState"
 import { findUserByNickname } from "./login"
 import { PoolClient } from "pg"
 import { encrypt } from "../../middlewares/jsonWebToken/enCryptHelper"
-import { startInlineKeyboard } from "../../telegram/commands/inlineKeyboard"
 import { deleteLastMessage } from "."
 import { userStateData } from "../../model/client"
+import { signUpVerificationMenu } from "../../telegram/services/singUp"
+import { bot } from "../../telegram/bot"
 
 export const handleNicknameNotAvailable = async (ctx: Context, userId: number) => {
   await ctx.reply(`Usuario no disponible, crea otro nickname!`)
@@ -23,8 +24,6 @@ export const handleSignUpNickname = async (ctx: Context, userId: number, userMes
   await ctx.deleteMessage()
   const userManager = new UserStateManager(userId)
   userManager.updateData({ nickname: userMessage }, 'signUp_password')
-
-
   await ctx.reply(`Por favor, proporciona una contrasena!`)
 }
 
@@ -37,25 +36,17 @@ export const handleSignUpPassword = async (ctx: Context, userId: number, userMes
 }
 
 
-export const handleSignUpEmail = async (ctx: Context, userId: number, userMessage: string, client: PoolClient) => {
+export const handleSignUpEmail = async (ctx: Context, userId: number, userMessage: string) => {
   await deleteLastMessage(ctx)
   const userManager = new UserStateManager<userStateData>(userId)
   userManager.updateData({ email: userMessage })
   await ctx.deleteMessage()
   const passwordHash = await encrypt(userManager.getUserData().password)
-  await signUpUser(userId, passwordHash, client)
+  await signUpVerificationMenu(bot, ctx, passwordHash)
   delete userState[userId]
-  await ctx.reply(`Gracias por haber creado tu cuenta.\nAhora, por favor inicia seccion para continuar `,
-    startInlineKeyboard)
 }
 
-export const signUpUser = async (userId: number, passwordHash: string, client: PoolClient) => {
-  const userManager = new UserStateManager<userStateData>(userId)
-  const { nickname, email } = userManager.getUserData()
-  await client.query(
-    `INSERT INTO client (id, nickname, password, email) VALUES ($1, $2, $3, $4)`,
-    [userId, nickname, passwordHash, email]
-  );
-}
+
+
 
 

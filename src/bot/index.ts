@@ -44,7 +44,7 @@ bot.on(message("text"), async ctx => {
 
         case 'signUp_email':
           try {
-            await handleSignUpEmail(ctx, userId, userMessage, client)
+            await handleSignUpEmail(ctx, userId, userMessage)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }

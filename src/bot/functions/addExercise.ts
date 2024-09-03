@@ -59,3 +59,5 @@ export const handleAddExerciseVerification = async (ctx: Context, userId: number
   await addExerciseVeryficationMenu(bot, ctx)
   delete userState[userId]
 }
+
+
