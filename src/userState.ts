@@ -1,5 +1,5 @@
 import { UserSession } from "./bot/functions"
-import {  userStateData } from "./model/client"
+import { ClientData, UserData, userStateData } from "./model/client"
 import { ClientWorkout } from "./model/workout"
 import { merge } from 'lodash'
 

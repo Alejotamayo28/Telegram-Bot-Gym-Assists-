@@ -5,7 +5,7 @@ import { ClientWorkout, workoutOutput } from "../../../model/workout";
 import { pool } from "../../../database/database";
 import { Context } from "telegraf";
 import { deleteLastMessage } from "..";
-import { handleIncorrectDayInput, verifyDayInput } from "../addExercise";
+import { handleIncorrectDayInput, verifyDayInput } from "../../../telegram/services/addMethod/functions";
 import { sendMenuFunctions } from "../../../telegram/menus/userMenu";
 
 export const handleGetDailyExercises = async (ctx: Context, userMessage: string,

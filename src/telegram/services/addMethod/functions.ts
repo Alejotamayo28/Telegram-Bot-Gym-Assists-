@@ -1,9 +1,9 @@
 import { Context } from "telegraf"
-import { deleteLastMessage, verifyDay } from "."
-import { UserStateManager, userState } from "../../userState"
-import { addExerciseVeryficationMenu } from "../../telegram/services/addMethod"
-import { bot } from "../../telegram/bot"
-import { userStateWorkout } from "../../model/workout"
+import { deleteLastMessage, verifyDay } from "../../../bot/functions"
+import { UserStateManager, userState } from "../../../userState"
+import { addExerciseVeryficationMenu } from "."
+import { bot } from "../../bot"
+import { userStateWorkout } from "../../../model/workout"
 
 export const verifyDayInput = (day: string) => {
   return verifyDay(day)

@@ -1,6 +1,6 @@
 import { PoolClient, QueryResult } from "pg"
 import { ClientLogin, UserData } from "../../model/client"
-import { workoutOutput } from "../../model/workout"
+import { userStateWorkout, workoutOutput } from "../../model/workout"
 import { escapeMarkdown } from "./markdownV2"
 import { Context, Telegraf } from "telegraf"
 import { webApp } from "telegraf/typings/button"
@@ -133,7 +133,14 @@ export const verifySignUpOutput = (data: UserData) => {
 _Escoge alguna de las siguientes opciones para continuar\\!_`
 }
 
+export const verifyDeleteExercise = (data: workoutOutput) => {
+  return `*Confirmar eliminacion:*
 
+🗓 *Dia:* ${escapeMarkdown(data.day!)}
+💪 *Nombre:* ${escapeMarkdown(data.name!)}
+
+_Escoge alguna de las siguientes opciones para continuar\\!_`
+}
 export const errorMessage = (userStage: string) => {
   return `Error during ${userStage} process: `
 }

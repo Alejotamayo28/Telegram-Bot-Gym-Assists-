@@ -32,6 +32,8 @@ export const mainMenuPage = async (bot: Telegraf, ctx: Context) => {
   })
 
   bot.action(DELETE_EXERCISE_CALLBACK, async (ctx) => {
+    await ctx.reply(`Por favor, digita el dia del ejercicio a eliminar: `)
+    userState[ctx.from!.id] = { stage: 'menu_delete_exercise_day' }
   })
 
   bot.action(EXERCISE_GUIDE_CALLBACK, async (ctx: Context) => {
@@ -41,3 +43,4 @@ export const mainMenuPage = async (bot: Telegraf, ctx: Context) => {
     await sendSplitMenu(ctx)
   })
 }
+

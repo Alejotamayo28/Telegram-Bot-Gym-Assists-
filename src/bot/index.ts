@@ -4,13 +4,14 @@ import { sendMenuFunctions } from "../telegram/menus/userMenu";
 import { bot } from "../telegram/bot";
 import { handleLoginNickname, handleLoginPassword } from "./functions/login";
 import { handleError } from "../errors";
-import { handleSignUpEmail, handleSignUpNickname, handleSignUpPassword } from "./functions/singUp";
-import { handleAddExerciseDay, handleAddExerciseName, handleAddExerciseReps, handleAddExerciseVerification } from "./functions/addExercise";
+import { handleSignUpEmail, handleSignUpNickname, handleSignUpPassword } from "../telegram/services/singUp/functions";
+import { handleAddExerciseDay, handleAddExerciseName, handleAddExerciseReps, handleAddExerciseVerification } from "../telegram/services/addMethod/functions";
 import { handleUpdateExerciseDay, handleUpdateExerciseName, handlerUpdateExerciseKg, handlerUpdateExerciseReps } from "./functions/updateExercise";
 import { message } from 'telegraf/filters'
 import { NarrowedContext, Context } from "telegraf";
 import { Update, Message } from "telegraf/typings/core/types/typegram";
 import { handleGetDailyExercises } from "./functions/getExercise/day";
+import { handleDeleteExerciseDay, handleDeleteExerciseName } from "../telegram/services/deleteMethod/functions";
 
 
 // Type for both text messages and callback queries (chatGPT cookHere)
@@ -22,7 +23,7 @@ export type MyContext =
 bot.on(message("text"), async ctx => {
   const client = await pool.connect();
   const userId = ctx.from!.id;
-  const userMessage = ctx.message.text
+  const userMessage = ctx.message!.text
   try {
     if (userState[userId]) {
       switch (userState[userId].stage) {
@@ -147,9 +148,7 @@ bot.on(message("text"), async ctx => {
 
         case 'menu_delete_exercise_day':
           try {
-            userState[userId].day = userMessage.toLowerCase()
-            await ctx.reply(`Por favor, digita el nombre del ejercicio a eliminar`)
-            userState[userId].stage = 'menu_delete_exercise_name'
+            await handleDeleteExerciseDay(ctx, userMessage)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
@@ -158,11 +157,7 @@ bot.on(message("text"), async ctx => {
 
         case 'menu_delete_exercise_name':
           try {
-            userState[userId].name = userMessage.toLowerCase()
-            await client.query(`DELETE FROM workout WHERE name = $1 AND day = $2 AND id = $3`,
-              [userState[userId].name, userState[userId].day, userId])
-            await ctx.reply(`Ejercicio eliminado con exito!`)
-            await sendMenuFunctions(ctx)
+            await handleDeleteExerciseName(ctx, userMessage)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
