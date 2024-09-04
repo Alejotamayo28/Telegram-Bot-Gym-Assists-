@@ -6,9 +6,10 @@ import { compare } from "bcryptjs";
 import { mainMenuPage } from "../../telegram/mainMenu";
 import { bot } from "..";
 import { deleteLastMessage } from ".";
+import { pool } from "../../database/database";
 
-export const findUserByNickname = async (client: PoolClient, nickname: string): Promise<Client | undefined> => {
-  const response: QueryResult = await client.query(
+export const findUserByNickname = async (nickname: string): Promise<Client | undefined> => {
+  const response: QueryResult = await pool.query(
     `SELECT nickname, password FROM client WHERE nickname = $1`, [nickname])
   return response.rowCount ? response.rows[0] : null
 }
@@ -20,7 +21,7 @@ export const handleUserNotFound = async (ctx: Context, userId: number) => {
 
 export const handleLoginNickname = async (ctx: Context, userId: number, userMessage: string, client: PoolClient) => {
   await ctx.deleteMessage(ctx.message!.message_id - 1)
-  const user = await findUserByNickname(client, userMessage)
+  const user = await findUserByNickname(userMessage)
   if (!user) {
     await handleUserNotFound(ctx, userId)
     await ctx.deleteMessage()

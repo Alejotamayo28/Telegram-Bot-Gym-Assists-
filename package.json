@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "concurrently \"tsc --watch\" \"nodemon dist/index.js\""
+    "dev": "concurrently \"tsc --watch\" \"nodemon dist/index.js\"",
+    "test": "jest"
   },
   "keywords": [],
   "author": "Alejandro Vergara Tamayo",
@@ -13,12 +14,15 @@
     "@types/cors": "^2.8.17",
     "@types/dotenv": "^8.2.0",
     "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.12",
     "@types/nodemailer": "^6.4.15",
     "@types/pg": "^8.11.0",
     "concurrently": "^8.2.2",
     "dotenv": "^16.4.1",
     "express-validator": "^7.0.1",
+    "jest": "^29.7.0",
     "nodemailer": "^6.9.13",
+    "ts-jest": "^29.2.5",
     "typescript": "^5.3.3"
   },
   "dependencies": {

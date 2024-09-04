@@ -1,6 +1,5 @@
 import { pool } from "../database/database";
 import { userState } from "../userState";
-import { sendMenuFunctions } from "../telegram/menus/userMenu";
 import { bot } from "../telegram/bot";
 import { handleLoginNickname, handleLoginPassword } from "./functions/login";
 import { handleError } from "../errors";
@@ -29,7 +28,7 @@ bot.on(message("text"), async ctx => {
       switch (userState[userId].stage) {
         case 'signUp_nickname':
           try {
-            await handleSignUpNickname(ctx, userId, userMessage, client)
+            await handleSignUpNickname(ctx)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
@@ -37,7 +36,7 @@ bot.on(message("text"), async ctx => {
 
         case 'signUp_password':
           try {
-            await handleSignUpPassword(ctx, userId, userMessage)
+            await handleSignUpPassword(ctx)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
@@ -45,7 +44,7 @@ bot.on(message("text"), async ctx => {
 
         case 'signUp_email':
           try {
-            await handleSignUpEmail(ctx, userId, userMessage)
+            await handleSignUpEmail(ctx)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
