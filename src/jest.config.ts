@@ -1,13 +1,6 @@
-import type { Config } from 'jest';
-
-const config: Config = {
-  preset: 'ts-jest',
+module.exports = {
+  transform: { '^.+\\.ts?$': 'ts-jest' },
   testEnvironment: 'node',
-  testPathIgnorePatterns: ['/dist/', '/node_modules/'],
-  transform: {
-    '^.+\\.tsx?$': 'ts-jest', // Transforma archivos .ts y .tsx usando ts-jest
-  },
+  testRegex: '/tests/.*\\.(test|spec)?\\.(ts|tsx)$',
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node']
 };
-export default config;
-
-
