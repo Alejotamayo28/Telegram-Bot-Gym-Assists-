@@ -50,10 +50,9 @@ bot.on(message("text"), async ctx => {
           }
           break;
 
-
         case 'login_nickname':
           try {
-            await handleLoginNickname(ctx, userId, userMessage, client)
+            await handleLoginNickname(ctx)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }

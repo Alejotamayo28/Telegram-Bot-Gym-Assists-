@@ -8,21 +8,22 @@ import { signUpVerificationMenu } from "."
 import { bot } from "../../bot"
 import { Message } from "telegraf/typings/core/types/typegram"
 
-export const handleNicknameNotAvailable = async (ctx: Context, userId: number) => {
+export const handleNicknameNotAvailable = async (ctx: Context) => {
   await ctx.reply(`Usuario no disponible, crea otro nickname!`)
-  updateUserState(userId, { stage: 'signUp_nickname' })
+  updateUserState(ctx.from!.id, { stage: 'signUp_nickname' })
 }
 
 export const handleSignUpNickname = async (ctx: Context) => {
   const userId = ctx.from!.id
   const message = ctx.message as Message.TextMessage | undefined
   const userMessage = message?.text
+  console.log(userMessage)
 
   await deleteLastMessage(ctx)
 
   const user = await findUserByNickname(userMessage!.toLowerCase())
   if (user) {
-    await handleNicknameNotAvailable(ctx, userId)
+    await handleNicknameNotAvailable(ctx)
     ctx.deleteMessage()
     return
   }
