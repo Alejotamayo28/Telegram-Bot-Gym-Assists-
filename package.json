@@ -56,6 +56,9 @@
     "preset": "ts-jest",
     "testEnvironment": "node",
     "collectCoverage": true,
+    "testPathIgnorePatterns" : [
+      "/dist/"
+    ],
     "coveragePathIgnorePatterns": [
       "/node_modules/",
       "/test/",
