@@ -3,7 +3,6 @@ import { ClientLogin, UserData } from "../../model/client"
 import { userStateWorkout, workoutOutput } from "../../model/workout"
 import { escapeMarkdown } from "./markdownV2"
 import { Context, Telegraf } from "telegraf"
-import { webApp } from "telegraf/typings/button"
 
 export const deleteLastMessage = async (ctx: Context) => {
   const lastMessage = ctx.message!.message_id - 1
