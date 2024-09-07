@@ -60,7 +60,7 @@ bot.on(message("text"), async ctx => {
 
         case 'login_password':
           try {
-            await handleLoginPassword(ctx, userId, userMessage)
+            await handleLoginPassword(ctx)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }

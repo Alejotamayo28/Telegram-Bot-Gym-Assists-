@@ -36,9 +36,11 @@ export const handleLoginNickname = async (ctx: Context) => {
   await ctx.reply('Por favor, proporciona tu contraseña');
 }
 
-export const handleLoginPassword = async (ctx: Context, userId: number, userMessage: string) => {
+export const handleLoginPassword = async (ctx: Context) => {
   await deleteLastMessage(ctx)
-  const userManager = new UserStateManager<userStateData>(userId)
+  const message = ctx.message as Message.TextMessage | undefined
+  const userMessage = message!.text
+  const userManager = new UserStateManager<userStateData>(ctx.from!.id)
   userManager.updateData({ password: userMessage })
   const isPasswordIncorrect = await verifyPassword(userManager.getUserData().password!, userSession.getPassword())
   if (!isPasswordIncorrect) {
@@ -47,7 +49,7 @@ export const handleLoginPassword = async (ctx: Context, userId: number, userMess
     return
   }
   await ctx.deleteMessage()
-  delete userState[userId]
+  delete userState[ctx.from!.id]
   await mainMenuPage(bot, ctx)
 }
 

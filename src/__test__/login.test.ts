@@ -4,6 +4,9 @@ jest.mock(`../bot/functions/index`, () => ({
 
 jest.mock(`../userState`, () => ({
   updateUserState: jest.fn(),
+  UserStateManager: {
+    updateData: jest.fn()
+  },
   userSession: {
     setPassword: jest.fn()
   }
@@ -12,12 +15,12 @@ jest.mock(`../userState`, () => ({
 import { mockContext } from "../__helpers__";
 import { deleteLastMessage } from "../bot/functions/index";
 import * as loginModule from "../bot/functions/login";
-import { updateUserState, userSession } from "../userState";
+import { updateUserState, userSession, UserStateManager } from "../userState";
 
 jest.spyOn(loginModule, `findUserByNickname`)
 jest.spyOn(loginModule, `handleUserNotFound`)
 
-describe(`handleLoginNickname`, () => {
+describe(`HANDLE LOGIN`, () => {
   afterEach(() => {
     jest.clearAllMocks()
   })
@@ -36,10 +39,10 @@ describe(`handleLoginNickname`, () => {
       'Por favor, proporciona tu contraseña')
   })
   it(`should handle user not found`, async () => {
+
     (loginModule.findUserByNickname as jest.Mock).mockResolvedValueOnce(null)
 
     await loginModule.handleLoginNickname(mockContext)
-
     expect(deleteLastMessage).toHaveBeenCalledWith(mockContext);
     expect(loginModule.findUserByNickname).toHaveBeenCalledWith('Test message');
     expect(loginModule.handleUserNotFound).toHaveBeenCalledWith(mockContext);

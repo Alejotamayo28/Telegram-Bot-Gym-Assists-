@@ -25,7 +25,6 @@ describe('findUserByNickname', () => {
       ['testuser']
     );
   })
-
   it('should return null when user is not found', async () => {
     (pool.query as jest.Mock).mockResolvedValueOnce(mockEmptyQueryResult);
     const user = await findUserByNickname('nonexistentuser');
@@ -35,7 +34,6 @@ describe('findUserByNickname', () => {
       ['nonexistentuser']
     );
   });
-
   it(`should reply with the correct message and update user state`, async () => {
     await handleUserNotFound(mockContext)
     expect(mockContext.reply).toHaveBeenCalledWith(

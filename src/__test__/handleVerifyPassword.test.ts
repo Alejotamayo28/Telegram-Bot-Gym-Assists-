@@ -10,19 +10,17 @@ describe(`verifyPassword`, () => {
     jest.clearAllMocks()
   })
   it('should return true when the password matches', async () => {
-    // Simulamos que 'compare' retorna true, indicando que las contraseñas coinciden
     (compare as jest.Mock).mockResolvedValueOnce(true);
     const result = await verifyPassword('inputPassword', 'storedPassword');
     expect(result).toBe(true);
-    expect(compare).toHaveBeenCalledWith('inputPassword', 'storedPassword');  // Verificamos que se haya llamado correctamente
+    expect(compare).toHaveBeenCalledWith('inputPassword', 'storedPassword');
   });
 
   it('should return false when the password does not match', async () => {
-    // Simulamos que 'compare' retorna false, indicando que las contraseñas no coinciden
     (compare as jest.Mock).mockResolvedValueOnce(false);
     const result = await verifyPassword('wrongPassword', 'storedPassword');
     expect(result).toBe(false);
-    expect(compare).toHaveBeenCalledWith('wrongPassword', 'storedPassword');  // Verificamos que se haya llamado correctamente
+    expect(compare).toHaveBeenCalledWith('wrongPassword', 'storedPassword');  
   });
 
   it('should throw an error if compare fails', async () => {
