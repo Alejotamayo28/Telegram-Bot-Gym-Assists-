@@ -1,8 +1,7 @@
-import { Context } from "telegraf";
 import { findUserByNickname, handleUserNotFound } from "../bot/functions/login";
 import { pool } from "../database/database";
 import { updateUserState } from "../userState";
-import { mockEmptyQueryResult, mockQueryResult } from "../__helpers__";
+import { mockContext, mockEmptyQueryResult, mockQueryResult } from "../__helpers__";
 
 jest.mock("../database/database", () => ({
   pool: {
@@ -38,16 +37,8 @@ describe('findUserByNickname', () => {
   });
 
   it(`should reply with the correct message and update user state`, async () => {
-    const ctxMocked = {
-      reply: jest.fn(),
-      from: {
-        id: 123,
-        is_bot: false,
-        first_name: `newuser`
-      }
-    } as unknown as Context
-    await handleUserNotFound(ctxMocked as Context)
-    expect(ctxMocked.reply).toHaveBeenCalledWith(
+    await handleUserNotFound(mockContext)
+    expect(mockContext.reply).toHaveBeenCalledWith(
       `Usuario no encontrado, vuelve a escribir tu nickname: .`)
     expect(updateUserState).toHaveBeenCalledWith(123, { stage: `login_nickname` })
   })

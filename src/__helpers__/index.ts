@@ -1,5 +1,6 @@
 import { QueryResult } from "pg";
 import { Context } from "telegraf";
+import { Message } from "telegraf/typings/core/types/typegram";
 
 export const mockContext = {
   from: {
@@ -8,8 +9,9 @@ export const mockContext = {
     first_name: `newuser`,
   },
   message: {
+    text: 'Test message',
     message_id: 10
-  },
+  } as Message.TextMessage,
   reply: jest.fn(),
   deleteMessage: jest.fn()
 } as unknown as Context

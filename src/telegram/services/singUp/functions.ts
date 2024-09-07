@@ -14,13 +14,10 @@ export const handleNicknameNotAvailable = async (ctx: Context) => {
 }
 
 export const handleSignUpNickname = async (ctx: Context) => {
+  await deleteLastMessage(ctx)
   const userId = ctx.from!.id
   const message = ctx.message as Message.TextMessage | undefined
   const userMessage = message?.text
-  console.log(userMessage)
-
-  await deleteLastMessage(ctx)
-
   const user = await findUserByNickname(userMessage!.toLowerCase())
   if (user) {
     await handleNicknameNotAvailable(ctx)
