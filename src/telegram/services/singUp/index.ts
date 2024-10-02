@@ -10,7 +10,7 @@ export const signUpVerificationMenu = async (bot: Telegraf, ctx: Context, passwo
   const userManager = new UserStateManager<userStateData>(ctx.from!.id)
   const { nickname, password, email } = userManager.getUserData()
   await ctx.reply(`¡Registro completo!`)
-  /*await ctx.reply(verifySignUpOutput({ nickname, password, email }),
+  await ctx.reply(verifySignUpOutput({ nickname, password, email }),
     {
       parse_mode: 'MarkdownV2',
       ...inlineKeyboardVerifySignUp
@@ -37,5 +37,4 @@ export const signUpVerificationMenu = async (bot: Telegraf, ctx: Context, passwo
         ...startInlineKeyboard
       })
   })
-  */
 }

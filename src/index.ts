@@ -4,7 +4,6 @@ import cors from 'cors';
 const app: Application = express();
 const PORT = 4000;
 // Servir archivos estáticos desde el directorio 'public'
-import './bot/actions'
 import './bot/index'
 import { bot } from './telegram/bot';
 

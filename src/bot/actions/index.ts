@@ -1,5 +1,0 @@
-import './guideExercise/brazo'
-import './guideExercise/pecho'
-import './guideExercise/espalda'
-import './guideExercise/pierna'
-import './splitWorkout/splitWorkout'

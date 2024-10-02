@@ -1,6 +1,7 @@
 import { QueryResult } from "pg";
 import { Context } from "telegraf";
 import { Message } from "telegraf/typings/core/types/typegram";
+import { UserStateManager } from "../userState";
 
 export const mockContext = {
   from: {
@@ -29,3 +30,5 @@ export const mockEmptyQueryResult: Partial<QueryResult> = {
   rowCount: 0,
   rows: []
 }
+
+

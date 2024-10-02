@@ -3,8 +3,6 @@ import { MAIN_MENU_MESSAGE } from "../messages/mainMenuMessage"
 import { userState } from "../../userState"
 import { DELETE_EXERCISE_CALLBACK, EXERCISE_GUIDE_CALLBACK, GET_EXERCISE_DAY_CALLBACK, GET_EXERCISE_WEEK_CALLBACK, POST_EXERCISE_CALLBACK, SEMANAL_SPLIT_CALLBACK, UPDATE_EXERCISE_CALLBACK } from "./buttons"
 import { inlineKeyboardMenu } from "./inlineKeyboard"
-import { sendSplitMenu } from "../menus/splitMenu"
-import { guideExercisesMenu } from "../menus/guide/body"
 import { handleGetWeeklyExercises } from "../../bot/functions/getExercise/weekly"
 import { sendMenuFunctions } from "../menus/userMenu"
 
@@ -36,11 +34,5 @@ export const mainMenuPage = async (bot: Telegraf, ctx: Context) => {
     userState[ctx.from!.id] = { stage: 'menu_delete_exercise_day' }
   })
 
-  bot.action(EXERCISE_GUIDE_CALLBACK, async (ctx: Context) => {
-    await guideExercisesMenu(ctx)
-  })
-  bot.action(SEMANAL_SPLIT_CALLBACK, async (ctx: Context) => {
-    await sendSplitMenu(ctx)
-  })
 }
 

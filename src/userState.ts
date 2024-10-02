@@ -1,13 +1,9 @@
 import { UserSession } from "./bot/functions"
-import { ClientData, UserData, userStateData } from "./model/client"
+import { userStateData } from "./model/client"
 import { ClientWorkout } from "./model/workout"
 import { merge } from 'lodash'
-
-
 export let userState: { [key: number]: any } = {}
 export const userSession = new UserSession()
-
-
 export interface User {
   data: userStateData,
   stage: string,
@@ -17,7 +13,6 @@ export interface User {
 export function updateUserState(userId: number, newState: Partial<User>): void {
   userState[userId] = { ...userState[userId], ...newState }
 }
-
 export class UserStateManager<T> {
   constructor(private userId: number) { }
   updateData(newData: T, nextStage?: string) {
