@@ -1,18 +1,18 @@
 import { PoolClient, QueryResult } from "pg";
 import { userState } from "../../../userState";
-import { handleExerciseNotFound } from "../updateExercise";
 import { ClientWorkout, workoutOutput } from "../../../model/workout";
 import { pool } from "../../../database/database";
 import { Context } from "telegraf";
 import { deleteLastMessage } from "..";
 import { handleIncorrectDayInput, verifyDayInput } from "../../../telegram/services/addMethod/functions";
 import { sendMenuFunctions } from "../../../telegram/menus/userMenu";
+import { handleExerciseNotFound } from "../../../telegram/services/updateMethod/functions";
 
 export const handleGetDailyExercises = async (ctx: Context, userMessage: string,
   userId: number) => {
   await deleteLastMessage(ctx)
   if (!verifyDayInput(userMessage)) {
-    await handleIncorrectDayInput(ctx, userId)
+    await handleIncorrectDayInput(ctx)
     await ctx.deleteMessage()
     return
   }

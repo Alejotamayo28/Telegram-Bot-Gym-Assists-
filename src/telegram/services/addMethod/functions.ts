@@ -4,15 +4,14 @@ import { UserStateManager, userState } from "../../../userState"
 import { addExerciseVeryficationMenu } from "."
 import { bot } from "../../bot"
 import { userStateWorkout } from "../../../model/workout"
+import { EXERCISE_NAME_OUTPUT, EXERCISE_REPS_OUTPUT, EXERCISE_WEIGHT_OUTPUT, INCORRECT_DAY_INPUT } from "./messages"
 
 export const verifyDayInput = (day: string) => {
   return verifyDay(day)
 }
 
-export const handleIncorrectDayInput = async (ctx: Context, userId: number) => {
-  ctx.reply(`
-*El día ingresado no es válido❌*
-Por favor, asegúrate de escribirlo correctamente`, {
+export const handleIncorrectDayInput = async (ctx: Context) => {
+  ctx.reply(INCORRECT_DAY_INPUT, {
     parse_mode: 'MarkdownV2'
   })
 }
@@ -20,14 +19,16 @@ Por favor, asegúrate de escribirlo correctamente`, {
 export const handleAddExerciseDay = async (ctx: Context, userId: number, userMessage: string) => {
   await deleteLastMessage(ctx)
   if (!verifyDayInput(userMessage)) {
-    await handleIncorrectDayInput(ctx, userId)
+    await handleIncorrectDayInput(ctx)
     await ctx.deleteMessage()
     return
   }
   await ctx.deleteMessage()
   const userManager = new UserStateManager<userStateWorkout>(userId)
   userManager.updateData({ day: userMessage }, 'menu_post_exercise_name')
-  await ctx.reply(`Por favor, digita el nombre del ejercicio!`)
+  await ctx.reply(EXERCISE_NAME_OUTPUT, {
+    parse_mode: "MarkdownV2"
+  })
 }
 
 export const handleAddExerciseName = async (ctx: Context, userId: number, userMessage: string) => {
@@ -35,7 +36,9 @@ export const handleAddExerciseName = async (ctx: Context, userId: number, userMe
   const userManager = new UserStateManager<userStateWorkout>(userId)
   userManager.updateData({ name: userMessage }, 'menu_post_exercise_reps')
   await ctx.deleteMessage()
-  await ctx.reply(`Por favor, digita la cantidad de repeticiones que realizaste.\n Ej: 10 10 10`)
+  await ctx.reply(EXERCISE_REPS_OUTPUT, {
+    parse_mode: "MarkdownV2"
+  })
 }
 
 export const handleAddExerciseReps = async (ctx: Context, userId: number, userMessage: string) => {
@@ -44,9 +47,11 @@ export const handleAddExerciseReps = async (ctx: Context, userId: number, userMe
   const userManager = new UserStateManager<userStateWorkout>(userId)
   userManager.updateData({ reps: userMessage.split(" ").map(Number) }, 'menu_post_exercise_verification')
   await ctx.deleteMessage()
-  await ctx.reply(`Por favor, digita el peso en kg con el cual realizaste el ejercicio`)
+  await ctx.reply(EXERCISE_WEIGHT_OUTPUT, {
+    parse_mode: "MarkdownV2"
+  }
+  )
 }
-
 export const handleAddExerciseVerification = async (ctx: Context, userId: number, userMessage: string) => {
   await deleteLastMessage(ctx)
   const userManager = new UserStateManager<userStateWorkout>(userId)

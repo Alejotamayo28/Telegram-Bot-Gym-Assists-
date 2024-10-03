@@ -14,11 +14,6 @@ export const handleDeleteExerciseDay = async (ctx: Context, userMessage: string)
   await ctx.deleteMessage()
 }
 
-export const deleteExerciseByNameDay = async (ctx: Context, { name, day }: workoutOutput) => {
-  await deleteLastMessage(ctx)
-  await pool.query(`DELETE FROM workout WHERE name = $1 AND day = $2 AND id = $3`,
-    [name, day, ctx.from!.id])
-}
 
 export const handleDeleteExerciseName = async (ctx: Context, userMessage: string) => {
   await deleteLastMessage(ctx)

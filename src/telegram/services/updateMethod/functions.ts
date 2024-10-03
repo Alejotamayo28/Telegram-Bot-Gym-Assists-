@@ -1,13 +1,14 @@
-import { Context } from "telegraf";
-import { userState } from "../../userState";
-import { workoutOutput } from "../../model/workout";
-import { PoolClient, QueryResult } from "pg";
-import { inlineKeyboardMenu } from "../../telegram/mainMenu/inlineKeyboard";
-import { updateExerciseVeryficationMenu } from "../../telegram/services/updateMethod";
-import { bot } from "../../telegram/bot";
+import { Context } from "telegraf"
+import { userState } from "../../../userState"
+import { workoutOutput } from "../../../model/workout"
+import { PoolClient, QueryResult } from "pg"
+import { inlineKeyboardMenu } from "../../mainMenu/inlineKeyboard"
+import { updateExerciseVeryficationMenu } from "."
+import { bot } from "../../bot"
+import { deleteLastMessage } from "../../../bot/functions"
 
 export const handleUpdateExerciseDay = async (ctx: Context, userId: number, userMessage: string) => {
-  await ctx.deleteMessage(ctx.message!.message_id - 1)
+  await deleteLastMessage(ctx)
   userState[userId] = {
     ...userState[userId],
     day: userMessage.toLowerCase(),
@@ -19,10 +20,10 @@ export const handleUpdateExerciseDay = async (ctx: Context, userId: number, user
 
 export const findExerciseByDayName = async (userId: number, userState: workoutOutput, client: PoolClient): Promise<QueryResult<workoutOutput>> => {
   const { day, name }: workoutOutput = userState
-  const response: QueryResult = await client.query(
+  const { rows, rowCount }: QueryResult = await client.query(
     `SELECT name, reps, kg FROM workout WHERE id = $1 AND day = $2 AND name = $3`,
     [userId, day, name])
-  return response.rowCount ? response.rows[0] : null
+  return rowCount ? rows[0] : null
 }
 
 export const handleExerciseNotFound = async (ctx: Context) => {
@@ -33,7 +34,7 @@ export const handleExerciseNotFound = async (ctx: Context) => {
     })
 }
 export const handleUpdateExerciseName = async (ctx: Context, userId: number, userMessage: string, client: PoolClient) => {
-  await ctx.deleteMessage(ctx.message!.message_id - 1)
+  await deleteLastMessage(ctx)
   userState[userId] = {
     ...userState[userId],
     name: userMessage
@@ -53,7 +54,7 @@ export const handleUpdateExerciseName = async (ctx: Context, userId: number, use
 }
 
 export const handlerUpdateExerciseReps = async (ctx: Context, userId: number, userMessage: string) => {
-  await ctx.deleteMessage(ctx.message!.message_id - 1)
+  await deleteLastMessage(ctx)
   userState[userId] = {
     ...userState[userId],
     reps: userMessage.split(" ").map(Number),
@@ -64,7 +65,7 @@ export const handlerUpdateExerciseReps = async (ctx: Context, userId: number, us
 }
 
 export const handlerUpdateExerciseKg = async (ctx: Context, userId: number, userMessage: string) => {
-  ctx.deleteMessage(ctx.message!.message_id - 1)
+  await deleteLastMessage(ctx)
   userState[userId] = {
     ...userState[userId],
     kg: userMessage
@@ -73,5 +74,3 @@ export const handlerUpdateExerciseKg = async (ctx: Context, userId: number, user
   await updateExerciseVeryficationMenu(bot, ctx, userState[userId])
   delete userState[userId]
 }
-
-

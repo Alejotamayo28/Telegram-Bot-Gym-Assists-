@@ -1,8 +1,8 @@
 import { PoolClient, QueryResult } from "pg"
 import { ClientLogin, UserData } from "../../model/client"
 import { workoutOutput } from "../../model/workout"
-import { escapeMarkdown } from "./markdownV2"
 import { Context } from "telegraf"
+import { escapeMarkdown } from "./markdownV2"
 
 export const deleteLastMessage = async (ctx: Context) => {
   const lastMessage = ctx.message?.message_id ? ctx.message.message_id - 1 : undefined;

@@ -1,6 +1,6 @@
 import { UserSession } from "./bot/functions"
 import { userStateData } from "./model/client"
-import { ClientWorkout } from "./model/workout"
+import { ClientWorkout, workoutOutput } from "./model/workout"
 import { merge } from 'lodash'
 export let userState: { [key: number]: any } = {}
 export const userSession = new UserSession()

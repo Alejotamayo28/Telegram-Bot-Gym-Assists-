@@ -4,7 +4,9 @@ import { userStateData } from "../../../model/client";
 import { verifySignUpOutput } from "../../../bot/functions";
 import { inlineKeyboardVerifySignUp } from "./inlineKeyboard";
 import { startInlineKeyboard } from "../../commands/inlineKeyboard";
-import { pool } from "../../../database/database";
+import { SIGN_UP_NOT_SUCCESFULLY, SIGN_UP_SUCCESFULLY } from "./message";
+import { onTransaction } from "../../../database/dataAccessLayer";
+import { insertClientQuery } from "./queries";
 
 export const signUpVerificationMenu = async (bot: Telegraf, ctx: Context, passwordHash: string) => {
   const userManager = new UserStateManager<userStateData>(ctx.from!.id)
@@ -17,24 +19,20 @@ export const signUpVerificationMenu = async (bot: Telegraf, ctx: Context, passwo
     })
   bot.action(`si`, async (ctx: Context) => {
     await ctx.deleteMessage()
-    await pool.query(
-      `INSERT INTO client (id, nickname, password, email) VALUES ($1, $2, $3, $4)`,
-      [ctx.from!.id, nickname, passwordHash, email]
-    );
-    ctx.reply(
-      `*¡Cuenta creada con éxito\\!* 🎉\n\n_¿Sigue explorando, qué te gustaría hacer ahora?_`,
-      {
-        parse_mode: 'MarkdownV2',
-        ...startInlineKeyboard
-      }
+    await onTransaction(async (transactionClient) => {
+      await insertClientQuery(ctx, { nickname, email }, passwordHash, transactionClient)
+    })
+    await ctx.reply(SIGN_UP_SUCCESFULLY, {
+      parse_mode: 'MarkdownV2',
+      ...startInlineKeyboard
+    }
     )
   })
   bot.action(`no`, async (ctx: Context) => {
     await ctx.deleteMessage()
-    await ctx.reply(`*¡Usuario no creado\\!* 🤕\n\n_¿Sigue explorando, qué te gustaría hacer ahora?_`,
-      {
-        parse_mode: 'MarkdownV2',
-        ...startInlineKeyboard
-      })
+    await ctx.reply(SIGN_UP_NOT_SUCCESFULLY, {
+      parse_mode: 'MarkdownV2',
+      ...startInlineKeyboard
+    })
   })
 }

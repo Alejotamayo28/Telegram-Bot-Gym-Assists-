@@ -5,13 +5,13 @@ import { handleLoginNickname, handleLoginPassword } from "./functions/login";
 import { handleError } from "../errors";
 import { handleSignUpEmail, handleSignUpNickname, handleSignUpPassword } from "../telegram/services/singUp/functions";
 import { handleAddExerciseDay, handleAddExerciseName, handleAddExerciseReps, handleAddExerciseVerification } from "../telegram/services/addMethod/functions";
-import { handleUpdateExerciseDay, handleUpdateExerciseName, handlerUpdateExerciseKg, handlerUpdateExerciseReps } from "./functions/updateExercise";
 import { message } from 'telegraf/filters'
 import { NarrowedContext, Context } from "telegraf";
 import { Update, Message } from "telegraf/typings/core/types/typegram";
 import { handleGetDailyExercises } from "./functions/getExercise/day";
 import { handleDeleteExerciseDay, handleDeleteExerciseName } from "../telegram/services/deleteMethod/functions";
-
+import { handleUpdateExerciseDay, handleUpdateExerciseName, handlerUpdateExerciseReps, handlerUpdateExerciseKg } from "../telegram/services/updateMethod/functions";
+import { graphic } from "./functions/getExercise/weekly";
 
 // Type for both text messages and callback queries (chatGPT cookHere)
 export type MyContext =
@@ -116,7 +116,6 @@ bot.on(message("text"), async ctx => {
           }
           break
 
-
         case 'menu_put_exercise_reps':
           try {
             await handlerUpdateExerciseReps(ctx, userId, userMessage)
@@ -137,6 +136,11 @@ bot.on(message("text"), async ctx => {
         case 'menu_get_weekly':
           try {
             await handleGetDailyExercises(ctx, userMessage, userId)
+            const image = await graphic(userId, userMessage)
+            await ctx.replyWithPhoto({ 
+              source: image, filename: 'exercise_chart.png' }, {
+              caption: 'Gráfico de tus ejercicios'
+            });
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
@@ -159,7 +163,7 @@ bot.on(message("text"), async ctx => {
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
-          break;
+
 
         default:
           ctx.reply('Por favor, selecciona una opción válida para continuar.');

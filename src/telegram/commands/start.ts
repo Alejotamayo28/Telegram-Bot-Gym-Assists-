@@ -2,10 +2,10 @@ import { Context, Telegraf } from "telegraf"
 import { welcomeMessage } from "../messages/welcomeMessage"
 import { userState } from "../../userState"
 import { startInlineKeyboard } from "./inlineKeyboard"
-import { LOGIN_CALLBACK, LOGIN_EXAMPLE_CALLBACK } from "../login/buttons"
-import { LOGIN_EXAMPLE_INFO_MESSAGE, LOGIN_REQUEST_NICKNAME_MESSAGE } from "../login/messages"
 import { SIGN_UP_CALLBACK, SIGN_UP_EXAMPLE_CALLBACK } from "../services/singUp/buttons"
 import { SING_UP_EXAMPLE_MESSAGE } from "../services/singUp/message"
+import { LOGIN_REQUEST_NICKNAME_MESSAGE, LOGIN_EXAMPLE_INFO_MESSAGE } from "../messages/singUpLoginMessages"
+import { LOGIN_CALLBACK, LOGIN_EXAMPLE_CALLBACK } from "../services/login/buttons"
 
 
 export const setUpHolaCommand = async (bot: Telegraf) => {
@@ -26,6 +26,9 @@ export const setUpHolaCommand = async (bot: Telegraf) => {
   })
   bot.action(SIGN_UP_EXAMPLE_CALLBACK, async (ctx: Context) => {
     await ctx.reply(SING_UP_EXAMPLE_MESSAGE)
+  })
+  bot.action(`openAi_testing`, async (ctx: Context) => {
+    userState[ctx.from!.id] = { stage: 'openai' }
   })
 }
 

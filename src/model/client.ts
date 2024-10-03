@@ -29,5 +29,6 @@ export interface Client {
   password: string,
   email: string
 }
+export type clientData = Partial<Client>
 
 
