@@ -53,8 +53,7 @@
     "openai": "^4.67.1",
     "pg": "^8.11.5",
     "telegraf": "^4.16.3",
-    "uninstall": "^0.0.0",
-    "whatsapp-web.js": "^1.23.0"
+    "uninstall": "^0.0.0"
   },
   "jest": {
     "preset": "ts-jest",

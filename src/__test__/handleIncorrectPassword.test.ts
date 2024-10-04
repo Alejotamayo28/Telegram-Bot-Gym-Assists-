@@ -1,6 +1,6 @@
 import { updateUserState } from "../userState";
-import { handleIncorrectPassword } from "../bot/functions/login";
 import { mockContext } from "../__helpers__";
+import { handleIncorrectPassword } from "../telegram/services/login/functions";
 
 jest.mock('../userState', () => ({
   updateUserState: jest.fn()

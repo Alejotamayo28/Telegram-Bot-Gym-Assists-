@@ -13,9 +13,9 @@ jest.mock(`../userState`, () => ({
 }))
 
 import { mockContext } from "../__helpers__";
-import { deleteLastMessage } from "../bot/functions/index";
-import * as loginModule from "../bot/functions/login";
-import { updateUserState, userSession} from "../userState";
+import { deleteLastMessage } from "../telegram/services/utils";
+import * as loginModule from "../telegram/services/login/functions";
+import { updateUserState, userSession } from "../userState";
 
 jest.spyOn(loginModule, `findUserByNickname`)
 jest.spyOn(loginModule, `handleUserNotFound`)

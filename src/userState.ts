@@ -1,4 +1,4 @@
-import { UserSession } from "./bot/functions"
+import { UserSession } from "./telegram/services/utils"
 import { userStateData } from "./model/client"
 import { ClientWorkout, workoutOutput } from "./model/workout"
 import { merge } from 'lodash'
@@ -20,6 +20,17 @@ export class UserStateManager<T> {
     if (nextStage) {
       userState[this.userId].stage = nextStage
     }
+  }
+  static updateUserDay(userId: number, day: string): void {
+    userState[userId] = {
+      ...userState[userId], day: day.toLowerCase()
+    }
+  }
+  static getUserDay(userId: number): string {
+    return userState[userId].day
+  }
+  static getUserStage(userId: number): string {
+    return userState[userId].stage
   }
   getUserData() {
     return userState[this.userId].data

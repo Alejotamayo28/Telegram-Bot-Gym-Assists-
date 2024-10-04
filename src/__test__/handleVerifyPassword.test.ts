@@ -3,7 +3,7 @@ jest.mock(`bcryptjs`, () => ({
 }))
 
 import { compare } from "bcryptjs";
-import { verifyPassword } from "../bot/functions/login";
+import { verifyPassword } from "../telegram/services/login/functions";
 
 describe(`verifyPassword`, () => {
   afterEach(() => {
@@ -20,7 +20,7 @@ describe(`verifyPassword`, () => {
     (compare as jest.Mock).mockResolvedValueOnce(false);
     const result = await verifyPassword('wrongPassword', 'storedPassword');
     expect(result).toBe(false);
-    expect(compare).toHaveBeenCalledWith('wrongPassword', 'storedPassword');  
+    expect(compare).toHaveBeenCalledWith('wrongPassword', 'storedPassword');
   });
 
   it('should throw an error if compare fails', async () => {

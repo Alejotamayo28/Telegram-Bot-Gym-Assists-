@@ -1,7 +1,7 @@
-import { findUserByNickname, handleUserNotFound } from "../bot/functions/login";
 import { pool } from "../database/database";
 import { updateUserState } from "../userState";
 import { mockContext, mockEmptyQueryResult, mockQueryResult } from "../__helpers__";
+import { findUserByNickname, handleUserNotFound } from "../telegram/services/login/functions";
 
 jest.mock("../database/database", () => ({
   pool: {

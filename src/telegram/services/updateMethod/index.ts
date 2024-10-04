@@ -1,6 +1,6 @@
 import { Context, Telegraf } from "telegraf";
 import { workoutOutput } from "../../../model/workout";
-import { verifyExerciseOutput } from "../../../bot/functions";
+import { verifyExerciseOutput } from "../utils";
 import { inlineKeyboardMenu } from "../../mainMenu/inlineKeyboard";
 import { inlineKeyboardVerifyExerciseUpdate } from "./inlineKeyboard";
 import { VERIFY_EXERCISE_UPDATE_YES_CALLBACK } from "./buttons";

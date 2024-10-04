@@ -1,10 +1,10 @@
 import { Context, Telegraf } from "telegraf"
 import { MAIN_MENU_MESSAGE } from "../messages/mainMenuMessage"
 import { userState } from "../../userState"
-import { DELETE_EXERCISE_CALLBACK, EXERCISE_GUIDE_CALLBACK, GET_EXERCISE_DAY_CALLBACK, GET_EXERCISE_WEEK_CALLBACK, POST_EXERCISE_CALLBACK, SEMANAL_SPLIT_CALLBACK, UPDATE_EXERCISE_CALLBACK } from "./buttons"
+import { DELETE_EXERCISE_CALLBACK, GET_EXERCISE_DAY_CALLBACK, GET_EXERCISE_WEEK_CALLBACK, POST_EXERCISE_CALLBACK, UPDATE_EXERCISE_CALLBACK } from "./buttons"
 import { inlineKeyboardMenu } from "./inlineKeyboard"
-import { handleGetWeeklyExercises } from "../../bot/functions/getExercise/weekly"
 import { sendMenuFunctions } from "../menus/userMenu"
+import { graphic, handleGetWeeklyExercises } from "../services/getMethod/functions"
 
 export const mainMenuPage = async (bot: Telegraf, ctx: Context) => {
   await ctx.reply(MAIN_MENU_MESSAGE, inlineKeyboardMenu)
@@ -21,7 +21,7 @@ export const mainMenuPage = async (bot: Telegraf, ctx: Context) => {
 
   bot.action(GET_EXERCISE_DAY_CALLBACK, async ctx => {
     await ctx.reply(`Por favor, digita el dia para buscar tus ejercicios: `)
-    userState[ctx.from!.id] = { stage: 'menu_get_weekly' }
+    userState[ctx.from!.id] = { stage: 'menuGetExerciseOptions' }
   })
 
   bot.action(GET_EXERCISE_WEEK_CALLBACK, async (ctx: Context) => {
@@ -33,6 +33,9 @@ export const mainMenuPage = async (bot: Telegraf, ctx: Context) => {
     await ctx.reply(`Por favor, digita el dia del ejercicio a eliminar: `)
     userState[ctx.from!.id] = { stage: 'menu_delete_exercise_day' }
   })
-
 }
+
+
+
+
 

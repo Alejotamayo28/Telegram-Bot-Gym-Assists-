@@ -1,5 +1,5 @@
 import { Context } from "telegraf";
-import { deleteLastMessage } from "../bot/functions";
+import { deleteLastMessage } from "../telegram/services/utils";
 import { mockContext } from "../__helpers__";
 
 describe(`deleteLastMessage`, () => {

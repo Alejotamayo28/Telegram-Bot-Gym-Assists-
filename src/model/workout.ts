@@ -1,3 +1,14 @@
+enum weekday {
+  Lunes = "lunes",
+  Martes = "martes",
+  Miercoles = "miercoles",
+  Jueves = "jueves",
+  Viernes = "viernes",
+  Sabado = "sabado",
+  Domingo = "domingo"
+}
+
+
 export interface ClientWorkout {
   day: string,
   name: string,
@@ -6,5 +17,3 @@ export interface ClientWorkout {
 }
 
 export type workoutOutput = Partial<ClientWorkout>
-export type userStateWorkout = Partial<ClientWorkout>
-

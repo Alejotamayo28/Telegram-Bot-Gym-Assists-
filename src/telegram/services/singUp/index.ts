@@ -1,7 +1,7 @@
 import { Context, Telegraf } from "telegraf";
 import { UserStateManager } from "../../../userState";
 import { userStateData } from "../../../model/client";
-import { verifySignUpOutput } from "../../../bot/functions";
+import { verifySignUpOutput } from "../utils";
 import { inlineKeyboardVerifySignUp } from "./inlineKeyboard";
 import { startInlineKeyboard } from "../../commands/inlineKeyboard";
 import { SIGN_UP_NOT_SUCCESFULLY, SIGN_UP_SUCCESFULLY } from "./message";

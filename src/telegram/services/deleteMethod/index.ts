@@ -1,6 +1,6 @@
 import { Context, Telegraf } from "telegraf";
 import { UserStateManager } from "../../../userState";
-import { verifyDeleteExercise } from "../../../bot/functions";
+import { verifyDeleteExercise } from "../utils";
 import { inlineKeyboardVerifyDeleteExercise } from "./inlineKeyboard";
 import { inlineKeyboardMenu } from "../../mainMenu/inlineKeyboard";
 import { EXERCISE_DELETE_SUCCESFULLY, EXERCISE_NOT_DELETE_SUCCESFULLY } from "./messages";

@@ -5,7 +5,7 @@ import { PoolClient, QueryResult } from "pg"
 import { inlineKeyboardMenu } from "../../mainMenu/inlineKeyboard"
 import { updateExerciseVeryficationMenu } from "."
 import { bot } from "../../bot"
-import { deleteLastMessage } from "../../../bot/functions"
+import { deleteLastMessage } from "../utils"
 
 export const handleUpdateExerciseDay = async (ctx: Context, userId: number, userMessage: string) => {
   await deleteLastMessage(ctx)

@@ -1,12 +1,12 @@
 import { Context } from "telegraf"
 import { UserStateManager, updateUserState, userState } from "../../../userState"
-import { findUserByNickname } from "../../../bot/functions/login"
 import { encrypt } from "../../../middlewares/jsonWebToken/enCryptHelper"
-import { deleteLastMessage } from "../../../bot/functions"
+import { deleteLastMessage } from "../utils"
 import { userStateData } from "../../../model/client"
 import { signUpVerificationMenu } from "."
 import { bot } from "../../bot"
 import { Message } from "telegraf/typings/core/types/typegram"
+import { findUserByNickname } from "../login/functions"
 
 export const handleNicknameNotAvailable = async (ctx: Context) => {
   await ctx.reply(`Usuario no disponible, crea otro nickname!`)
