@@ -10,6 +10,11 @@ import { handleError } from "../../../errors";
 
 export const getDayExercisesGraphic = async (ctx: Context, userMessage: string) => {
   await ctx.deleteMessage()
+  if (!verifyDayInput(userMessage)) {
+    await handleIncorrectDayInput(ctx)
+    await ctx.deleteMessage()
+    return
+  }
   const image = await graphic(ctx.from!.id, userMessage)
   const response = ctx.replyWithPhoto({
     source: image, filename: 'exercise_chart.png'

@@ -1,11 +1,12 @@
 import { Context } from "telegraf"
 import { userState } from "../../../userState"
-import { workoutOutput } from "../../../model/workout"
+import { PartialWorkout } from "../../../model/workout"
 import { PoolClient, QueryResult } from "pg"
 import { inlineKeyboardMenu } from "../../mainMenu/inlineKeyboard"
 import { updateExerciseVeryficationMenu } from "."
 import { bot } from "../../bot"
 import { deleteLastMessage } from "../utils"
+import { UPDATE_EXERCISE_KG, UPDATE_EXERCISE_NAME, UPDATE_EXERCISE_REPS } from "./message"
 
 export const handleUpdateExerciseDay = async (ctx: Context, userId: number, userMessage: string) => {
   await deleteLastMessage(ctx)
@@ -15,11 +16,13 @@ export const handleUpdateExerciseDay = async (ctx: Context, userId: number, user
     stage: 'menu_put_exercise_name'
   }
   await ctx.deleteMessage()
-  await ctx.reply(`Por favor, digita el nombre del ejercicio a actualizar: `)
+  await ctx.reply(UPDATE_EXERCISE_NAME, {
+    parse_mode: "Markdown"
+  })
 }
 
-export const findExerciseByDayName = async (userId: number, userState: workoutOutput, client: PoolClient): Promise<QueryResult<workoutOutput>> => {
-  const { day, name }: workoutOutput = userState
+export const findExerciseByDayName = async (userId: number, userState: PartialWorkout, client: PoolClient): Promise<QueryResult<PartialWorkout>> => {
+  const { day, name }: PartialWorkout = userState
   const { rows, rowCount }: QueryResult = await client.query(
     `SELECT name, reps, kg FROM workout WHERE id = $1 AND day = $2 AND name = $3`,
     [userId, day, name])
@@ -50,7 +53,9 @@ export const handleUpdateExerciseName = async (ctx: Context, userId: number, use
     ...userState[userId],
     stage: 'menu_put_exercise_reps',
   }
-  await ctx.reply(`Por favor, digita las repeticiones nuevas del ejercicio.\N Ej: 10 10 10`)
+  await ctx.reply(UPDATE_EXERCISE_REPS, {
+    parse_mode: "Markdown"
+  })
 }
 
 export const handlerUpdateExerciseReps = async (ctx: Context, userId: number, userMessage: string) => {
@@ -61,7 +66,9 @@ export const handlerUpdateExerciseReps = async (ctx: Context, userId: number, us
     stage: 'menu_put_exercise_weight'
   }
   await ctx.deleteMessage()
-  await ctx.reply(`Por favor, digita el nuevo peso en kg: `)
+  await ctx.reply(UPDATE_EXERCISE_KG, {
+    parse_mode: "Markdown"
+  })
 }
 
 export const handlerUpdateExerciseKg = async (ctx: Context, userId: number, userMessage: string) => {

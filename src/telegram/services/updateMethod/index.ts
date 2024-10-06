@@ -1,5 +1,5 @@
 import { Context, Telegraf } from "telegraf";
-import { workoutOutput } from "../../../model/workout";
+import { PartialWorkout } from "../../../model/workout";
 import { verifyExerciseOutput } from "../utils";
 import { inlineKeyboardMenu } from "../../mainMenu/inlineKeyboard";
 import { inlineKeyboardVerifyExerciseUpdate } from "./inlineKeyboard";
@@ -8,8 +8,8 @@ import { UPDATED_EXERCISE_SUCCESFULLY } from "./message";
 import { onTransaction } from "../../../database/dataAccessLayer";
 import { workoutUpdateQuery } from "./queries";
 
-export const updateExerciseVeryficationMenu = async (bot: Telegraf, ctx: Context, workout: workoutOutput) => {
-  const { day, name, reps, kg }: workoutOutput = workout
+export const updateExerciseVeryficationMenu = async (bot: Telegraf, ctx: Context, workout: PartialWorkout) => {
+  const { day, name, reps, kg }: PartialWorkout = workout
   await ctx.reply(verifyExerciseOutput({ day, name, reps, kg }),
     {
       parse_mode: 'MarkdownV2',

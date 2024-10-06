@@ -2,14 +2,16 @@ import { Context } from "telegraf"
 import { UserStateManager, updateUserState, userState } from "../../../userState"
 import { encrypt } from "../../../middlewares/jsonWebToken/enCryptHelper"
 import { deleteLastMessage } from "../utils"
-import { userStateData } from "../../../model/client"
 import { signUpVerificationMenu } from "."
 import { bot } from "../../bot"
 import { Message } from "telegraf/typings/core/types/typegram"
 import { findUserByNickname } from "../login/functions"
+import { SIGN_UP_EMAIL, SIGN_UP_NICKNAME_NOT_AVAIBLABLE, SIGN_UP_PASSWORD } from "./message"
 
 export const handleNicknameNotAvailable = async (ctx: Context) => {
-  await ctx.reply(`Usuario no disponible, crea otro nickname!`)
+  await ctx.reply(SIGN_UP_NICKNAME_NOT_AVAIBLABLE, {
+    parse_mode: "Markdown"
+  })
   updateUserState(ctx.from!.id, { stage: 'signUp_nickname' })
 }
 
@@ -27,7 +29,9 @@ export const handleSignUpNickname = async (ctx: Context) => {
   await ctx.deleteMessage()
   const userManager = new UserStateManager(userId)
   userManager.updateData({ nickname: userMessage }, 'signUp_password')
-  await ctx.reply(`¡Nickname guardado! Ahora, por favor ingresa tu contraseña.`)
+  await ctx.reply(SIGN_UP_PASSWORD, {
+    parse_mode: "Markdown"
+  })
 }
 
 export const handleSignUpPassword = async (ctx: Context) => {
@@ -37,12 +41,13 @@ export const handleSignUpPassword = async (ctx: Context) => {
 
   await deleteLastMessage(ctx)
 
-  const userManager = new UserStateManager<userStateData>(userId)
+  const userManager = new UserStateManager(userId)
   userManager.updateData({ password: userMessage }, 'signUp_email')
-  await ctx.reply(`¡Contraseña guardada! Ahora, por favor ingresa tu email.`)
+  await ctx.reply(SIGN_UP_EMAIL, {
+    parse_mode: "Markdown"
+  })
   await ctx.deleteMessage()
 }
-
 
 export const handleSignUpEmail = async (ctx: Context) => {
   const userId = ctx.from!.id
@@ -51,7 +56,7 @@ export const handleSignUpEmail = async (ctx: Context) => {
 
   await deleteLastMessage(ctx)
 
-  const userManager = new UserStateManager<userStateData>(userId)
+  const userManager = new UserStateManager(userId)
   userManager.updateData({ email: userMessage })
   await ctx.deleteMessage()
   const passwordHash = await encrypt(userManager.getUserData().password)

@@ -1,5 +1,5 @@
 import { pool } from "../database/database";
-import { userState} from "../userState";
+import { userState } from "../userState";
 import { bot } from "../telegram/bot";
 import { handleError } from "../errors";
 import { handleSignUpEmail, handleSignUpNickname, handleSignUpPassword } from "../telegram/services/singUp/functions";
@@ -12,6 +12,7 @@ import { handleUpdateExerciseDay, handleUpdateExerciseName, handlerUpdateExercis
 import { handleLoginNickname, handleLoginPassword } from "../telegram/services/login/functions";
 import { inlineKeyboardGetDailyExercicses } from "../telegram/services/getMethod/inlineKeyboard";
 import { getDayExercisesGraphic, handleGetDailyExercises } from "../telegram/services/getMethod";
+import { GET_RESULT_OPTIONS } from "../telegram/services/getMethod/messages";
 
 export type MyContext =
   | NarrowedContext<Context<Update>, Update.MessageUpdate<Message.TextMessage>>
@@ -135,8 +136,11 @@ bot.on(message("text"), async ctx => {
         case 'menuGetExerciseOptions':
           try {
             await ctx.deleteMessage()
-            await ctx.reply(`Como te gustaria ver tu resultado?`, inlineKeyboardGetDailyExercicses)
-            const message = userMessage 
+            await ctx.reply(GET_RESULT_OPTIONS, {
+              parse_mode: "Markdown",
+              reply_markup: inlineKeyboardGetDailyExercicses.reply_markup
+            })
+            const message = userMessage
             bot.action(`grafico`, async (ctx) => {
               await getDayExercisesGraphic(ctx, message)
             })

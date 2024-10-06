@@ -8,12 +8,11 @@ enum weekday {
   Domingo = "domingo"
 }
 
-
-export interface ClientWorkout {
-  day: string,
+export interface userWorkout {
+  day: weekday,
   name: string,
   reps: number[],
   kg: number | string
 }
 
-export type workoutOutput = Partial<ClientWorkout>
+export type PartialWorkout = Partial<userWorkout>

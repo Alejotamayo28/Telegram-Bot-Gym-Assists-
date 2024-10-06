@@ -1,5 +1,5 @@
 import { PoolClient, QueryResult } from "pg";
-import { ClientWorkout } from "../../../model/workout";
+import { PartialWorkout } from "../../../model/workout";
 import { Context } from "telegraf";
 import { handleExerciseNotFound } from "../../../telegram/services/updateMethod/functions";
 import { onSession } from "../../../database/dataAccessLayer";
@@ -7,7 +7,7 @@ import { validateDays } from "../utils";
 import { ChartData, ChartConfiguration } from "chart.js";
 import { ChartJSNodeCanvas } from "chartjs-node-canvas";
 
-export const handleOutputDailyExercise = (data: QueryResult<Partial<ClientWorkout>>): String => {
+export const handleOutputDailyExercise = (data: QueryResult<PartialWorkout>): String => {
   let result = ""
   data.rows.map((i: any) => {
     let kg: number = i.kg
@@ -20,7 +20,7 @@ _Peso:_ ${Math.trunc(kg)}\n`
 }
 
 export const findExercisesByDay = async (client: PoolClient, day: string, id: number):
-  Promise<QueryResult<Partial<ClientWorkout>>> => {
+  Promise<QueryResult<PartialWorkout>> => {
   const response: QueryResult = await client.query(
     `SELECT name, reps, kg FROM workout WHERE id = $1 and day = $2`,
     [id, day])

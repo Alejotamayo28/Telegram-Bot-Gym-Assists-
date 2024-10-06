@@ -1,14 +1,14 @@
 import { UserSession } from "./telegram/services/utils"
-import { userStateData } from "./model/client"
-import { ClientWorkout, workoutOutput } from "./model/workout"
+import { PartialWorkout } from "./model/workout"
 import { merge } from 'lodash'
+import { PartialUserData } from "./model/client"
 export let userState: { [key: number]: any } = {}
 export const userSession = new UserSession()
 export interface User {
-  data: userStateData,
+  data: PartialUserData,
   stage: string,
   lastMessageId: number,
-  workout: ClientWorkout
+  workout: PartialWorkout
 }
 export function updateUserState(userId: number, newState: Partial<User>): void {
   userState[userId] = { ...userState[userId], ...newState }

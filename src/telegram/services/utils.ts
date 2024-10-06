@@ -1,9 +1,10 @@
 import { PoolClient, QueryResult } from "pg"
 import { ClientLogin, UserData } from "../../model/client"
-import { workoutOutput } from "../../model/workout"
+import { PartialWorkout } from "../../model/workout"
 import { Context } from "telegraf"
 
 export const deleteLastMessage = async (ctx: Context) => {
+  //ELIMINA EL MENSAJE DEL USUARIO
   const lastMessage = ctx.message?.message_id ? ctx.message.message_id - 1 : undefined;
   if (lastMessage) {
     await ctx.deleteMessage(lastMessage)
@@ -110,7 +111,7 @@ export const verifyDay = (day: string) => {
   return validateDays.includes(day)
 }
 
-export const verifyExerciseOutput = (workout: workoutOutput) => {
+export const verifyExerciseOutput = (workout: PartialWorkout) => {
   return `*Confirmación de ejercicio:*
 
 🗓 *Día:* ${escapeMarkdown(workout.day!)}
@@ -131,7 +132,7 @@ export const verifySignUpOutput = (data: UserData) => {
 _Escoge alguna de las siguientes opciones para continuar\\!_`
 }
 
-export const verifyDeleteExercise = (data: workoutOutput) => {
+export const verifyDeleteExercise = (data: PartialWorkout) => {
   return `*Confirmar eliminacion:*
 
 🗓 *Dia:* ${escapeMarkdown(data.day!)}

@@ -6,11 +6,11 @@ import { inlineKeyboardMenu } from "../../mainMenu/inlineKeyboard";
 import { EXERCISE_DELETE_SUCCESFULLY, EXERCISE_NOT_DELETE_SUCCESFULLY } from "./messages";
 import { onTransaction } from "../../../database/dataAccessLayer";
 import { deleteWorkoutQuery } from "./queries";
-import { workoutOutput } from "../../../model/workout";
+import { PartialWorkout } from "../../../model/workout";
 
 export const deleteExerciseVerificationMenu = async (bot: Telegraf, ctx: Context) => {
   const userManager = new UserStateManager(ctx.from!.id)
-  const workoutData: workoutOutput = userManager.getUserData()
+  const workoutData: PartialWorkout = userManager.getUserData()
   await ctx.reply(verifyDeleteExercise(workoutData),
     {
       parse_mode: 'MarkdownV2',

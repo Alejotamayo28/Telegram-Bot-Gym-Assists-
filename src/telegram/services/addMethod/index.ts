@@ -1,5 +1,5 @@
 import { Context, Telegraf } from "telegraf";
-import { workoutOutput } from "../../../model/workout";
+import { PartialWorkout } from "../../../model/workout";
 import { verifyExerciseOutput } from "../utils";
 import { inlineKeyboardVerifyExercise } from "./inlineKeyboard";
 import { VERIFY_EXERCISE_NO_CALLBACK, VERIFY_EXERCISE_YES_CALLBACK } from "./buttons";
@@ -13,7 +13,8 @@ import { handleError } from "../../../errors";
 export const addExerciseVeryficationMenu = async (bot: Telegraf, ctx: Context) => {
   try {
     const userManager = new UserStateManager(ctx.from!.id)
-    const workoutData: workoutOutput = userManager.getUserData()
+    const workoutData: PartialWorkout = userManager.getUserData()
+    console.log(`Esta es la workoutData extraida del userManager.getUserData()`, workoutData)
     await ctx.reply(verifyExerciseOutput(workoutData),
       {
         parse_mode: 'MarkdownV2',
