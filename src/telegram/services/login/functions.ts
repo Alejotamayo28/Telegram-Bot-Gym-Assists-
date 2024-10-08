@@ -47,7 +47,7 @@ export const handleLoginPassword = async (ctx: Context) => {
   const userMessage = message!.text
   const userManager = new UserStateManager(ctx.from!.id)
   userManager.updateData({ password: userMessage })
-  const isPasswordIncorrect = await verifyPassword(userManager.getUserData().password!, userSession.getPassword())
+  const isPasswordIncorrect = await verifyPassword(userManager.getUserProfile().password!, userSession.getPassword())
   if (!isPasswordIncorrect) {
     await handleIncorrectPassword(ctx)
     await ctx.deleteMessage()

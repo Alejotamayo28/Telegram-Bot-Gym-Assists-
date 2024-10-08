@@ -166,6 +166,8 @@ bot.on(message("text"), async ctx => {
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
+        break
+
         default:
           ctx.reply('Por favor, selecciona una opción válida para continuar.');
           break;

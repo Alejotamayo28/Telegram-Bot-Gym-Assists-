@@ -1,9 +1,9 @@
 import { sign, verify } from 'jsonwebtoken'
 import dotenv from "dotenv";
-import { ClientLogin } from '../../model/client';
+import { UserCredentials } from '../../model/client';
 dotenv.config();
 
-export const generateToken = (id: any, clientData: ClientLogin) => {
+export const generateToken = (id: any, clientData: UserCredentials) => {
   const { nickname } = clientData
   const jwt = sign({
     id: id,

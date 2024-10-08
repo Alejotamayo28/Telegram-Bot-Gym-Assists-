@@ -59,7 +59,7 @@ export const handleSignUpEmail = async (ctx: Context) => {
   const userManager = new UserStateManager(userId)
   userManager.updateData({ email: userMessage })
   await ctx.deleteMessage()
-  const passwordHash = await encrypt(userManager.getUserData().password)
+  const passwordHash = await encrypt(userManager.getUserProfile().password)
   await signUpVerificationMenu(bot, ctx, passwordHash)
   delete userState[userId]
 }

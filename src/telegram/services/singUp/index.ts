@@ -9,7 +9,7 @@ import { insertClientQuery } from "./queries";
 
 export const signUpVerificationMenu = async (bot: Telegraf, ctx: Context, passwordHash: string) => {
   const userManager = new UserStateManager(ctx.from!.id)
-  const { nickname, password, email } = userManager.getUserData()
+  const { nickname, password, email } = userManager.getUserProfile()
   await ctx.reply(SIGN_UP_SUCCESFULLY,
     {
       parse_mode: "Markdown"

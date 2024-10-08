@@ -4,13 +4,12 @@ import { verifyDeleteExercise } from "../utils";
 import { inlineKeyboardVerifyDeleteExercise } from "./inlineKeyboard";
 import { inlineKeyboardMenu } from "../../mainMenu/inlineKeyboard";
 import { EXERCISE_DELETE_SUCCESFULLY, EXERCISE_NOT_DELETE_SUCCESFULLY } from "./messages";
-import { onTransaction } from "../../../database/dataAccessLayer";
-import { deleteWorkoutQuery } from "./queries";
+import { onTransaction } from "../../../database/dataAccessLayer"; import { deleteWorkoutQuery } from "./queries";
 import { PartialWorkout } from "../../../model/workout";
 
 export const deleteExerciseVerificationMenu = async (bot: Telegraf, ctx: Context) => {
   const userManager = new UserStateManager(ctx.from!.id)
-  const workoutData: PartialWorkout = userManager.getUserData()
+  const workoutData: PartialWorkout = userManager.getUserProfile()
   await ctx.reply(verifyDeleteExercise(workoutData),
     {
       parse_mode: 'MarkdownV2',
@@ -28,6 +27,7 @@ export const deleteExerciseVerificationMenu = async (bot: Telegraf, ctx: Context
       }
     )
   })
+
   bot.action(`eliminar_no`, async (ctx: Context) => {
     await ctx.reply(EXERCISE_NOT_DELETE_SUCCESFULLY,
       {

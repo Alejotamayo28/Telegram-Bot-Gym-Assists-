@@ -1,9 +1,10 @@
 import { Context } from "telegraf"
-import { deleteLastMessage, verifyDay } from "../utils"
+import { deleteLastMessage, verifyDay, verifyExerciseInput } from "../utils"
 import { UserStateManager, userState } from "../../../userState"
 import { addExerciseVeryficationMenu } from "."
 import { bot } from "../../bot"
 import { EXERCISE_NAME_OUTPUT, EXERCISE_REPS_OUTPUT, EXERCISE_WEIGHT_OUTPUT, INCORRECT_DAY_INPUT } from "./messages"
+import { inlineKeyboardMenu } from "../../mainMenu/inlineKeyboard"
 
 export const verifyDayInput = (day: string) => {
   return verifyDay(day)
@@ -11,7 +12,7 @@ export const verifyDayInput = (day: string) => {
 
 export const handleIncorrectDayInput = async (ctx: Context) => {
   ctx.reply(INCORRECT_DAY_INPUT, {
-    parse_mode: 'MarkdownV2'
+    parse_mode: 'Markdown'
   })
 }
 
@@ -32,6 +33,14 @@ export const handleAddExerciseDay = async (ctx: Context, userId: number, userMes
 
 export const handleAddExerciseName = async (ctx: Context, userId: number, userMessage: string) => {
   await deleteLastMessage(ctx)
+  if (!verifyExerciseInput(userMessage)) {
+    await ctx.reply(`_El nombre del ejercicio no existe en nuestros datos_`, {
+      parse_mode: "Markdown",
+      reply_markup: inlineKeyboardMenu.reply_markup
+    })
+    await ctx.deleteMessage()
+    return
+  }
   const userManager = new UserStateManager(userId)
   userManager.updateData({ name: userMessage }, 'menu_post_exercise_reps')
   await ctx.deleteMessage()

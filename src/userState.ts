@@ -1,11 +1,11 @@
 import { UserSession } from "./telegram/services/utils"
 import { PartialWorkout } from "./model/workout"
 import { merge } from 'lodash'
-import { PartialUserData } from "./model/client"
+import { PartialUserProfile } from "./model/client"
 export let userState: { [key: number]: any } = {}
 export const userSession = new UserSession()
 export interface User {
-  data: PartialUserData,
+  data: PartialUserProfile,
   stage: string,
   lastMessageId: number,
   workout: PartialWorkout
@@ -32,7 +32,7 @@ export class UserStateManager<T> {
   static getUserStage(userId: number): string {
     return userState[userId].stage
   }
-  getUserData() {
+  getUserProfile() {
     return userState[this.userId].data
   }
   getStage() {

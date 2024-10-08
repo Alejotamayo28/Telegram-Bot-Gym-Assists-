@@ -1,6 +1,8 @@
 export const INCORRECT_DAY_INPUT = `
-*El día ingresado no es válido❌*
-Por favor, asegúrate de escribirlo correctamente`
+❌ *El día ingresado no es válido ❌*
+
+_Por favor, asegúrate de escribir el dia correctamente
+Ejemplo: Lunes_`
 
 export const EXERCISE_NAME_OUTPUT = `
 *🏋️ Nombre del ejercicio:*

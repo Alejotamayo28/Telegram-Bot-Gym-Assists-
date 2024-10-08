@@ -1,9 +1,20 @@
-export interface ClientLogin {
+export interface UserCredentials {
   nickname: string,
   password: string,
 }
-export interface UserData extends ClientLogin {
+export interface UserProfile extends UserCredentials {
   id?: number,
   email: string
 }
-export type PartialUserData = Partial<UserData>
+export type PartialUserProfile = Partial<UserProfile>
+
+//EXAMPLE 
+export interface UserData extends UserProfile, UserCredentials {
+  role: string
+}
+const UserData: UserData = {
+  email: "",
+  nickname: "",
+  password: "",
+  role: "admin"
+}
