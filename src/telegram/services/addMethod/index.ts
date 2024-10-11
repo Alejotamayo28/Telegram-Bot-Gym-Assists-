@@ -14,7 +14,6 @@ export const addExerciseVeryficationMenu = async (bot: Telegraf, ctx: Context) =
   try {
     const userManager = new UserStateManager(ctx.from!.id)
     const workoutData: PartialWorkout = userManager.getUserProfile()
-    console.log(`Esta es la workoutData extraida del userManager.getUserProfile()`, workoutData)
     await ctx.reply(verifyExerciseOutput(workoutData),
       {
         parse_mode: 'MarkdownV2',

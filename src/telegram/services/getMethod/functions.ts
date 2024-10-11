@@ -1,7 +1,5 @@
-import { PoolClient, QueryResult } from "pg";
-import { PartialWorkout } from "../../../model/workout";
-import { Context } from "telegraf";
-import { handleExerciseNotFound } from "../../../telegram/services/updateMethod/functions";
+import { QueryResult } from "pg";
+import { PartialWorkout, userWorkout } from "../../../model/workout";
 import { onSession } from "../../../database/dataAccessLayer";
 import { validateDays } from "../utils";
 import { ChartData, ChartConfiguration } from "chart.js";
@@ -19,45 +17,29 @@ _Peso:_ ${Math.trunc(kg)}\n`
   return result
 }
 
-export const findExercisesByDay = async (client: PoolClient, day: string, id: number):
-  Promise<QueryResult<PartialWorkout>> => {
-  const response: QueryResult = await client.query(
-    `SELECT name, reps, kg FROM workout WHERE id = $1 and day = $2`,
-    [id, day])
+export const findWeeklyExercises = async (userId: number):
+  Promise<QueryResult<userWorkout>>  => {
+  const response: QueryResult<userWorkout> = await onSession(async (clientTransaction) => {
+    const response = await clientTransaction.query(
+      `SELECT day, name, reps, kg FROM workout WHERE id = $1 ORDER BY  name`, [userId])
+    return response
+  })
   return response
 }
-
-export const handleGetWeeklyExercises = async (ctx: Context) => {
-  const exercise = await onSession(async (clientTransaction) => {
-    return findWeeklyExercises(clientTransaction, ctx.from!.id)
+export const findExercisesByDay = async (day: string, id: number):
+  Promise<QueryResult<PartialWorkout>> => {
+  const exercises: QueryResult = await onSession(async (clientTransaction) => {
+    const response = await clientTransaction.query(
+      `SELECT name, reps, kg FROM workout WHERE id = $1 and day = $2`,
+      [id, day])
+    return response
   })
-  if (!exercise) {
-    await handleExerciseNotFound(ctx)
-    await ctx.deleteMessage()
-    return
-  }
-  const formattedExercises = mapWeeklyExercise(exercise)
-  await ctx.reply(formattedExercises, {
-    parse_mode: 'MarkdownV2'
-  })
+  return exercises
 }
 
-const findWeeklyExercises = async (client: PoolClient, userId: number) => {
-  const response: QueryResult = await client.query(
-    `SELECT day, name, reps, kg FROM workout WHERE id = $1 ORDER BY  name`, [userId])
-  return response.rowCount ? response.rows : null
-}
-
-interface Ejercicio {
-  name: string,
-  day: string,
-  reps: any,
-  kg: number
-}
-
-export const mapWeeklyExercise = (data: Ejercicio[]) => {
-  const groupedExercises: { [day: string]: Ejercicio[] } = {}
-  data.forEach((exercise: Ejercicio) => {
+export const mapWeeklyExercise = (data: userWorkout[]) => {
+  const groupedExercises: { [day: string]: userWorkout[] } = {}
+  data.forEach((exercise: userWorkout) => {
     if (validateDays.includes(exercise.day)) {
       if (!groupedExercises[exercise.day]) {
         groupedExercises[exercise.day] = [];
@@ -163,7 +145,6 @@ export const graphic = async (userId: number, day: string) => {
       }
     }
   };
-
   return await chartJSNodeCanvas.renderToBuffer(configuration)
 }
 

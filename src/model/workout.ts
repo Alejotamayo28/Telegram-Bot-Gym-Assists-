@@ -12,7 +12,7 @@ export interface userWorkout {
   day: weekday,
   name: string,
   reps: number[],
-  kg: number | string
+  kg: number
 }
 
 export type PartialWorkout = Partial<userWorkout>

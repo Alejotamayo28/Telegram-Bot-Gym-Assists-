@@ -5,6 +5,7 @@ import { Context } from "telegraf"
 import { onSession } from "../../database/dataAccessLayer"
 import { inlineKeyboardMenu } from "../mainMenu/inlineKeyboard"
 import { UserStateManager } from "../../userState"
+import { EXERCISE_NAME_OUTPUT_INVALID } from "./addMethod/messages"
 
 export const verifyExerciseName = async (userMessage: string, ctx: Context) => {
   const { rowCount }: QueryResult = await onSession((transactionClient) => {
@@ -39,9 +40,7 @@ export const verifyExerciseInput = (name: string): boolean => {
 }
 
 export const handleIncorrectExerciseNameInput = async (ctx: Context) => {
-  return await ctx.reply(`🗓️*Nombre del entrenamiento:*🗓️
-
-_Ejercicio no encontrado en tus datos, vuelve a escribirlo o crealo!_`, {
+  return await ctx.reply(EXERCISE_NAME_OUTPUT_INVALID, {
     parse_mode: "Markdown",
     reply_markup: inlineKeyboardMenu.reply_markup
   })
