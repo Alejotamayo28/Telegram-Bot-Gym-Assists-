@@ -4,7 +4,6 @@ import { PartialWorkout } from "../../model/workout"
 import { Context } from "telegraf"
 import { onSession } from "../../database/dataAccessLayer"
 import { inlineKeyboardMenu } from "../mainMenu/inlineKeyboard"
-import { UserStateManager } from "../../userState"
 import { EXERCISE_NAME_OUTPUT_INVALID } from "./addMethod/messages"
 
 export const verifyExerciseName = async (userMessage: string, ctx: Context) => {
@@ -52,25 +51,6 @@ export const deleteLastMessage = async (ctx: Context) => {
     await ctx.deleteMessage(lastMessage)
   }
 }
-
-export const deleteLastMessages = async (ctx: Context) => {
-  const userManager = new UserStateManager(ctx.from!.id)
-  userManager.updateData({ lastMessageId: ctx.message?.message_id })
-  const lastBotMessageId = userManager.getUserProfile().lastMessageId
-  const lastUserMessageId = ctx.message?.message_id;
-  try {
-    if (lastBotMessageId !== undefined) {
-      await ctx.deleteMessage(lastBotMessageId);  // Eliminar el mensaje del bot
-    }
-    if (lastUserMessageId !== undefined) {
-      await ctx.deleteMessage(lastUserMessageId);  // Eliminar el mensaje del usuario
-    }
-  } catch (error) {
-    console.error("Error deleting messages:", error);
-  }
-};
-
-
 
 export class UserSession {
   private UserProfile: UserCredentials

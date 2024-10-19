@@ -2,10 +2,7 @@ import { Context } from "telegraf";
 import { sendMenuFunctions } from "../../menus/userMenu";
 import { findExercisesByDay, findWeeklyExercises, graphic, handleOutputDailyExercise, mapWeeklyExercise } from "./functions";
 import { deleteLastMessage } from "../utils";
-import { UserStateManager } from "../../../userState";
 import { handleExerciseNotFound } from "../updateMethod/functions";
-import { handleError } from "../../../errors";
-import { onSession } from "../../../database/dataAccessLayer";
 
 export const handleGetDailyExercisesGraphic = async (ctx: Context, day: string) => {
   await ctx.deleteMessage()
@@ -39,7 +36,7 @@ export const handleGetDailyExercisesText = async (ctx: Context, day: string) => 
     await ctx.reply(`*${formattedDay}:*\n${formattedOutput}`, { parse_mode: `MarkdownV2` })
     await sendMenuFunctions(ctx)
   } catch (error) {
-    return handleError(error, UserStateManager.getUserStage(ctx.from!.id), ctx)
+    console.error(`Error: `, error)
   }
 }
 

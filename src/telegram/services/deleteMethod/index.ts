@@ -24,7 +24,6 @@ export const deleteExerciseVerificationMenu = async (bot: Telegraf, ctx: Context
       }
     )
   })
-
   bot.action(`eliminar_no`, async (ctx: Context) => {
     await ctx.reply(EXERCISE_NOT_DELETE_SUCCESFULLY,
       {

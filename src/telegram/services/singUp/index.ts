@@ -1,5 +1,5 @@
 import { Context, Telegraf } from "telegraf";
-import { UserStateManager } from "../../../userState";
+import { userState } from "../../../userState";
 import { verifySignUpOutput } from "../utils";
 import { inlineKeyboardVerifySignUp } from "./inlineKeyboard";
 import { startInlineKeyboard } from "../../commands/inlineKeyboard";
@@ -8,8 +8,7 @@ import { onTransaction } from "../../../database/dataAccessLayer";
 import { insertClientQuery } from "./queries";
 
 export const signUpVerificationMenu = async (bot: Telegraf, ctx: Context, passwordHash: string) => {
-  const userManager = new UserStateManager(ctx.from!.id)
-  const { nickname, password, email } = userManager.getUserProfile()
+  const { nickname, password, email } = userState[ctx.from!.id]
   await ctx.reply(SIGN_UP_SUCCESFULLY,
     {
       parse_mode: "Markdown"

@@ -1,16 +1,12 @@
 import { Context } from "telegraf";
-import { userState } from "../../../userState";
+import { userStageDeleteExercise, userStateUpdateDay } from "../../../userState";
 import { bot } from "../../bot";
 import { EXERCISE_DELETE_NAME } from "./messages";
 import { deleteExerciseVerificationMenu } from ".";
 
 export const handleDeleteExerciseDay = async (ctx: Context, userMessage: string) => {
   try {
-    userState[ctx.from!.id] = {
-      ...userState[ctx.from!.id],
-      day: userMessage,
-      stage: 'menu_delete_exercise_name'
-    }
+    userStateUpdateDay(ctx,userMessage, userStageDeleteExercise.DELETE_EXERCISE_NAME)
     await ctx.deleteMessage()
     await ctx.reply(EXERCISE_DELETE_NAME, {
       parse_mode: "Markdown",

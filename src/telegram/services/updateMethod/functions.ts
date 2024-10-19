@@ -1,5 +1,5 @@
 import { Context } from "telegraf"
-import { userState } from "../../../userState"
+import { userStagePutExercise, userState, userStateUpdateDay, userStateUpdateKg, userStateUpdateReps, userStateUpdateStage } from "../../../userState"
 import { PartialWorkout } from "../../../model/workout"
 import { QueryResult } from "pg"
 import { updateExerciseVeryficationMenu } from "."
@@ -7,50 +7,41 @@ import { bot } from "../../bot"
 import { UPDATE_EXERCISE_KG, UPDATE_EXERCISE_NAME, UPDATE_EXERCISE_REPS } from "./message"
 import { onSession } from "../../../database/dataAccessLayer"
 
-export const handleUpdateExerciseDay = async (ctx: Context, userId: number, userMessage: string) => {
+export const handleUpdateExerciseDay = async (ctx: Context, userMessage: string) => {
   try {
-    userState[userId] = {
-      ...userState[userId],
-      day: userMessage.toLowerCase(),
-      stage: 'menu_put_exercise_name'
-    }; await ctx.deleteMessage()
-    await ctx.reply(UPDATE_EXERCISE_NAME, { parse_mode: "Markdown" });
+    const day = userMessage.toLowerCase()
+    userStateUpdateDay(ctx, day, userStagePutExercise.PUT_EXERCISE_NAME)
+    await ctx.deleteMessage()
+    await ctx.reply(UPDATE_EXERCISE_NAME, {
+      parse_mode: "Markdown"
+    });
   } catch (error) {
     console.error(`Error: `, error)
   }
 };
 
-export const handleUpdateExerciseName = async (ctx: Context, userId: number) => {
+export const handleUpdateExerciseName = async (ctx: Context) => {
   await ctx.deleteMessage()
-  userState[userId] = {
-    ...userState[userId],
-    stage: 'menu_put_exercise_reps',
-  }
+  userStateUpdateStage(ctx, userStagePutExercise.PUT_EXERCISE_REPS)
   await ctx.reply(UPDATE_EXERCISE_REPS, {
     parse_mode: "Markdown"
   })
 }
 
-export const handlerUpdateExerciseReps = async (ctx: Context, userId: number, userMessage: string) => {
-  userState[userId] = {
-    ...userState[userId],
-    reps: userMessage.split(" ").map(Number),
-    stage: 'menu_put_exercise_weight'
-  }
+export const handlerUpdateExerciseReps = async (ctx: Context, userMessage: string) => {
+  const reps = userMessage.split(" ").map(Number)
+  userStateUpdateReps(ctx, reps, userStagePutExercise.PUT_EXERCISE_WEIGHT)
   await ctx.deleteMessage()
   await ctx.reply(UPDATE_EXERCISE_KG, {
     parse_mode: "Markdown"
   })
 }
 
-export const handlerUpdateExerciseKg = async (ctx: Context, userId: number, userMessage: string) => {
-  userState[userId] = {
-    ...userState[userId],
-    kg: userMessage
-  }
+export const handlerUpdateExerciseKg = async (ctx: Context, userMessage: number) => {
+  userStateUpdateKg(ctx, userMessage)
   await ctx.deleteMessage()
-  await updateExerciseVeryficationMenu(bot, ctx, userState[userId])
-  delete userState[userId]
+  await updateExerciseVeryficationMenu(bot, ctx, userState[ctx.from!.id])
+  delete userState[ctx.from!.id]
 }
 
 export const findExerciseByDayName = async (userId: number, userState: PartialWorkout):
@@ -71,12 +62,5 @@ export const handleExerciseNotFound = async (ctx: Context) => {
       parse_mode: 'MarkdownV2',
     })
 };
-
-export const userStateUpdateDay = (ctx: Context, day: string) => {
-  userState[ctx.from!.id] = { ...userState[ctx.from!.id], day: day }
-}
-export const userStateUpdateName = (ctx: Context, name: string) => {
-  userState[ctx.from!.id] = { ...userState[ctx.from!.id], name: name }
-}
 
 

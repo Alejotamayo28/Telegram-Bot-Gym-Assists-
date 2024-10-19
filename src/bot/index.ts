@@ -1,5 +1,4 @@
-import { pool } from "../database/database";
-import { userState } from "../userState";
+import { userStage,  userStageDeleteExercise,  userStageGetExercise,  userStagePostExercise, userStagePutExercise, userStageSignUp, userState, userStateUpdateName } from "../userState";
 import { bot } from "../telegram/bot";
 import { handleError } from "../errors";
 import { handleSignUpEmail, handleSignUpNickname, handleSignUpPassword } from "../telegram/services/singUp/functions";
@@ -16,6 +15,7 @@ import { deleteLastMessage, verifyExerciseInput } from "../telegram/services/uti
 import { handleGetDailyExercisesGraphic, handleGetDailyExercisesText } from "../telegram/services/getMethod";
 import { isNaN, parseInt } from "lodash";
 import { EXERCISE_REPS_INVALID_OUTPUT, EXERCISE_WEIGHT_OUTPUT_INVALID } from "../telegram/services/addMethod/messages";
+import { inlineKeyboardMenu } from "../telegram/mainMenu/inlineKeyboard";
 
 export type MyContext =
   | NarrowedContext<Context<Update>, Update.MessageUpdate<Message.TextMessage>>
@@ -23,53 +23,53 @@ export type MyContext =
 
 
 bot.on(message("text"), async ctx => {
-  const client = await pool.connect();
   const userId = ctx.from!.id;
   const userMessage = ctx.message!.text
   try {
     if (userState[userId]) {
       switch (userState[userId].stage) {
-        case 'signUp_nickname':
+
+        case userStageSignUp.SIGN_UP_NICKNAME:
           try {
-            await handleSignUpNickname(ctx)
+            await handleSignUpNickname(ctx, userMessage)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
           break;
 
-        case 'signUp_password':
+        case userStageSignUp.SIGN_UP_PASSWORD:
           try {
-            await handleSignUpPassword(ctx)
+            await handleSignUpPassword(ctx, userMessage)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
           break;
 
-        case 'signUp_email':
+        case userStageSignUp.SIGN_UP_EMAIL:
           try {
-            await handleSignUpEmail(ctx)
+            await handleSignUpEmail(ctx, userMessage)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
           break;
 
-        case 'login_nickname':
+        case userStage.LOGIN_NICKNAME:
           try {
-            await handleLoginNickname(ctx)
+            await handleLoginNickname(ctx, userMessage)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
           break
 
-        case 'login_password':
+        case userStage.LOGIN_PASSWORD:
           try {
-            await handleLoginPassword(ctx)
+            await handleLoginPassword(ctx, userMessage)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
           break
 
-        case `menu_post_exercise_day`:
+        case userStagePostExercise.POST_EXERCISE_DAY:
           await deleteLastMessage(ctx)
           try {
             if (!verifyDayInput(userMessage)) {
@@ -83,7 +83,7 @@ bot.on(message("text"), async ctx => {
           }
           break
 
-        case `menu_post_exercise_name`:
+        case userStagePostExercise.POST_EXERCISE_NAME:
           await deleteLastMessage(ctx)
           try {
             if (!verifyExerciseInput(userMessage)) {
@@ -97,7 +97,7 @@ bot.on(message("text"), async ctx => {
           }
           break
 
-        case `menu_post_exercise_reps`:
+        case userStagePostExercise.POST_EXERCISE_REPS:
           await deleteLastMessage(ctx)
           try {
             const reps = userMessage.split(" ").map(Number)
@@ -114,7 +114,7 @@ bot.on(message("text"), async ctx => {
           }
           break
 
-        case `menu_post_exercise_verification`:
+        case userStagePostExercise.POST_EXERCISE_VERIFICATION:
           await deleteLastMessage(ctx)
           try {
             if (isNaN(parseInt(userMessage))) {
@@ -131,7 +131,7 @@ bot.on(message("text"), async ctx => {
           }
           break
 
-        case 'menu_put_exercise_day':
+        case userStagePutExercise.PUT_EXERCISE_DAY:
           await deleteLastMessage(ctx)
           try {
             if (!verifyDayInput(userMessage)) {
@@ -139,14 +139,13 @@ bot.on(message("text"), async ctx => {
               await handleIncorrectDayInput(ctx)
               return
             }
-            await handleUpdateExerciseDay(ctx, userId, userMessage)
+            await handleUpdateExerciseDay(ctx, userMessage)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
           break
 
-
-        case 'menu_put_exercise_name':
+        case userStagePutExercise.PUT_EXERCISE_NAME:
           await deleteLastMessage(ctx)
           try {
             if (!verifyExerciseInput(userMessage)) {
@@ -154,23 +153,20 @@ bot.on(message("text"), async ctx => {
               await handleIncorrectExerciseInput(ctx)
               return
             }
-            userState[userId] = {
-              ...userState[userId],
-              name: userMessage
-            }
+            userStateUpdateName(ctx, userMessage)
             const exercise = await findExerciseByDayName(userId, userState[userId])
             if (!exercise) {
               await ctx.deleteMessage()
               await handleExerciseNotFound(ctx)
               return
             }
-            await handleUpdateExerciseName(ctx, userId)
+            await handleUpdateExerciseName(ctx)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
           break
 
-        case 'menu_put_exercise_reps':
+        case userStagePutExercise.PUT_EXERCISE_REPS:
           await deleteLastMessage(ctx)
           try {
             const reps = userMessage.split(" ").map(Number)
@@ -181,13 +177,13 @@ bot.on(message("text"), async ctx => {
               });
               return;
             }
-            await handlerUpdateExerciseReps(ctx, userId, userMessage)
+            await handlerUpdateExerciseReps(ctx, userMessage)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
           break
 
-        case 'menu_put_exercise_weight':
+        case userStagePutExercise.PUT_EXERCISE_WEIGHT:
           await deleteLastMessage(ctx)
           try {
             if (isNaN(parseInt(userMessage))) {
@@ -195,14 +191,15 @@ bot.on(message("text"), async ctx => {
               await ctx.reply(EXERCISE_WEIGHT_OUTPUT_INVALID, {
                 parse_mode: "Markdown"
               })
+              return
             }
-            await handlerUpdateExerciseKg(ctx, userId, userMessage)
+            await handlerUpdateExerciseKg(ctx, parseInt(userMessage))
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
           break
 
-        case 'menuGetExerciseOptions':
+        case userStageGetExercise.GET_EXERCISE_OPTIONS:
           await deleteLastMessage(ctx)
           try {
             if (!verifyDayInput(userMessage)) {
@@ -226,7 +223,7 @@ bot.on(message("text"), async ctx => {
           }
           break
 
-        case 'menu_delete_exercise_day':
+        case userStageDeleteExercise.DELETE_EXERCISE_DAY:
           await deleteLastMessage(ctx)
           try {
             if (!verifyDayInput(userMessage)) {
@@ -240,13 +237,10 @@ bot.on(message("text"), async ctx => {
           }
           break
 
-        case 'menu_delete_exercise_name':
+        case userStageDeleteExercise.DELETE_EXERCISE_NAME:
           await deleteLastMessage(ctx)
           try {
-            userState[userId] = {
-              ...userState[userId],
-              name: userMessage
-            }
+            userStateUpdateName(ctx, userMessage)
             const exercise = await findExerciseByDayName(userId, userState[userId])
             if (!exercise) {
               await ctx.deleteMessage()
@@ -260,7 +254,10 @@ bot.on(message("text"), async ctx => {
           break
 
         default:
-          ctx.reply('Por favor, selecciona una opción válida para continuar.');
+          ctx.reply(`*Ha ocurrdio un error, vuelve a escoger la accion para volver a comenzar.*`, {
+            parse_mode: "Markdown",
+            reply_markup: inlineKeyboardMenu.reply_markup
+          });
           break;
       }
     }
@@ -268,7 +265,6 @@ bot.on(message("text"), async ctx => {
     console.error('Error handling user message:', error);
     ctx.reply('Ha ocurrido un error. Por favor, intenta nuevamente más tarde.');
   } finally {
-    client.release();
   }
 });
 
