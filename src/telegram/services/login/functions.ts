@@ -3,7 +3,7 @@ import { Client, QueryResult } from "pg"
 import { Context } from "telegraf"
 import { deleteLastMessage } from "../utils"
 import { pool } from "../../../database/database"
-import {  userStage, userState,  userStateUpdatePassword, userStateUpdateStage } from "../../../userState"
+import { userStage, userState, userStateUpdatePassword, userStateUpdateStage } from "../../../userState"
 import { bot } from "../../bot"
 import { mainMenuPage } from "../../mainMenu"
 import { LOGIN_NICKNAME_NOT_FOUND, LOGIN_PASSWORD_INCORRECT, LOGIN_REQUEST_PASSWORD_MESSAGE } from "./messages"
@@ -33,7 +33,7 @@ export const handleLoginPassword = async (ctx: Context, userMessage: string) => 
   }
   await ctx.deleteMessage()
   delete userState[ctx.from!.id]
-  await mainMenuPage(bot, ctx)
+  await mainMenuPage(ctx, bot)
 }
 
 

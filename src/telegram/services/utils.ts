@@ -6,6 +6,27 @@ import { onSession } from "../../database/dataAccessLayer"
 import { inlineKeyboardMenu } from "../mainMenu/inlineKeyboard"
 import { EXERCISE_NAME_OUTPUT_INVALID } from "./addMethod/messages"
 
+// regetPattern para las acciones del usuario, parametro = enum
+export const regexPattern = <T extends { [key: string]: string }>(optionsEnum: T) => {
+  return new RegExp(`^(${Object.values(optionsEnum).join('|')})$`)
+}
+
+export const tryCatch = async (fn: () => Promise<void>, ctx: Context) => {
+  try {
+    await fn()
+  } catch (error) {
+    console.error(`Error: `, error)
+    await ctx.reply(`An error ocurred. Please try again.`)
+  }
+}
+
+export const insertWorkoutQueryTESTING = async (workoutData: PartialWorkout, ctx: Context, client: PoolClient) => {
+  await client.query(`INSERT INTO ejercicios (usuario_id, dia, fecha, nombre, reps, kg, semana)
+    VALUES ($1, $2, CURRENT_DATE, $3, $4, $5, EXTRACT(WEEK FROM CURRENT_DATE) - EXTRACT(WEEK FROM CURRENT_DATE - interval '21 days'))
+    RETURNING *;
+`, [ctx.from!.id, workoutData.day, workoutData.name, workoutData.reps, workoutData.kg])
+}
+
 export const verifyExerciseName = async (userMessage: string, ctx: Context) => {
   const { rowCount }: QueryResult = await onSession((transactionClient) => {
     return transactionClient.query(

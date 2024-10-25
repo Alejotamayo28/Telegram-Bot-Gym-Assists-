@@ -13,6 +13,8 @@ export const inlineKeyboardMenu = Markup.inlineKeyboard([
   [Markup.button.callback(`🗑️ ${DELETE_EXERCISE_BUTTON}`, DELETE_EXERCISE_CALLBACK)],
 ])
 
+
+
 //EJEMPLO
 /*
 export const TESTreplyKeyboard = () => {

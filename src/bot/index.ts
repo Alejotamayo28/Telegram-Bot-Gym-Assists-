@@ -1,4 +1,4 @@
-import { userStage,  userStageDeleteExercise,  userStageGetExercise,  userStagePostExercise, userStagePutExercise, userStageSignUp, userState, userStateUpdateName } from "../userState";
+import { userStage, userStageDeleteExercise, userStageGetExercise, userStagePostExercise, userStagePutExercise, userStageSignUp, userState, userStateUpdateName } from "../userState";
 import { bot } from "../telegram/bot";
 import { handleError } from "../errors";
 import { handleSignUpEmail, handleSignUpNickname, handleSignUpPassword } from "../telegram/services/singUp/functions";
@@ -12,7 +12,7 @@ import { handleLoginNickname, handleLoginPassword } from "../telegram/services/l
 import { inlineKeyboardGetDailyExercicses } from "../telegram/services/getMethod/inlineKeyboard";
 import { GET_RESULT_OPTIONS } from "../telegram/services/getMethod/messages";
 import { deleteLastMessage, verifyExerciseInput } from "../telegram/services/utils";
-import { handleGetDailyExercisesGraphic, handleGetDailyExercisesText } from "../telegram/services/getMethod";
+import { handleGetDailyExercisesGraphic, handleGetDailyExercisesText, handleGetExercisesByInterval } from "../telegram/services/getMethod";
 import { isNaN, parseInt } from "lodash";
 import { EXERCISE_REPS_INVALID_OUTPUT, EXERCISE_WEIGHT_OUTPUT_INVALID } from "../telegram/services/addMethod/messages";
 import { inlineKeyboardMenu } from "../telegram/mainMenu/inlineKeyboard";
@@ -198,6 +198,24 @@ bot.on(message("text"), async ctx => {
             await handleError(error, userState[userId].stage, ctx)
           }
           break
+
+
+        case `getOptions`:
+          await deleteLastMessage(ctx)
+          try {
+            if (isNaN(parseInt(userMessage))) {
+              await ctx.deleteMessage()
+              await ctx.reply(`dia invalido`, {
+                parse_mode: "Markdown"
+              })
+              return
+            }
+            await ctx.deleteMessage()
+            await handleGetExercisesByInterval(ctx, bot)
+          } catch (error) {
+            console.error(`Error: `, error)
+          }
+          break;
 
         case userStageGetExercise.GET_EXERCISE_OPTIONS:
           await deleteLastMessage(ctx)

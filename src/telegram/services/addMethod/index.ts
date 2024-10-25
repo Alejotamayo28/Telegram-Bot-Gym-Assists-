@@ -1,13 +1,12 @@
 import { Context, Telegraf } from "telegraf";
 import { PartialWorkout } from "../../../model/workout";
-import { verifyExerciseOutput } from "../utils";
+import { insertWorkoutQueryTESTING, verifyExerciseOutput } from "../utils";
 import { inlineKeyboardVerifyExercise } from "./inlineKeyboard";
 import { VERIFY_EXERCISE_NO_CALLBACK, VERIFY_EXERCISE_YES_CALLBACK } from "./buttons";
 import { inlineKeyboardMenu } from "../../mainMenu/inlineKeyboard";
 import { userState } from "../../../userState";
 import { EXERCISE_NOT_SUCCESFULLY_CREATED, EXERCISE_SUCCESFULLY_CREATED } from "./messages";
 import { onTransaction } from "../../../database/dataAccessLayer";
-import { insertWorkoutQuery } from "./queries";
 import { handleError } from "../../../errors";
 
 export const addExerciseVeryficationMenu = async (bot: Telegraf, ctx: Context) => {
@@ -21,7 +20,8 @@ export const addExerciseVeryficationMenu = async (bot: Telegraf, ctx: Context) =
     bot.action(VERIFY_EXERCISE_YES_CALLBACK, async (ctx: Context) => {
       await ctx.deleteMessage()
       await onTransaction(async (transactionWorkout) => {
-        await insertWorkoutQuery(workoutData, ctx, transactionWorkout)
+        await insertWorkoutQueryTESTING(workoutData, ctx, transactionWorkout)
+        //await insertWorkoutQuery(workoutData, ctx, transactionWorkout)
       })
       await ctx.reply(EXERCISE_SUCCESFULLY_CREATED, {
         parse_mode: 'MarkdownV2',

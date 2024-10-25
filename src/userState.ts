@@ -44,12 +44,12 @@ interface UpdateUserStateOptions {
   name?: string;
   reps?: number[];
   kg?: number;
+  interval?: number,
   stage?: string;
   nickname?: string,
   password?: string,
   email?: string
 }
-
 export const updateUserStateExample = (ctx: Context, updates: UpdateUserStateOptions) => {
   userState[ctx.from!.id] = {
     ...userState[ctx.from!.id],
@@ -87,4 +87,8 @@ export const userStateUpdatePassword = (ctx: Context, password: string, stage?: 
 
 export const userStateUpdateEmail = (ctx: Context, email: string, stage?: string) => {
   updateUserStateExample(ctx, { email, stage })
+}
+
+export const userStateUpdateInterval = (ctx: Context, interval: number, stage?: string) => {
+  updateUserStateExample(ctx, { interval, stage })
 }

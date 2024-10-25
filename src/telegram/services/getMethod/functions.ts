@@ -1,13 +1,12 @@
-import { QueryResult } from "pg";
-import { PartialWorkout, userWorkout } from "../../../model/workout";
-import { onSession } from "../../../database/dataAccessLayer";
+import { Exercise, userWorkout } from "../../../model/workout";
 import { validateDays } from "../utils";
 import { ChartData, ChartConfiguration } from "chart.js";
 import { ChartJSNodeCanvas } from "chartjs-node-canvas";
+import { ExerciseQueryFetcher } from "./queries";
 
-export const handleOutputDailyExercise = (data: QueryResult<PartialWorkout>): String => {
+export const handleOutputDailyExercise = (data: Exercise[]): String => {
   let result = ""
-  data.rows.map((i: any) => {
+  data.map((i: any) => {
     let kg: number = i.kg
     result += `
 _Nombre:_ ${i.name}
@@ -17,29 +16,9 @@ _Peso:_ ${Math.trunc(kg)}\n`
   return result
 }
 
-export const findWeeklyExercises = async (userId: number):
-  Promise<QueryResult<userWorkout>>  => {
-  const response: QueryResult<userWorkout> = await onSession(async (clientTransaction) => {
-    const response = await clientTransaction.query(
-      `SELECT day, name, reps, kg FROM workout WHERE id = $1 ORDER BY  name`, [userId])
-    return response
-  })
-  return response
-}
-export const findExercisesByDay = async (day: string, id: number):
-  Promise<QueryResult<PartialWorkout>> => {
-  const exercises: QueryResult = await onSession(async (clientTransaction) => {
-    const response = await clientTransaction.query(
-      `SELECT name, reps, kg FROM workout WHERE id = $1 and day = $2`,
-      [id, day])
-    return response
-  })
-  return exercises
-}
-
-export const mapWeeklyExercise = (data: userWorkout[]) => {
+export const mapWeeklyExercise = (data: Exercise[]) => {
   const groupedExercises: { [day: string]: userWorkout[] } = {}
-  data.forEach((exercise: userWorkout) => {
+  data.forEach((exercise: Exercise) => {
     if (validateDays.includes(exercise.day)) {
       if (!groupedExercises[exercise.day]) {
         groupedExercises[exercise.day] = [];
@@ -64,27 +43,18 @@ _Peso:_ ${Math.trunc(exercise.kg)}\n`;
 }
 
 export const graphic = async (userId: number, day: string) => {
-  const result = await onSession(async (clientTransaction) => {
-    return clientTransaction.query(`
-    SELECT day, name, reps, kg
-    FROM workout
-    WHERE id = $1
-    AND day = $2
-  `, [userId, day]);
-  })
-  const ejercicios = result.rows.map(row => row.name + `\n${row.kg} kg`)
-  const serie1 = result.rows.map(row => row.reps[0] || 0)
-  const serie2 = result.rows.map(row => row.reps[1] || 0)
-  const serie3 = result.rows.map(row => row.reps[2] || 0)
+  const result = await ExerciseQueryFetcher.ExerciseByIdAndDay(userId, day)
+  const ejercicios = result.map(row => row.name + `\n${row.kg} kg`)
+  const serie1 = result.map(row => row.reps[0] || 0)
+  const serie2 = result.map(row => row.reps[1] || 0)
+  const serie3 = result.map(row => row.reps[2] || 0)
   const width = 1000
   const height = 600
-
   const chartCallback = (ChartJS: any) => {
     ChartJS.defaults.responsive = true,
       ChartJS.defaults.maintainAspectRatio = false;
   }
   const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height, chartCallback });
-
   const chartData: ChartData = {
     labels: ejercicios,
     datasets: [
