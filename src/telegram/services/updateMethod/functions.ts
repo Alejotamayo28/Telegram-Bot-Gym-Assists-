@@ -7,6 +7,9 @@ import { bot } from "../../bot"
 import { UPDATE_EXERCISE_KG, UPDATE_EXERCISE_NAME, UPDATE_EXERCISE_REPS } from "./message"
 import { onSession } from "../../../database/dataAccessLayer"
 
+
+
+
 export const handleUpdateExerciseDay = async (ctx: Context, userMessage: string) => {
   try {
     const day = userMessage.toLowerCase()

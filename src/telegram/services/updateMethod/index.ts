@@ -2,7 +2,7 @@ import { Context, Telegraf } from "telegraf";
 import { PartialWorkout } from "../../../model/workout";
 import { verifyExerciseOutput } from "../utils";
 import { inlineKeyboardMenu } from "../../mainMenu/inlineKeyboard";
-import { inlineKeyboardVerifyExerciseUpdate } from "./inlineKeyboard";
+import { ExerciseUpdateDayHandler, inlineKeyboardVerifyExerciseUpdate } from "./inlineKeyboard";
 import { VERIFY_EXERCISE_UPDATE_YES_CALLBACK } from "./buttons";
 import { UPDATED_EXERCISE_SUCCESFULLY } from "./message";
 import { onTransaction } from "../../../database/dataAccessLayer";
@@ -28,3 +28,5 @@ export const updateExerciseVeryficationMenu = async (bot: Telegraf, ctx: Context
     )
   })
 }
+
+

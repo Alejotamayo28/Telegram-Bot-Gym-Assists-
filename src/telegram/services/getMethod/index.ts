@@ -3,22 +3,20 @@ import { sendMenuFunctions } from "../../menus/userMenu";
 import { graphic, handleOutputDailyExercise, mapWeeklyExercise } from "./functions";
 import { deleteLastMessage, regexPattern, tryCatch } from "../utils";
 import { handleExerciseNotFound } from "../updateMethod/functions";
-import { ExerciseViewOption } from "./models";
-import { ExerciseIntervalHandler, sendInlineExerciseOptions } from "./inlineKeyboard";
-import { handleExerciseOption } from "./options";
+import { ExerciseFetchGraphTextOptions, ExerciseViewOption } from "./models";
+import { ExerciseFetchHandler, ExerciseFetchHandlerInterval, ExerciseFetchHandlerOptions } from "./inlineKeyboard";
 import { ExerciseQueryFetcher } from "./queries";
 
 export const handleGetDailyExercisesGraphic = async (ctx: Context, day: string) => {
   await ctx.deleteMessage()
   try {
     const image = await graphic(ctx.from!.id, day)
-    const response = ctx.replyWithPhoto({
+    await ctx.replyWithPhoto({
       source: image, filename: 'exercise_chart.png'
     }, {
       caption: `_Gráfico de ejercicios del dia ${day}._`,
       parse_mode: "Markdown"
     });
-    await response
     await sendMenuFunctions(ctx)
   } catch (error) {
     console.error(`Error: `, error)
@@ -62,31 +60,46 @@ export const handleGetWeeklyExercises = async (ctx: Context) => {
   }
 }
 
-// -------> EJEMPLOS NUEVOS DE ESTRUCTURA ->
+// Estructuracion nueva ================
 
-
-//MENSAJE
-
-
-
-
-
-
-
-
-//Funcion principal
-export const handleGetExercisesOptions = async (ctx: Context, bot: Telegraf) => {
+export const fetchExerciseController = async (ctx: Context, bot: Telegraf) => {
+  const response = new ExerciseFetchHandler()
   try {
-    const message = await sendInlineExerciseOptions(ctx)
+    const message = await response.sendCompleteMessage(ctx)
     bot.action(regexPattern(ExerciseViewOption), async (ctx) => {
       const action = ctx.match[0]
-      await tryCatch(() => handleExerciseOption(ctx, message, action, bot), ctx)
+      await tryCatch(() => response.handleOptions(ctx, message, action, bot), ctx)
     })
   } catch (error) {
     console.error(`Error in handleGetExerciseOptions :`, error)
   }
 }
 
+export const fetchExerciseIntervalController = async (ctx: Context, bot: Telegraf) => {
+  const response = new ExerciseFetchHandlerInterval()
+  try {
+    const message = await response.sendCompleteMessage(ctx)
+    bot.action(regexPattern(ExerciseIntervalOption), async (ctx) => {
+      const action = ctx.match[0]
+      await tryCatch(() => response.handleOptions(ctx, message, action, bot), ctx)
+    })
+  } catch (error) {
+    console.error(`Error in handleGetExerciseOptions :`, error)
+  }
+}
+
+export const fetchExerciseGraphTextController = async (ctx: Context, bot: Telegraf, userMessage: string) => {
+  const response = new ExerciseFetchHandlerOptions()
+  try {
+    const message = await response.sendCompleteMessage(ctx)
+    bot.action(regexPattern(ExerciseFetchGraphTextOptions), async (ctx) => {
+      const action = ctx.match[0]
+      await tryCatch(() => response.handleOptions(ctx, message, action, bot, userMessage), ctx)
+    })
+  } catch (error) {
+    console.error(`Error :`, error)
+  }
+}
 
 
 //OTRO EJEMPLO DE ESTRUCTURA
@@ -102,19 +115,5 @@ export const EXERCISE_INTERVALS_LABELS = {
   SEMANA_2: '🔹 Semana 2',
   SEMANA_3: '🔹 Semana 3'
 }
-
-export const handleGetExercisesByInterval = async (ctx: Context, bot: Telegraf) => {
-  try {
-    const response = new ExerciseIntervalHandler()
-    const message = await response.sendExerciseIntervalOptions(ctx)
-    bot.action(regexPattern(ExerciseIntervalOption), async (ctx) => {
-      const action = ctx.match[0]
-      await tryCatch(() => response.handleOption(ctx, message, action), ctx)
-    })
-  } catch (error) {
-    console.error(`Error: `, error)
-  }
-}
-
 
 

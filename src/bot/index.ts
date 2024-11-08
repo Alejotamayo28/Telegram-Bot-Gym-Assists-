@@ -12,10 +12,12 @@ import { handleLoginNickname, handleLoginPassword } from "../telegram/services/l
 import { inlineKeyboardGetDailyExercicses } from "../telegram/services/getMethod/inlineKeyboard";
 import { GET_RESULT_OPTIONS } from "../telegram/services/getMethod/messages";
 import { deleteLastMessage, verifyExerciseInput } from "../telegram/services/utils";
-import { handleGetDailyExercisesGraphic, handleGetDailyExercisesText, handleGetExercisesByInterval } from "../telegram/services/getMethod";
+import { fetchExerciseGraphTextController, handleGetDailyExercisesGraphic, handleGetDailyExercisesText } from "../telegram/services/getMethod";
 import { isNaN, parseInt } from "lodash";
 import { EXERCISE_REPS_INVALID_OUTPUT, EXERCISE_WEIGHT_OUTPUT_INVALID } from "../telegram/services/addMethod/messages";
 import { inlineKeyboardMenu } from "../telegram/mainMenu/inlineKeyboard";
+import { ExerciseUpdateKgHandler } from "../telegram/services/updateMethod/inlineKeyboard";
+import { PostExerciseVerificationController } from "../telegram/services/addMethod";
 
 export type MyContext =
   | NarrowedContext<Context<Update>, Update.MessageUpdate<Message.TextMessage>>
@@ -124,7 +126,10 @@ bot.on(message("text"), async ctx => {
               })
               return
             }
-            await handleAddExerciseVerification(ctx, parseInt(userMessage))
+            const response = new ExerciseUpdateKgHandler()
+            await response.handle(ctx, userMessage)
+            await PostExerciseVerificationController(ctx, bot)
+            //await handleAddExerciseVerification(ctx, parseInt(userMessage))
             delete userState[userId]
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
@@ -199,24 +204,6 @@ bot.on(message("text"), async ctx => {
           }
           break
 
-
-        case `getOptions`:
-          await deleteLastMessage(ctx)
-          try {
-            if (isNaN(parseInt(userMessage))) {
-              await ctx.deleteMessage()
-              await ctx.reply(`dia invalido`, {
-                parse_mode: "Markdown"
-              })
-              return
-            }
-            await ctx.deleteMessage()
-            await handleGetExercisesByInterval(ctx, bot)
-          } catch (error) {
-            console.error(`Error: `, error)
-          }
-          break;
-
         case userStageGetExercise.GET_EXERCISE_OPTIONS:
           await deleteLastMessage(ctx)
           try {
@@ -226,16 +213,7 @@ bot.on(message("text"), async ctx => {
               break
             }
             await ctx.deleteMessage()
-            await ctx.reply(GET_RESULT_OPTIONS, {
-              parse_mode: "Markdown",
-              reply_markup: inlineKeyboardGetDailyExercicses.reply_markup
-            })
-            bot.action(`grafico`, async (ctx) => {
-              await handleGetDailyExercisesGraphic(ctx, userMessage)
-            })
-            bot.action(`texto`, async (ctx) => {
-              await handleGetDailyExercisesText(ctx, userMessage)
-            })
+            await fetchExerciseGraphTextController(ctx, bot, userMessage)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }

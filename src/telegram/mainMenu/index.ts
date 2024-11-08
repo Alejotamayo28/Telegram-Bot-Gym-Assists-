@@ -7,7 +7,7 @@ import { GET_EXERCISE_DAY_OUTPUT, POST_EXERCISE_DAY_OUTPUT } from "./messages"
 import { MAIN_MENU_MESSAGE } from "../messages/mainMenuMessage"
 import { UPDATE_EXERCISE_DAY_OUTPUT } from "../services/updateMethod/message"
 import { DELETE_EXERICISE_DAY } from "../services/deleteMethod/messages"
-import { handleGetExercisesByInterval, handleGetExercisesOptions, handleGetWeeklyExercises } from "../services/getMethod"
+import { fetchExerciseController, handleGetExercisesByInterval, handleGetWeeklyExercises } from "../services/getMethod"
 import { inlineKeyboardGetMenu, testingGet } from "../services/getMethod/inlineKeyboard"
 
 export const mainMenuPage = async (ctx: Context, bot: Telegraf) => {
@@ -28,7 +28,9 @@ export const mainMenuPage = async (ctx: Context, bot: Telegraf) => {
     userStateUpdateStage(ctx, userStagePutExercise.PUT_EXERCISE_DAY)
   })
   bot.action(GET_EXERCISE_DAY_CALLBACK, async (ctx: Context) => {
-    await handleGetExercisesOptions(ctx, bot)
+    await fetchExerciseController(ctx, bot)
+    //await fecthExerisesController(ctx, bot)
+    //await handleGetExercisesOptions(ctx, bot)
   })
   bot.action(GET_EXERCISE_WEEK_CALLBACK, async (ctx: Context) => {
     await handleGetWeeklyExercises(ctx)

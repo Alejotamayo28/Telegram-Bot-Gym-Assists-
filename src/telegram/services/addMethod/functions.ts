@@ -1,4 +1,4 @@
-import { Context } from "telegraf"
+import { Context, Telegraf } from "telegraf"
 import { verifyDay } from "../utils"
 import { userStagePostExercise, userState, userStateUpdateDay, userStateUpdateKg, userStateUpdateName, userStateUpdateReps } from "../../../userState"
 import { addExerciseVeryficationMenu } from "."
@@ -43,6 +43,9 @@ export const handleAddExerciseReps = async (ctx: Context, userMessage: string): 
   }
 }
 
+
+
+// VIEJA ESTRUCTURA 
 export const handleAddExerciseVerification = async (ctx: Context, userMessage: number): Promise<void> => {
   try {
     userStateUpdateKg(ctx, userMessage)
@@ -62,8 +65,7 @@ export const handleIncorrectDayInput = async (ctx: Context): Promise<void> => {
     parse_mode: 'Markdown'
   })
 }
-export const handleIncorrectExerciseInput = async (ctx: Context): Promise<void> => {
-  await ctx.reply(EXERCISE_NAME_OUTPUT_INVALID, {
+export const handleIncorrectExerciseInput = async (ctx: Context): Promise<void> => { await ctx.reply(EXERCISE_NAME_OUTPUT_INVALID, {
     parse_mode: "Markdown"
   })
 }
