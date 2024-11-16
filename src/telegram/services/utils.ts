@@ -168,6 +168,7 @@ export const menuPageGetExercises = async (client: PoolClient, id: number) => {
 
 
 export const validateDays = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']
+
 export const verifyDay = (day: string) => {
   return validateDays.includes(day)
 }

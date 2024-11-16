@@ -1,48 +1,33 @@
 import { Context, Telegraf } from "telegraf"
-import { userStageDeleteExercise, userStageGetExercise, userStagePostExercise, userStagePutExercise, userStateUpdateStage } from "../../userState"
-import { DELETE_EXERCISE_CALLBACK, GET_EXERCISE_DAY_CALLBACK, GET_EXERCISE_WEEK_CALLBACK, POST_EXERCISE_CALLBACK, UPDATE_EXERCISE_CALLBACK } from "./buttons"
-import { inlineKeyboardMenu } from "./inlineKeyboard"
-import { sendMenuFunctions } from "../menus/userMenu"
-import { GET_EXERCISE_DAY_OUTPUT, POST_EXERCISE_DAY_OUTPUT } from "./messages"
-import { MAIN_MENU_MESSAGE } from "../messages/mainMenuMessage"
-import { UPDATE_EXERCISE_DAY_OUTPUT } from "../services/updateMethod/message"
-import { DELETE_EXERICISE_DAY } from "../services/deleteMethod/messages"
-import { fetchExerciseController, handleGetExercisesByInterval, handleGetWeeklyExercises } from "../services/getMethod"
-import { inlineKeyboardGetMenu, testingGet } from "../services/getMethod/inlineKeyboard"
+import { MainMenuHandler, ReturnMainMenuHandler } from "./inlineKeyboard"
+import { regexPattern, tryCatch } from "../services/utils"
+import { MainMenuCallbacks, ReturnMainMenuCallbacks } from "./models"
+
 
 export const mainMenuPage = async (ctx: Context, bot: Telegraf) => {
-  await ctx.reply(MAIN_MENU_MESSAGE, {
-    parse_mode: "Markdown",
-    reply_markup: inlineKeyboardMenu.reply_markup
-  })
-  bot.action(POST_EXERCISE_CALLBACK, async (ctx: Context) => {
-    await ctx.reply(POST_EXERCISE_DAY_OUTPUT, {
-      parse_mode: "MarkdownV2",
+  const response = new MainMenuHandler()
+  try {
+    const message = await response.sendCompleteMessage(ctx)
+    bot.action(regexPattern(MainMenuCallbacks), async (ctx) => {
+      const action = ctx.match[0]
+      await tryCatch(() => response.handleOptions(ctx, message, action), ctx)
     })
-    userStateUpdateStage(ctx, userStagePostExercise.POST_EXERCISE_DAY)
-  })
-  bot.action(UPDATE_EXERCISE_CALLBACK, async (ctx: Context) => {
-    await ctx.reply(UPDATE_EXERCISE_DAY_OUTPUT, {
-      parse_mode: "MarkdownV2"
-    })
-    userStateUpdateStage(ctx, userStagePutExercise.PUT_EXERCISE_DAY)
-  })
-  bot.action(GET_EXERCISE_DAY_CALLBACK, async (ctx: Context) => {
-    await fetchExerciseController(ctx, bot)
-    //await fecthExerisesController(ctx, bot)
-    //await handleGetExercisesOptions(ctx, bot)
-  })
-  bot.action(GET_EXERCISE_WEEK_CALLBACK, async (ctx: Context) => {
-    await handleGetWeeklyExercises(ctx)
-    await sendMenuFunctions(ctx)
-  })
+  } catch (error) {
+    console.error(`Error: `, error)
+  }
+}
 
-  bot.action(DELETE_EXERCISE_CALLBACK, async (ctx: Context) => {
-    await ctx.reply(DELETE_EXERICISE_DAY, {
-      parse_mode: "Markdown"
+export const returnMainMenuPage = async (ctx: Context, bot: Telegraf) => {
+  const response = new ReturnMainMenuHandler()
+  try {
+    const message = await response.sendCompleteMessage(ctx)
+    bot.action(regexPattern(ReturnMainMenuCallbacks), async (ctx) => {
+      const action = ctx.match[0]
+      await tryCatch(() => response.handleOptions(ctx, message, action, bot), ctx)
     })
-    userStateUpdateStage(ctx, userStageDeleteExercise.DELETE_EXERCISE_DAY)
-  })
+  } catch (error) {
+    console.error(`Error: `, error)
+  }
 }
 
 

@@ -1,8 +1,6 @@
 import { Context } from "telegraf";
 import { userStageDeleteExercise, userStateUpdateDay } from "../../../userState";
-import { bot } from "../../bot";
 import { EXERCISE_DELETE_NAME } from "./messages";
-import { deleteExerciseVerificationMenu } from ".";
 
 export const handleDeleteExerciseDay = async (ctx: Context, userMessage: string) => {
   try {
@@ -16,12 +14,5 @@ export const handleDeleteExerciseDay = async (ctx: Context, userMessage: string)
   }
 };
 
-export const handleDeleteExerciseName = async (ctx: Context) => {
-  try {
-    await ctx.deleteMessage()
-    await deleteExerciseVerificationMenu(bot, ctx);
-  } catch (error) {
-    console.error(`Error: `, error)
-  }
-};
+
 

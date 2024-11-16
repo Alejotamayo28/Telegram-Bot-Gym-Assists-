@@ -6,8 +6,9 @@ import { handleExerciseNotFound } from "../updateMethod/functions";
 import { ExerciseFetchGraphTextOptions, ExerciseViewOption } from "./models";
 import { ExerciseFetchHandler, ExerciseFetchHandlerInterval, ExerciseFetchHandlerOptions } from "./inlineKeyboard";
 import { ExerciseQueryFetcher } from "./queries";
+import { returnMainMenuPage } from "../../mainMenu";
 
-export const handleGetDailyExercisesGraphic = async (ctx: Context, day: string) => {
+export const handleGetDailyExercisesGraphic = async (ctx: Context, day: string, bot:Telegraf) => {
   await ctx.deleteMessage()
   try {
     const image = await graphic(ctx.from!.id, day)
@@ -17,7 +18,7 @@ export const handleGetDailyExercisesGraphic = async (ctx: Context, day: string) 
       caption: `_Gráfico de ejercicios del dia ${day}._`,
       parse_mode: "Markdown"
     });
-    await sendMenuFunctions(ctx)
+    await returnMainMenuPage(ctx,bot)
   } catch (error) {
     console.error(`Error: `, error)
   }

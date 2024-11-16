@@ -28,15 +28,21 @@ export const EXERCISE_REPS_INVALID_OUTPUT = `
 *📋Repeticiones INVALIDAS:*
 
 _¡Por favor, ingresa la cantidad de repeticiones que realizaste en cada serie!
-Ejemplo: 10 10 10_
-`
+Ejemplo: 10 10 10_`
+
+export const EXERCISE_WEIGHT_INVALID_OUTPUT = `
+*📋Peso invalido:*
+
+_¡Por favor, ingresa el peso en kilogramos (kg) con el cual realizase el ejercicio!
+Ejemplo: 20_`
+
 export const EXERCISE_WEIGHT_OUTPUT = `
 *🏋️ Peso utilizado:*
 
 _¡Por favor, ingresa el peso en kilogramos \\(kg\\) con el cual realizaste el ejercicio\\!_
 _Ejemplo_: _20_`
 
-export const EXERCISE_WEIGHT_OUTPUT_INVALID =`
+export const EXERCISE_WEIGHT_OUTPUT_INVALID = `
 *🏋️ Peso ingresado INVALIDO*
 
 _¡Por favor, ingresa el peso en kilogramos (kg) con el cual realizaste el ejercicio!

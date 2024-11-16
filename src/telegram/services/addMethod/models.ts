@@ -1,9 +1,11 @@
+//Label
 export const ExerciseVerificationLabels = {
-  YES: 'Si',
-  NO: 'No'
+  YES: 'Confirmar`',
+  NO: 'Cancelar'
 }
 
-export enum ExerciseVerificationOptions {
+//Callback
+export enum ExerciseVerificationCallbacks {
   YES = 'si',
   NO = 'no'
 }

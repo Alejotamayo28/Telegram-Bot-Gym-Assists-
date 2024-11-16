@@ -2,22 +2,21 @@ import { userStage, userStageDeleteExercise, userStageGetExercise, userStagePost
 import { bot } from "../telegram/bot";
 import { handleError } from "../errors";
 import { handleSignUpEmail, handleSignUpNickname, handleSignUpPassword } from "../telegram/services/singUp/functions";
-import { handleAddExerciseDay, handleAddExerciseName, handleAddExerciseReps, handleAddExerciseVerification, handleIncorrectDayInput, handleIncorrectExerciseInput, isAllRepsValid, verifyDayInput } from "../telegram/services/addMethod/functions";
+import { ExercisePostHandler } from "../telegram/services/addMethod/functions";
 import { message } from 'telegraf/filters'
 import { NarrowedContext, Context } from "telegraf";
 import { Update, Message } from "telegraf/typings/core/types/typegram";
-import { handleDeleteExerciseDay, handleDeleteExerciseName } from "../telegram/services/deleteMethod/functions";
+import { handleDeleteExerciseDay } from "../telegram/services/deleteMethod/functions";
 import { handleUpdateExerciseDay, handleUpdateExerciseName, handlerUpdateExerciseReps, handlerUpdateExerciseKg, findExerciseByDayName, handleExerciseNotFound } from "../telegram/services/updateMethod/functions";
 import { handleLoginNickname, handleLoginPassword } from "../telegram/services/login/functions";
-import { inlineKeyboardGetDailyExercicses } from "../telegram/services/getMethod/inlineKeyboard";
-import { GET_RESULT_OPTIONS } from "../telegram/services/getMethod/messages";
-import { deleteLastMessage, verifyExerciseInput } from "../telegram/services/utils";
-import { fetchExerciseGraphTextController, handleGetDailyExercisesGraphic, handleGetDailyExercisesText } from "../telegram/services/getMethod";
-import { isNaN, parseInt } from "lodash";
-import { EXERCISE_REPS_INVALID_OUTPUT, EXERCISE_WEIGHT_OUTPUT_INVALID } from "../telegram/services/addMethod/messages";
+import { deleteLastMessage } from "../telegram/services/utils";
+import { fetchExerciseGraphTextController } from "../telegram/services/getMethod";
+import { parseInt } from "lodash";
 import { inlineKeyboardMenu } from "../telegram/mainMenu/inlineKeyboard";
-import { ExerciseUpdateKgHandler } from "../telegram/services/updateMethod/inlineKeyboard";
 import { PostExerciseVerificationController } from "../telegram/services/addMethod";
+import { DataValidator } from "../validators/dataValidator";
+import { deleteExerciseVerificationController } from "../telegram/services/deleteMethod";
+import { ExerciseQueryFetcher } from "../telegram/services/getMethod/queries";
 
 export type MyContext =
   | NarrowedContext<Context<Update>, Update.MessageUpdate<Message.TextMessage>>
@@ -74,12 +73,8 @@ bot.on(message("text"), async ctx => {
         case userStagePostExercise.POST_EXERCISE_DAY:
           await deleteLastMessage(ctx)
           try {
-            if (!verifyDayInput(userMessage)) {
-              await ctx.deleteMessage()
-              await handleIncorrectDayInput(ctx)
-              break
-            }
-            await handleAddExerciseDay(ctx, userMessage)
+            if (await (DataValidator.validateDay(ctx, userMessage))) break
+            await ExercisePostHandler.postExerciseDay(ctx, userMessage)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
@@ -88,12 +83,8 @@ bot.on(message("text"), async ctx => {
         case userStagePostExercise.POST_EXERCISE_NAME:
           await deleteLastMessage(ctx)
           try {
-            if (!verifyExerciseInput(userMessage)) {
-              await ctx.deleteMessage()
-              await handleIncorrectExerciseInput(ctx)
-              return
-            }
-            await handleAddExerciseName(ctx, userMessage)
+            if (await (DataValidator.validateExercise(ctx, userMessage))) break
+            await ExercisePostHandler.postExerciseName(ctx, userMessage)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
@@ -102,15 +93,8 @@ bot.on(message("text"), async ctx => {
         case userStagePostExercise.POST_EXERCISE_REPS:
           await deleteLastMessage(ctx)
           try {
-            const reps = userMessage.split(" ").map(Number)
-            if (!isAllRepsValid(reps)) {
-              await ctx.deleteMessage()
-              await ctx.reply(EXERCISE_REPS_INVALID_OUTPUT, {
-                parse_mode: "Markdown"
-              });
-              return;
-            }
-            await handleAddExerciseReps(ctx, userMessage)
+            if (await (DataValidator.validateReps(ctx, userMessage))) break
+            await ExercisePostHandler.postExerciseReps(ctx, userMessage)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
@@ -119,18 +103,9 @@ bot.on(message("text"), async ctx => {
         case userStagePostExercise.POST_EXERCISE_VERIFICATION:
           await deleteLastMessage(ctx)
           try {
-            if (isNaN(parseInt(userMessage))) {
-              await ctx.deleteMessage()
-              await ctx.reply(EXERCISE_WEIGHT_OUTPUT_INVALID, {
-                parse_mode: "Markdown"
-              })
-              return
-            }
-            const response = new ExerciseUpdateKgHandler()
-            await response.handle(ctx, userMessage)
+            if (await (DataValidator.validateWeight(ctx, userMessage))) break
+            await ExercisePostHandler.postExerciseWeight(ctx, Number(userMessage))
             await PostExerciseVerificationController(ctx, bot)
-            //await handleAddExerciseVerification(ctx, parseInt(userMessage))
-            delete userState[userId]
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
@@ -139,11 +114,7 @@ bot.on(message("text"), async ctx => {
         case userStagePutExercise.PUT_EXERCISE_DAY:
           await deleteLastMessage(ctx)
           try {
-            if (!verifyDayInput(userMessage)) {
-              await ctx.deleteMessage()
-              await handleIncorrectDayInput(ctx)
-              return
-            }
+            if (await (DataValidator.validateDay(ctx, userMessage))) break
             await handleUpdateExerciseDay(ctx, userMessage)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
@@ -153,11 +124,7 @@ bot.on(message("text"), async ctx => {
         case userStagePutExercise.PUT_EXERCISE_NAME:
           await deleteLastMessage(ctx)
           try {
-            if (!verifyExerciseInput(userMessage)) {
-              await ctx.deleteMessage()
-              await handleIncorrectExerciseInput(ctx)
-              return
-            }
+            if (await (DataValidator.validateExercise(ctx, userMessage))) break
             userStateUpdateName(ctx, userMessage)
             const exercise = await findExerciseByDayName(userId, userState[userId])
             if (!exercise) {
@@ -174,14 +141,7 @@ bot.on(message("text"), async ctx => {
         case userStagePutExercise.PUT_EXERCISE_REPS:
           await deleteLastMessage(ctx)
           try {
-            const reps = userMessage.split(" ").map(Number)
-            if (!isAllRepsValid(reps)) {
-              await ctx.deleteMessage()
-              await ctx.reply(EXERCISE_REPS_INVALID_OUTPUT, {
-                parse_mode: "Markdown"
-              });
-              return;
-            }
+            if (await (DataValidator.validateReps(ctx, userMessage))) break
             await handlerUpdateExerciseReps(ctx, userMessage)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
@@ -191,13 +151,7 @@ bot.on(message("text"), async ctx => {
         case userStagePutExercise.PUT_EXERCISE_WEIGHT:
           await deleteLastMessage(ctx)
           try {
-            if (isNaN(parseInt(userMessage))) {
-              await ctx.deleteMessage()
-              await ctx.reply(EXERCISE_WEIGHT_OUTPUT_INVALID, {
-                parse_mode: "Markdown"
-              })
-              return
-            }
+            if (await (DataValidator.validateWeight(ctx, userMessage))) break
             await handlerUpdateExerciseKg(ctx, parseInt(userMessage))
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
@@ -207,11 +161,7 @@ bot.on(message("text"), async ctx => {
         case userStageGetExercise.GET_EXERCISE_OPTIONS:
           await deleteLastMessage(ctx)
           try {
-            if (!verifyDayInput(userMessage)) {
-              await ctx.deleteMessage()
-              await handleIncorrectDayInput(ctx)
-              break
-            }
+            if (await (DataValidator.validateDay(ctx, userMessage))) break
             await ctx.deleteMessage()
             await fetchExerciseGraphTextController(ctx, bot, userMessage)
           } catch (error) {
@@ -222,11 +172,7 @@ bot.on(message("text"), async ctx => {
         case userStageDeleteExercise.DELETE_EXERCISE_DAY:
           await deleteLastMessage(ctx)
           try {
-            if (!verifyDayInput(userMessage)) {
-              await ctx.deleteMessage();
-              await handleIncorrectDayInput(ctx);
-              return;
-            }
+            if (await (DataValidator.validateDay(ctx, userMessage))) break
             await handleDeleteExerciseDay(ctx, userMessage)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
@@ -237,13 +183,13 @@ bot.on(message("text"), async ctx => {
           await deleteLastMessage(ctx)
           try {
             userStateUpdateName(ctx, userMessage)
-            const exercise = await findExerciseByDayName(userId, userState[userId])
+            const exercise = await ExerciseQueryFetcher.ExerciseByNameRepsAndId(userId, userState[userId])
             if (!exercise) {
               await ctx.deleteMessage()
               await handleExerciseNotFound(ctx)
               return
             }
-            await handleDeleteExerciseName(ctx)
+            await deleteExerciseVerificationController(ctx, bot)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
@@ -252,7 +198,6 @@ bot.on(message("text"), async ctx => {
         default:
           ctx.reply(`*Ha ocurrdio un error, vuelve a escoger la accion para volver a comenzar.*`, {
             parse_mode: "Markdown",
-            reply_markup: inlineKeyboardMenu.reply_markup
           });
           break;
       }

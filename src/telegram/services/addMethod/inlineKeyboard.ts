@@ -1,59 +1,57 @@
-import { Context, Markup, Telegraf } from "telegraf";
-import { VERIFY_EXERCISE_NO, VERIFY_EXERCISE_NO_CALLBACK, VERIFY_EXERCISE_YES, VERIFY_EXERCISE_YES_CALLBACK } from "./buttons";
+import { Context } from "telegraf";
 import { MessageTemplate } from "../../../template/message";
-import { insertWorkoutQueryTESTING, verifyExerciseOutput } from "../utils";
-import { createTextSpan } from "typescript";
+import { verifyExerciseOutput } from "../utils";
 import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram";
 import { PartialWorkout } from "../../../model/workout";
-import { userState } from "../../../userState";
-import { onTransaction } from "../../../database/dataAccessLayer";
+import { userState } from "../../../userState"; import { onTransaction } from "../../../database/dataAccessLayer";
 import { EXERCISE_NOT_SUCCESFULLY_CREATED, EXERCISE_SUCCESFULLY_CREATED } from "./messages";
 import { inlineKeyboardMenu } from "../../mainMenu/inlineKeyboard";
+import { ExerciseVerificationCallbacks, ExerciseVerificationLabels } from "./models";
+import { ExerciseQueryPost } from "./queries";
 
 export class ExercisePostVerificationHandler extends MessageTemplate {
-  private workoutData: PartialWorkout = userState[this.ctx.from!.id]
   constructor(private ctx: Context) {
     super()
   }
+  workoutData: PartialWorkout = userState[this.ctx.from!.id]
   protected prepareMessage() {
     const message = verifyExerciseOutput(this.workoutData)
     const keyboard: InlineKeyboardMarkup = {
       inline_keyboard: [
         [
-          this.createButton(`siiiiiiiiiii`, { action: VERIFY_EXERCISE_YES_CALLBACK }),
-          this.createButton(`nooooooooooo`, { action: VERIFY_EXERCISE_NO_CALLBACK })
+          this.createButton(ExerciseVerificationLabels.YES, { action: ExerciseVerificationCallbacks.YES }),
+          this.createButton(ExerciseVerificationLabels.NO, { action: ExerciseVerificationCallbacks.NO })
         ]
       ]
     }
     return { message, keyboard }
   }
-   async handleOptions(ctx: Context, message: Message, action: string, bot: Telegraf, userMessage?: string) {
+  async handleOptions(_: Context, message: Message, action: string) {
+    this.ctx.deleteMessage(message.message_id)
     const handlers: { [key: string]: () => Promise<void> } = {
-      [VERIFY_EXERCISE_YES_CALLBACK]: async () => {
-        await ctx.deleteMessage()
-        await onTransaction(async (transactionWorkout) => {
-          await insertWorkoutQueryTESTING(this.workoutData, ctx, transactionWorkout)
-        })
-        await ctx.reply(EXERCISE_SUCCESFULLY_CREATED, {
-          parse_mode: 'MarkdownV2',
-          ...inlineKeyboardMenu
-        })
-      },
-      [VERIFY_EXERCISE_NO_CALLBACK]: async () => {
-        await ctx.deleteMessage()
-        await ctx.reply(EXERCISE_NOT_SUCCESFULLY_CREATED, {
-          parse_mode: 'MarkdownV2',
-          ...inlineKeyboardMenu
-        })
-      }
+      [ExerciseVerificationCallbacks.YES]: this.handleYesCallback.bind(this, this.ctx),
+      [ExerciseVerificationCallbacks.NO]: this.handleNoCallback.bind(this, this.ctx)
     }
     if (handlers[action]) {
       return handlers[action]()
     }
   }
+  private async handleYesCallback(_: Context) {
+    const workoutData: PartialWorkout = userState[this.ctx.from!.id];
+    await onTransaction(async (transactionWorkout) => {
+      await ExerciseQueryPost.ExercisePost(workoutData, this.ctx, transactionWorkout);
+    });
+    await this.ctx.reply(EXERCISE_SUCCESFULLY_CREATED, {
+      parse_mode: 'MarkdownV2',
+      ...inlineKeyboardMenu
+    });
+  }
+  private async handleNoCallback(ctx: Context) {
+    await ctx.reply(EXERCISE_NOT_SUCCESFULLY_CREATED, {
+      parse_mode: 'MarkdownV2',
+      ...inlineKeyboardMenu
+    });
+  }
 }
 
-export const inlineKeyboardVerifyExercise = Markup.inlineKeyboard([
-  [Markup.button.callback(VERIFY_EXERCISE_YES, VERIFY_EXERCISE_YES_CALLBACK),
-  Markup.button.callback(VERIFY_EXERCISE_NO, VERIFY_EXERCISE_NO_CALLBACK)]
-])
+

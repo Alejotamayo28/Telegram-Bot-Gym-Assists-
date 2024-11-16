@@ -1,6 +1,6 @@
 import { Context } from "telegraf";
 import { onSession } from "../../../database/dataAccessLayer";
-import { Exercise } from "../../../model/workout";
+import { Exercise, PartialWorkout } from "../../../model/workout";
 
 export class ExerciseQueryFetcher {
   static async ExerciseByInterval(ctx: Context, interval: number): Promise<Exercise[]> {
@@ -59,6 +59,15 @@ export class ExerciseQueryFetcher {
       return await clientTransaction.query(
         `SELECT day, name, reps, kg FROM workout 
             WHERE id = $1 ORDER BY  Date`, [userId])
+    })
+    return response.rows
+  }
+  static async ExerciseByNameRepsAndId(userId: number, workoutData: PartialWorkout) {
+    const { name, day } = workoutData
+    const response = await onSession(async (clientTransaction) => {
+      return await clientTransaction.query(
+        `SELECT name FORM workout WHERE name = $1 AND day = $2 AND user_id = $3`,
+        [name, day, userId])
     })
     return response.rows
   }

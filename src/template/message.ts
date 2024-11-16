@@ -1,6 +1,6 @@
-import { wrap } from "lodash";
 import { Context, Telegraf } from "telegraf";
 import { InlineKeyboardButton, InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram";
+import { userState } from "../userState";
 
 export interface CallbackData {
   action: string;
@@ -22,13 +22,13 @@ export abstract class MessageTemplate {
   @param bot - Instance of the Telegraf bot
   @param userMessage - (Optional) Additional message from the user
   */
-  protected abstract handleOptions(ctx: Context, message: Message, action: string, bot: Telegraf, userMessage?: string): any
+  protected abstract handleOptions(ctx: Context, message: Message, action: string, bot: Telegraf, userMessage: string): any
 
   /**
    * Prepares the message content and inline keyboard structure
    * @returns An object containing the message text and inline keyboard markup
   */
-  protected abstract prepareMessage(): {
+  protected abstract prepareMessage(message?: string): {
     message: string,
     keyboard: InlineKeyboardMarkup
   }
@@ -60,7 +60,7 @@ export abstract class MessageTemplate {
       })
     }
     catch (error) {
-      console.error(error)
+      console.error(`Error: `, error)
       throw error
     }
   }
