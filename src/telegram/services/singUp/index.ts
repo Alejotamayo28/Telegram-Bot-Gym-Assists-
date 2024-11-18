@@ -1,39 +1,19 @@
 import { Context, Telegraf } from "telegraf";
-import { userState } from "../../../userState";
-import { verifySignUpOutput } from "../utils";
-import { inlineKeyboardVerifySignUp } from "./inlineKeyboard";
-import { startInlineKeyboard } from "../../commands/inlineKeyboard";
-import { SIGN_UP_NOT_SUCCESFULLY, SIGN_UP_SUCCESFULLY } from "./message";
-import { onTransaction } from "../../../database/dataAccessLayer";
-import { insertClientQuery } from "./queries";
+import { regexPattern, tryCatch } from "../utils";
+import { SignUpVerificationHandler } from "./inlineKeyboard";
+import { ExerciseVerificationCallbacks } from "../addMethod/models";
 
-export const signUpVerificationMenu = async (bot: Telegraf, ctx: Context, passwordHash: string) => {
-  const { nickname, password, email } = userState[ctx.from!.id]
-  await ctx.reply(SIGN_UP_SUCCESFULLY,
-    {
-      parse_mode: "Markdown"
+
+export const signUpVerificationController = async (ctx: Context, bot: Telegraf, passwordHash: string): Promise<void> => {
+  const response = new SignUpVerificationHandler(ctx, passwordHash)
+  try {
+    const message = await response.sendCompleteMessage(ctx)
+    bot.action(regexPattern(ExerciseVerificationCallbacks), async (ctx) => {
+      const action = ctx.match[0]
+      await tryCatch(() => response.handleOptions(ctx, message, action, bot), ctx)
     })
-  await ctx.reply(verifySignUpOutput({ nickname, password, email }),
-    {
-      parse_mode: 'MarkdownV2',
-      ...inlineKeyboardVerifySignUp
-    })
-  bot.action(`si`, async (ctx: Context) => {
-    await ctx.deleteMessage()
-    await onTransaction(async (transactionClient) => {
-      await insertClientQuery(ctx, { nickname, email }, passwordHash, transactionClient)
-    })
-    await ctx.reply(SIGN_UP_SUCCESFULLY, {
-      parse_mode: 'MarkdownV2',
-      ...startInlineKeyboard
-    }
-    )
-  })
-  bot.action(`no`, async (ctx: Context) => {
-    await ctx.deleteMessage()
-    await ctx.reply(SIGN_UP_NOT_SUCCESFULLY, {
-      parse_mode: 'MarkdownV2',
-      ...startInlineKeyboard
-    })
-  })
+  } catch (error) {
+    console.error(`Error: `, error)
+  }
 }
+

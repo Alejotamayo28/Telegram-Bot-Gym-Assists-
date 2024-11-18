@@ -2,6 +2,7 @@ import { Context, Telegraf } from "telegraf"
 import { MainMenuHandler, ReturnMainMenuHandler } from "./inlineKeyboard"
 import { regexPattern, tryCatch } from "../services/utils"
 import { MainMenuCallbacks, ReturnMainMenuCallbacks } from "./models"
+import { deleteBotMessage } from "../../userState"
 
 
 export const mainMenuPage = async (ctx: Context, bot: Telegraf) => {

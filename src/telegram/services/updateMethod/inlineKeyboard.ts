@@ -1,4 +1,4 @@
-import { Context } from "telegraf";
+import { Context, Telegraf } from "telegraf";
 import { ExerciseUpdateTemplate, MessageTemplate } from "../../../template/message";
 import { userStagePutExercise, userState, userStateUpdateDay, userStateUpdateKg, userStateUpdateName, userStateUpdateReps } from "../../../userState";
 import { UPDATE_EXERCIISE_CANCELED, UPDATE_EXERCISE_KG, UPDATE_EXERCISE_NAME, UPDATE_EXERCISE_REPS, UPDATED_EXERCISE_SUCCESFULLY } from "./message";
@@ -8,7 +8,7 @@ import { ExerciseVerificationCallbacks, ExerciseVerificationLabels } from "../ad
 import { verifyExerciseOutput } from "../utils";
 import { onTransaction } from "../../../database/dataAccessLayer";
 import { workoutUpdateQuery } from "./queries";
-import { inlineKeyboardMenu } from "../../mainMenu/inlineKeyboard";
+import { returnMainMenuPage } from "../../mainMenu";
 
 export class ExerciseUpdateDayHandler extends ExerciseUpdateTemplate {
   protected updateUserState(ctx: Context, message: string): void {
@@ -64,27 +64,24 @@ export class ExerciseUpdateVerificationHandler extends MessageTemplate {
     }
     return { message, keyboard }
   }
-  protected async handleOptions(ctx: Context, message: Message, action: string) {
+  async handleOptions(ctx: Context, message: Message, action: string, bot: Telegraf) {
     this.ctx.deleteMessage(message.message_id)
     const handlers: { [key: string]: () => Promise<void> } = {
-      [ExerciseVerificationCallbacks.YES]: this.handleYesCallback.bind(this, this.ctx),
-      [ExerciseVerificationCallbacks.NO]: this.handleNoCallback.bind(this, this.ctx)
+      [ExerciseVerificationCallbacks.YES]: this.handleYesCallback.bind(this, this.ctx, bot),
+      [ExerciseVerificationCallbacks.NO]: this.handleNoCallback.bind(this, this.ctx, bot)
+    }
+    if (handlers[action]) {
+      return handlers[action]()
     }
   }
-  private async handleYesCallback(ctx: Context) {
+  private async handleYesCallback(ctx: Context, bot: Telegraf) {
     await onTransaction(async (clientTransaction) => {
       await workoutUpdateQuery(ctx, this.workoutData, clientTransaction)
     })
-    await ctx.reply(UPDATED_EXERCISE_SUCCESFULLY, {
-      parse_mode: 'MarkdownV2',
-      reply_markup: inlineKeyboardMenu.reply_markup
-    })
+    await returnMainMenuPage(ctx, bot)
   }
-  private async handleNoCallback(ctx: Context) {
-    await ctx.reply(UPDATE_EXERCIISE_CANCELED, {
-      parse_mode: "Markdown",
-      reply_markup: inlineKeyboardMenu.reply_markup
-    })
+  private async handleNoCallback(ctx: Context, bot: Telegraf) {
+    await returnMainMenuPage(ctx, bot)
   }
 }
 

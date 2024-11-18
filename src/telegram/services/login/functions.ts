@@ -1,37 +1,34 @@
 import { compare } from "bcryptjs"
 import { Client, QueryResult } from "pg"
 import { Context } from "telegraf"
-import { deleteLastMessage } from "../utils"
 import { pool } from "../../../database/database"
-import { userStage, userState, userStateUpdatePassword, userStateUpdateStage } from "../../../userState"
+import { deleteUserMessage, userStage, userState, userStateUpdatePassword, userStateUpdateStage } from "../../../userState"
 import { bot } from "../../bot"
 import { mainMenuPage } from "../../mainMenu"
 import { LOGIN_NICKNAME_NOT_FOUND, LOGIN_PASSWORD_INCORRECT, LOGIN_REQUEST_PASSWORD_MESSAGE } from "./messages"
 
 export const handleLoginNickname = async (ctx: Context, userMessage: string) => {
-  await deleteLastMessage(ctx)
   const user = await findUserByNickname(userMessage)
   if (!user) {
     await handleUserNotFound(ctx)
-    await ctx.deleteMessage()
+    await deleteUserMessage(ctx)
     return
   }
   userStateUpdatePassword(ctx, user.password!, userStage.LOGIN_PASSWORD)
-  await ctx.deleteMessage()
+  await deleteUserMessage(ctx)
   await ctx.reply(LOGIN_REQUEST_PASSWORD_MESSAGE, {
     parse_mode: "Markdown"
   });
 }
 
 export const handleLoginPassword = async (ctx: Context, userMessage: string) => {
-  await deleteLastMessage(ctx)
   const isPasswordIncorrect = await verifyPassword(userMessage, userState[ctx.from!.id].password)
   if (!isPasswordIncorrect) {
     await handleIncorrectPassword(ctx)
-    await ctx.deleteMessage()
+    await deleteUserMessage(ctx)
     return
   }
-  await ctx.deleteMessage()
+  await deleteUserMessage(ctx)
   delete userState[ctx.from!.id]
   await mainMenuPage(ctx, bot)
 }

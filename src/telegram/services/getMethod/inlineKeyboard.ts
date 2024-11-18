@@ -1,13 +1,13 @@
 import { Context, Markup, Telegraf } from "telegraf";
-import { userStageGetExercise, userStateUpdateStage } from "../../../userState";
+import { saveBotMessage, userStageGetExercise, userStateUpdateStage } from "../../../userState";
 import { EXERCISE_VIEW_LABELS, ExerciseFetchGraphTextLabels, ExerciseFetchGraphTextOptions, ExerciseViewOption } from "./models";
 import { msgExerciseViewOptionsMD } from "./messages";
 import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram";
 import { EXERCISE_INTERVALS_LABELS, ExerciseIntervalOption, fetchExerciseIntervalController, handleGetDailyExercisesGraphic, handleGetDailyExercisesText, handleGetWeeklyExercises } from ".";
 import { ExerciseQueryFetcher } from "./queries";
-import { sendMenuFunctions } from "../../menus/userMenu";
 import { GET_EXERCISE_DAY_OUTPUT } from "../../mainMenu/messages";
 import { MessageTemplate } from "../../../template/message";
+import { returnMainMenuPage } from "../../mainMenu";
 
 /**
  * ExerciseFetchHandler, allows the user to choose how to receive their exercise results
@@ -33,23 +33,25 @@ export class ExerciseFetchHandler extends MessageTemplate {
   async handleOptions(ctx: Context, message: Message, action: string, bot: Telegraf) {
     await ctx.deleteMessage(message.message_id)
     const handlers: { [key: string]: () => Promise<void> } = {
-      [ExerciseViewOption.DAILY]: this.handleDailyCallback.bind(this, ctx),
-      [ExerciseViewOption.WEEKLY]: this.handleWeeklyCallback.bind(this, ctx),
+      [ExerciseViewOption.DAILY]: this.handleDailyCallback.bind(this, ctx, bot),
+      [ExerciseViewOption.WEEKLY]: this.handleWeeklyCallback.bind(this, ctx, bot),
       [ExerciseViewOption.INTERVAL]: this.handleIntervalCallback.bind(this, ctx, bot)
     };
     if (handlers[action]) {
       return handlers[action]();
     }
   }
-  private async handleDailyCallback(ctx: Context) {
+  // WORKS
+  private async handleDailyCallback(ctx: Context, bot: Telegraf) {
     await ctx.reply(GET_EXERCISE_DAY_OUTPUT, {
       parse_mode: "MarkdownV2"
     })
     userStateUpdateStage(ctx, userStageGetExercise.GET_EXERCISE_OPTIONS)
   }
-  private async handleWeeklyCallback(ctx: Context) {
+  // WORKING...
+  private async handleWeeklyCallback(ctx: Context, bot: Telegraf) {
     await handleGetWeeklyExercises(ctx)
-    await sendMenuFunctions(ctx)
+    await returnMainMenuPage(ctx, bot)
   }
   private async handleIntervalCallback(ctx: Context, bot: Telegraf) {
     await fetchExerciseIntervalController(ctx, bot)
@@ -123,15 +125,15 @@ export class ExerciseFetchHandlerOptions extends MessageTemplate {
   }
   async handleOptions(ctx: Context, message: Message, action: string, bot: Telegraf, userMessage: string) {
     const handlers: { [key: string]: () => Promise<any> } = {
-      [ExerciseFetchGraphTextOptions.TEXT]: this.handleTextCallback.bind(this, ctx, userMessage),
+      [ExerciseFetchGraphTextOptions.TEXT]: this.handleTextCallback.bind(this, ctx, userMessage, bot),
       [ExerciseFetchGraphTextOptions.GRAPHIC]: this.handleGraphicCallback.bind(this, ctx, userMessage, bot)
     };
     if (handlers[action]) {
       return handlers[action]();
     }
   }
-  private async handleTextCallback(ctx: Context, userMessage: string) {
-    await handleGetDailyExercisesText(ctx, userMessage)
+  private async handleTextCallback(ctx: Context, userMessage: string, bot: Telegraf) {
+    await handleGetDailyExercisesText(ctx, userMessage, bot)
   }
   private async handleGraphicCallback(ctx: Context, userMessage: string, bot: Telegraf) {
     await handleGetDailyExercisesGraphic(ctx, userMessage, bot)

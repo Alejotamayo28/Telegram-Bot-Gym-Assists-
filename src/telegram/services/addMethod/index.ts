@@ -8,7 +8,7 @@ export const PostExerciseVerificationController = async (ctx: Context, bot: Tele
     const message = await response.sendCompleteMessage(ctx)
     bot.action(regexPattern(ExerciseVerificationCallbacks), async (ctx) => {
       const action = ctx.match[0]
-      await tryCatch(() => response.handleOptions(ctx, message, action), ctx) })
+      await tryCatch(() => response.handleOptions(ctx, message, action, bot), ctx) })
   } catch (error) {
     console.error(`Error: `, error)
   }

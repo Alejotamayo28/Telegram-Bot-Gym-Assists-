@@ -1,49 +1,49 @@
 import { Context } from "telegraf"
-import { userStageSignUp, userState, userStateUpdateEmail, userStateUpdateNickname, userStateUpdatePassword, userStateUpdateStage } from "../../../userState"
+import { deleteBotMessage, deleteUserMessage, saveBotMessage, userStageSignUp, userState, userStateUpdateEmail, userStateUpdateNickname, userStateUpdatePassword, userStateUpdateStage } from "../../../userState"
 import { encrypt } from "../../../middlewares/jsonWebToken/enCryptHelper"
 import { deleteLastMessage } from "../utils"
-import { signUpVerificationMenu } from "."
+import { signUpVerificationController, signUpVerificationMenu } from "."
 import { bot } from "../../bot"
 import { findUserByNickname } from "../login/functions"
 import { SIGN_UP_EMAIL, SIGN_UP_NICKNAME_NOT_AVAIBLABLE, SIGN_UP_PASSWORD } from "./message"
 
 export const handleNicknameNotAvailable = async (ctx: Context) => {
-  await ctx.reply(SIGN_UP_NICKNAME_NOT_AVAIBLABLE, {
+  const response = await ctx.reply(SIGN_UP_NICKNAME_NOT_AVAIBLABLE, {
     parse_mode: "Markdown"
   })
-  userStateUpdateStage(ctx, 'signUp_nickname')
+  saveBotMessage(ctx, response.message_id)
+  userStateUpdateStage(ctx, userStageSignUp.SIGN_UP_NICKNAME)
 }
 
 export const handleSignUpNickname = async (ctx: Context, userMessage: string) => {
-  await deleteLastMessage(ctx)
   const user = await findUserByNickname(userMessage!.toLowerCase())
   if (user) {
     await handleNicknameNotAvailable(ctx)
-    ctx.deleteMessage()
+    await deleteUserMessage(ctx)
     return
   }
-  await ctx.deleteMessage()
+  await deleteUserMessage(ctx)
   userStateUpdateNickname(ctx, userMessage, userStageSignUp.SIGN_UP_PASSWORD)
-  await ctx.reply(SIGN_UP_PASSWORD, {
+  const response = await ctx.reply(SIGN_UP_PASSWORD, {
     parse_mode: "Markdown"
   })
+  saveBotMessage(ctx, response.message_id)
 }
 
 export const handleSignUpPassword = async (ctx: Context, userMessage: string) => {
-  await deleteLastMessage(ctx)
+  await deleteUserMessage(ctx)
   userStateUpdatePassword(ctx, userMessage, userStageSignUp.SIGN_UP_EMAIL)
-  await ctx.reply(SIGN_UP_EMAIL, {
+  const response = await ctx.reply(SIGN_UP_EMAIL, {
     parse_mode: "Markdown"
   })
-  await ctx.deleteMessage()
+  saveBotMessage(ctx, response.message_id)
 }
 
 export const handleSignUpEmail = async (ctx: Context, userMessage: string) => {
-  await deleteLastMessage(ctx)
+  await deleteUserMessage(ctx)
   userStateUpdateEmail(ctx, userMessage)
-  await ctx.deleteMessage()
   const passwordHash = await encrypt(userState[ctx.from!.id].password)
-  await signUpVerificationMenu(bot, ctx, passwordHash)
+  await signUpVerificationController(ctx, bot, passwordHash)
   delete userState[ctx.from!.id]
 }
 

@@ -58,7 +58,7 @@ export class ExerciseQueryFetcher {
     const response = await onSession(async (clientTransaction) => {
       return await clientTransaction.query(
         `SELECT day, name, reps, kg FROM workout 
-            WHERE id = $1 ORDER BY  Date`, [userId])
+            WHERE user_id = $1 ORDER BY  Date`, [userId])
     })
     return response.rows
   }

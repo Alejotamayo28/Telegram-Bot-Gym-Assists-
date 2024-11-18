@@ -30,12 +30,12 @@ export const mapWeeklyExercise = (data: Exercise[]) => {
   validateDays.forEach((day) => {
     if (groupedExercises[day]) {
       result += `
-*Dia:*\\ _${day}_\n`.toUpperCase();
+*Dia:* _${day}_\n`.toUpperCase();
       groupedExercises[day].forEach((exercise) => {
         result += `
-_Nombre:_ ${exercise.name}
-_Reps:_ ${exercise.reps}
-_Peso:_ ${Math.trunc(exercise.kg)}\n`;
+_Nombre:_  ${exercise.name}
+_Repeticiones:_  ${exercise.reps}
+_Peso:_  ${Math.trunc(exercise.kg)}\n`;
       });
     }
   });

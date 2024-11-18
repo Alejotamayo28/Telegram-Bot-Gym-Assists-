@@ -3,8 +3,6 @@ import { UserCredentials, UserProfile } from "../../model/client"
 import { PartialWorkout } from "../../model/workout"
 import { Context } from "telegraf"
 import { onSession } from "../../database/dataAccessLayer"
-import { inlineKeyboardMenu } from "../mainMenu/inlineKeyboard"
-import { EXERCISE_NAME_OUTPUT_INVALID } from "./addMethod/messages"
 
 // regetPattern para las acciones del usuario, parametro = enum
 export const regexPattern = <T extends { [key: string]: string }>(optionsEnum: T) => {
@@ -54,17 +52,8 @@ export const validExercises = [
   "remo en polea baja", "press de pierna", "step-ups", "elevación frontal con mancuernas"
 ];
 
-export const verifyExerciseInput = (name: string): boolean => {
-  const exercise = name.toLowerCase()
-  return validExercises.includes(exercise)
-}
 
-export const handleIncorrectExerciseNameInput = async (ctx: Context) => {
-  return await ctx.reply(EXERCISE_NAME_OUTPUT_INVALID, {
-    parse_mode: "Markdown",
-    reply_markup: inlineKeyboardMenu.reply_markup
-  })
-}
+
 
 export const deleteLastMessage = async (ctx: Context) => {
   const lastMessage = ctx.message?.message_id ? ctx.message.message_id - 1 : undefined;
@@ -173,8 +162,6 @@ export const verifyDay = (day: string) => {
   return validateDays.includes(day)
 }
 
-
-
 export const verifyExerciseOutput = (workout: PartialWorkout) => {
   return `*Confirmación de ejercicio:*
 
@@ -189,11 +176,11 @@ _Escoge alguna de las siguientes opciones para continuar\\!_`
 export const verifySignUpOutput = (data: UserProfile) => {
   return `*Confirmación de cuenta:*
 
-🗓 *Nickname:* ${escapeMarkdown(data.nickname!)}
-💪 *Contrasena:* ${escapeMarkdown(data.password!)}
-🔢 *Email:* ${escapeMarkdown(data.email)}
+🗓 *Nickname:* ${data.nickname}
+💪 *Contrasena:* ${data.password}
+🔢 *Email:* ${data.email}
 
-_Escoge alguna de las siguientes opciones para continuar\\!_`
+_Escoge alguna de las siguientes opciones para continuar!_`
 }
 
 export const verifyDeleteExercise = (data: PartialWorkout) => {

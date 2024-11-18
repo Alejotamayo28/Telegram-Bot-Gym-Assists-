@@ -1,6 +1,7 @@
 import { Context } from "telegraf"
-export let userState: { [key: number]: any } = {}
+import { message } from "telegraf/filters";
 
+export let userState: { [key: number]: any } = {}
 
 export enum userStage {
   LOGIN_NICKNAME = 'loginNicknameStage',
@@ -18,8 +19,7 @@ export enum userStageSignUp {
 export enum userStagePostExercise {
   POST_EXERCISE_DAY = 'postExerciseDay',
   POST_EXERCISE_NAME = 'postExerciseName',
-  POST_EXERCISE_REPS = 'postExerciseReps',
-  POST_EXERCISE_VERIFICATION = 'postExerciseVerification'
+  POST_EXERCISE_REPS = 'postExerciseReps', POST_EXERCISE_VERIFICATION = 'postExerciseVerification'
 }
 
 export enum userStagePutExercise {
@@ -48,8 +48,35 @@ interface UpdateUserStateOptions {
   stage?: string;
   nickname?: string,
   password?: string,
-  email?: string
+  email?: string,
 }
+
+export const botMessageTest: { [userId: number]: number } = {}
+export const userMessageTest: { [userId: number]: number } = {}
+
+export const saveBotMessage = async (ctx: Context, messageId: number) => {
+  botMessageTest[ctx.from!.id] = messageId
+}
+export const saveUserMessage = async (ctx: Context) => {
+  userMessageTest[ctx.from!.id] = ctx.message!.message_id
+}
+export const deleteBotMessage = async (ctx: Context) => {
+  if (botMessageTest[ctx.from!.id]) {
+    const messageId = botMessageTest[ctx.from!.id]
+    await ctx.deleteMessage(messageId)
+    console.log(`Bot message with the id: ${messageId} deleted`)
+    delete botMessageTest[ctx.from!.id]
+
+  }
+}
+export const deleteUserMessage = async (ctx: Context) => {
+  if (userMessageTest[ctx.from!.id]) {
+    await ctx.deleteMessage(userMessageTest[ctx.from!.id])
+    console.log(`User message with the id: ${userMessageTest[ctx.from!.id]} deleted`)
+    delete userMessageTest[ctx.from!.id]
+  }
+}
+
 export const updateUserStateExample = (ctx: Context, updates: UpdateUserStateOptions) => {
   userState[ctx.from!.id] = {
     ...userState[ctx.from!.id],

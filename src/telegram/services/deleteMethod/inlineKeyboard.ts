@@ -1,4 +1,4 @@
-import { Context } from "telegraf";
+import { Context, Telegraf } from "telegraf";
 import { PartialWorkout } from "../../../model/workout";
 import { userState } from "../../../userState";
 import { verifyDeleteExercise } from "../utils";
@@ -7,8 +7,7 @@ import { MessageTemplate } from "../../../template/message";
 import { ExerciseVerificationCallbacks, ExerciseVerificationLabels } from "../addMethod/models";
 import { onTransaction } from "../../../database/dataAccessLayer";
 import { ExerciseQueryDelete } from "./queries";
-import { EXERCISE_DELETE_SUCCESFULLY, EXERCISE_NOT_DELETE_SUCCESFULLY } from "./messages";
-import { inlineKeyboardMenu } from "../../mainMenu/inlineKeyboard";
+import { returnMainMenuPage } from "../../mainMenu";
 
 export class ExerciseDeleteVerificationHandler extends MessageTemplate {
   constructor(private ctx: Context) {
@@ -27,29 +26,23 @@ export class ExerciseDeleteVerificationHandler extends MessageTemplate {
     }
     return { message, keyboard }
   }
-  async handleOptions(_: Context, message: Message, action: string) {
+  async handleOptions(_: Context, message: Message, action: string, bot: Telegraf) {
     const handlers: { [key: string]: () => Promise<void> } = {
-      [ExerciseVerificationCallbacks.YES]: this.handleYesCallback.bind(this, this.ctx),
-      [ExerciseVerificationCallbacks.NO]: this.handleNoCallback.bind(this, this.ctx)
+      [ExerciseVerificationCallbacks.YES]: this.handleYesCallback.bind(this, bot),
+      [ExerciseVerificationCallbacks.NO]: this.handleNoCallback.bind(this, bot)
     }
     if (handlers[action]) {
       return handlers[action]()
     }
   }
-  private async handleYesCallback(_: Context) {
+  private async handleYesCallback(bot: Telegraf) {
     await onTransaction(async (transactionWorkout) => {
       await ExerciseQueryDelete.ExerciseDelete(this.ctx, userState[this.ctx.from!.id], transactionWorkout)
     })
-    await this.ctx.reply(EXERCISE_DELETE_SUCCESFULLY, {
-      parse_mode: "MarkdownV2",
-      reply_markup: inlineKeyboardMenu.reply_markup
-    })
+    await returnMainMenuPage(this.ctx, bot)
   }
-  private async handleNoCallback(_: Context) {
-    await this.ctx.reply(EXERCISE_NOT_DELETE_SUCCESFULLY, {
-      parse_mode: "MarkdownV2",
-      reply_markup: inlineKeyboardMenu.reply_markup
-    })
+  private async handleNoCallback(bot: Telegraf) {
+    await returnMainMenuPage(this.ctx, bot)
   }
 }
 

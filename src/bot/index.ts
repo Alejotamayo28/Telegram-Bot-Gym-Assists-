@@ -1,4 +1,4 @@
-import { userStage, userStageDeleteExercise, userStageGetExercise, userStagePostExercise, userStagePutExercise, userStageSignUp, userState, userStateUpdateName } from "../userState";
+import { deleteBotMessage, deleteUserMessage, saveUserMessage, userStage, userStageDeleteExercise, userStageGetExercise, userStagePostExercise, userStagePutExercise, userStageSignUp, userState, userStateUpdateName } from "../userState";
 import { bot } from "../telegram/bot";
 import { handleError } from "../errors";
 import { handleSignUpEmail, handleSignUpNickname, handleSignUpPassword } from "../telegram/services/singUp/functions";
@@ -12,7 +12,6 @@ import { handleLoginNickname, handleLoginPassword } from "../telegram/services/l
 import { deleteLastMessage } from "../telegram/services/utils";
 import { fetchExerciseGraphTextController } from "../telegram/services/getMethod";
 import { parseInt } from "lodash";
-import { inlineKeyboardMenu } from "../telegram/mainMenu/inlineKeyboard";
 import { PostExerciseVerificationController } from "../telegram/services/addMethod";
 import { DataValidator } from "../validators/dataValidator";
 import { deleteExerciseVerificationController } from "../telegram/services/deleteMethod";
@@ -31,6 +30,8 @@ bot.on(message("text"), async ctx => {
       switch (userState[userId].stage) {
 
         case userStageSignUp.SIGN_UP_NICKNAME:
+          await deleteBotMessage(ctx)
+          saveUserMessage(ctx)
           try {
             await handleSignUpNickname(ctx, userMessage)
           } catch (error) {
@@ -39,6 +40,8 @@ bot.on(message("text"), async ctx => {
           break;
 
         case userStageSignUp.SIGN_UP_PASSWORD:
+          await deleteBotMessage(ctx)
+          saveUserMessage(ctx)
           try {
             await handleSignUpPassword(ctx, userMessage)
           } catch (error) {
@@ -47,6 +50,8 @@ bot.on(message("text"), async ctx => {
           break;
 
         case userStageSignUp.SIGN_UP_EMAIL:
+          await deleteBotMessage(ctx)
+          saveUserMessage(ctx)
           try {
             await handleSignUpEmail(ctx, userMessage)
           } catch (error) {
@@ -55,6 +60,8 @@ bot.on(message("text"), async ctx => {
           break;
 
         case userStage.LOGIN_NICKNAME:
+          await deleteBotMessage(ctx)
+          saveUserMessage(ctx)
           try {
             await handleLoginNickname(ctx, userMessage)
           } catch (error) {
@@ -63,6 +70,8 @@ bot.on(message("text"), async ctx => {
           break
 
         case userStage.LOGIN_PASSWORD:
+          await deleteLastMessage(ctx)
+          saveUserMessage(ctx)
           try {
             await handleLoginPassword(ctx, userMessage)
           } catch (error) {
@@ -72,6 +81,7 @@ bot.on(message("text"), async ctx => {
 
         case userStagePostExercise.POST_EXERCISE_DAY:
           await deleteLastMessage(ctx)
+          saveUserMessage(ctx)
           try {
             if (await (DataValidator.validateDay(ctx, userMessage))) break
             await ExercisePostHandler.postExerciseDay(ctx, userMessage)
@@ -82,6 +92,7 @@ bot.on(message("text"), async ctx => {
 
         case userStagePostExercise.POST_EXERCISE_NAME:
           await deleteLastMessage(ctx)
+          saveUserMessage(ctx)
           try {
             if (await (DataValidator.validateExercise(ctx, userMessage))) break
             await ExercisePostHandler.postExerciseName(ctx, userMessage)
@@ -92,6 +103,7 @@ bot.on(message("text"), async ctx => {
 
         case userStagePostExercise.POST_EXERCISE_REPS:
           await deleteLastMessage(ctx)
+          saveUserMessage(ctx)
           try {
             if (await (DataValidator.validateReps(ctx, userMessage))) break
             await ExercisePostHandler.postExerciseReps(ctx, userMessage)
@@ -102,6 +114,7 @@ bot.on(message("text"), async ctx => {
 
         case userStagePostExercise.POST_EXERCISE_VERIFICATION:
           await deleteLastMessage(ctx)
+          saveUserMessage(ctx)
           try {
             if (await (DataValidator.validateWeight(ctx, userMessage))) break
             await ExercisePostHandler.postExerciseWeight(ctx, Number(userMessage))
@@ -113,6 +126,7 @@ bot.on(message("text"), async ctx => {
 
         case userStagePutExercise.PUT_EXERCISE_DAY:
           await deleteLastMessage(ctx)
+          saveUserMessage(ctx)
           try {
             if (await (DataValidator.validateDay(ctx, userMessage))) break
             await handleUpdateExerciseDay(ctx, userMessage)
@@ -123,16 +137,17 @@ bot.on(message("text"), async ctx => {
 
         case userStagePutExercise.PUT_EXERCISE_NAME:
           await deleteLastMessage(ctx)
+          saveUserMessage(ctx)
           try {
             if (await (DataValidator.validateExercise(ctx, userMessage))) break
             userStateUpdateName(ctx, userMessage)
             const exercise = await findExerciseByDayName(userId, userState[userId])
             if (!exercise) {
-              await ctx.deleteMessage()
+              await saveUserMessage(ctx)
               await handleExerciseNotFound(ctx)
               return
             }
-            await handleUpdateExerciseName(ctx)
+            await handleUpdateExerciseName(ctx, userMessage)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
@@ -140,6 +155,7 @@ bot.on(message("text"), async ctx => {
 
         case userStagePutExercise.PUT_EXERCISE_REPS:
           await deleteLastMessage(ctx)
+          saveUserMessage(ctx)
           try {
             if (await (DataValidator.validateReps(ctx, userMessage))) break
             await handlerUpdateExerciseReps(ctx, userMessage)
@@ -150,6 +166,7 @@ bot.on(message("text"), async ctx => {
 
         case userStagePutExercise.PUT_EXERCISE_WEIGHT:
           await deleteLastMessage(ctx)
+          saveUserMessage(ctx)
           try {
             if (await (DataValidator.validateWeight(ctx, userMessage))) break
             await handlerUpdateExerciseKg(ctx, parseInt(userMessage))
@@ -160,9 +177,9 @@ bot.on(message("text"), async ctx => {
 
         case userStageGetExercise.GET_EXERCISE_OPTIONS:
           await deleteLastMessage(ctx)
+          saveUserMessage(ctx)
           try {
             if (await (DataValidator.validateDay(ctx, userMessage))) break
-            await ctx.deleteMessage()
             await fetchExerciseGraphTextController(ctx, bot, userMessage)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
@@ -171,6 +188,7 @@ bot.on(message("text"), async ctx => {
 
         case userStageDeleteExercise.DELETE_EXERCISE_DAY:
           await deleteLastMessage(ctx)
+          saveUserMessage(ctx)
           try {
             if (await (DataValidator.validateDay(ctx, userMessage))) break
             await handleDeleteExerciseDay(ctx, userMessage)
@@ -181,11 +199,12 @@ bot.on(message("text"), async ctx => {
 
         case userStageDeleteExercise.DELETE_EXERCISE_NAME:
           await deleteLastMessage(ctx)
+          saveUserMessage(ctx)
           try {
             userStateUpdateName(ctx, userMessage)
             const exercise = await ExerciseQueryFetcher.ExerciseByNameRepsAndId(userId, userState[userId])
             if (!exercise) {
-              await ctx.deleteMessage()
+              await deleteUserMessage(ctx)
               await handleExerciseNotFound(ctx)
               return
             }

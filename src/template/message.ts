@@ -28,7 +28,7 @@ export abstract class MessageTemplate {
    * Prepares the message content and inline keyboard structure
    * @returns An object containing the message text and inline keyboard markup
   */
-  protected abstract prepareMessage(message?: string): {
+  protected abstract prepareMessage(): {
     message: string,
     keyboard: InlineKeyboardMarkup
   }

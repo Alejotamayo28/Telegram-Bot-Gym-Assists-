@@ -31,7 +31,7 @@ export const SIGN_UP_EMAIL = `
 🔒*Registrando cuenta*🔒
 *¡Contrasena de usuario registrado!*
 
-_Por favor, ingresa tu contrasena de usuario.
+_Por favor, ingresa tu email de usuario.
 Ejemplo: usuario@correo.com_`
 
 

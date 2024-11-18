@@ -1,13 +1,12 @@
-import { Context } from "telegraf";
+import { Context, Telegraf } from "telegraf";
 import { MessageTemplate } from "../../../template/message";
 import { verifyExerciseOutput } from "../utils";
 import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram";
 import { PartialWorkout } from "../../../model/workout";
 import { userState } from "../../../userState"; import { onTransaction } from "../../../database/dataAccessLayer";
-import { EXERCISE_NOT_SUCCESFULLY_CREATED, EXERCISE_SUCCESFULLY_CREATED } from "./messages";
-import { inlineKeyboardMenu } from "../../mainMenu/inlineKeyboard";
 import { ExerciseVerificationCallbacks, ExerciseVerificationLabels } from "./models";
 import { ExerciseQueryPost } from "./queries";
+import { returnMainMenuPage } from "../../mainMenu";
 
 export class ExercisePostVerificationHandler extends MessageTemplate {
   constructor(private ctx: Context) {
@@ -26,31 +25,25 @@ export class ExercisePostVerificationHandler extends MessageTemplate {
     }
     return { message, keyboard }
   }
-  async handleOptions(_: Context, message: Message, action: string) {
+  async handleOptions(_: Context, message: Message, action: string, bot: Telegraf) {
     this.ctx.deleteMessage(message.message_id)
     const handlers: { [key: string]: () => Promise<void> } = {
-      [ExerciseVerificationCallbacks.YES]: this.handleYesCallback.bind(this, this.ctx),
-      [ExerciseVerificationCallbacks.NO]: this.handleNoCallback.bind(this, this.ctx)
+      [ExerciseVerificationCallbacks.YES]: this.handleYesCallback.bind(this, bot),
+      [ExerciseVerificationCallbacks.NO]: this.handleNoCallback.bind(this, bot)
     }
     if (handlers[action]) {
       return handlers[action]()
     }
   }
-  private async handleYesCallback(_: Context) {
+  private async handleYesCallback(bot: Telegraf) {
     const workoutData: PartialWorkout = userState[this.ctx.from!.id];
     await onTransaction(async (transactionWorkout) => {
       await ExerciseQueryPost.ExercisePost(workoutData, this.ctx, transactionWorkout);
     });
-    await this.ctx.reply(EXERCISE_SUCCESFULLY_CREATED, {
-      parse_mode: 'MarkdownV2',
-      ...inlineKeyboardMenu
-    });
+    returnMainMenuPage(this.ctx, bot)
   }
-  private async handleNoCallback(ctx: Context) {
-    await ctx.reply(EXERCISE_NOT_SUCCESFULLY_CREATED, {
-      parse_mode: 'MarkdownV2',
-      ...inlineKeyboardMenu
-    });
+  private async handleNoCallback(bot: Telegraf) {
+    returnMainMenuPage(this.ctx, bot)
   }
 }
 
