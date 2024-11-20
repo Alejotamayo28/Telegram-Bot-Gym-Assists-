@@ -10,7 +10,6 @@ export const deleteExerciseVerificationController = async (ctx: Context, bot: Te
   try {
     const message = await response.sendCompleteMessage(ctx)
     bot.action(regexPattern(ExerciseVerificationCallbacks), async (ctx) => {
-      await ctx.deleteMessage(message.message_id)
       const action = ctx.match[0]
       await tryCatch(() => response.handleOptions(ctx, message, action, bot), ctx)
     })

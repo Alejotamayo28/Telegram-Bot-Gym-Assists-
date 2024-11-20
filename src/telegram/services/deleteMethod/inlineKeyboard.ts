@@ -7,7 +7,7 @@ import { MessageTemplate } from "../../../template/message";
 import { ExerciseVerificationCallbacks, ExerciseVerificationLabels } from "../addMethod/models";
 import { onTransaction } from "../../../database/dataAccessLayer";
 import { ExerciseQueryDelete } from "./queries";
-import { returnMainMenuPage } from "../../mainMenu";
+import { redirectToMainMenuWithTaskDone } from "../../mainMenu";
 
 export class ExerciseDeleteVerificationHandler extends MessageTemplate {
   constructor(private ctx: Context) {
@@ -27,6 +27,7 @@ export class ExerciseDeleteVerificationHandler extends MessageTemplate {
     return { message, keyboard }
   }
   async handleOptions(_: Context, message: Message, action: string, bot: Telegraf) {
+    await this.ctx.deleteMessage(message.message_id)
     const handlers: { [key: string]: () => Promise<void> } = {
       [ExerciseVerificationCallbacks.YES]: this.handleYesCallback.bind(this, bot),
       [ExerciseVerificationCallbacks.NO]: this.handleNoCallback.bind(this, bot)
@@ -35,14 +36,19 @@ export class ExerciseDeleteVerificationHandler extends MessageTemplate {
       return handlers[action]()
     }
   }
+  private async handleResponeCallback(bot: Telegraf, message: string) {
+    await redirectToMainMenuWithTaskDone(this.ctx, bot, message)
+  }
   private async handleYesCallback(bot: Telegraf) {
     await onTransaction(async (transactionWorkout) => {
       await ExerciseQueryDelete.ExerciseDelete(this.ctx, userState[this.ctx.from!.id], transactionWorkout)
     })
-    await returnMainMenuPage(this.ctx, bot)
+    await this.handleResponeCallback(bot,
+      `*Ejercicio eliminado* ❌ \n\n_El ejercicio ha sido agregado exitosamente._`)
   }
   private async handleNoCallback(bot: Telegraf) {
-    await returnMainMenuPage(this.ctx, bot)
+    await this.handleResponeCallback(bot,
+      `*Eliminación cancelada* ❌ \n\n_La acción ha sido cancelada exitosamente._`)
   }
 }
 

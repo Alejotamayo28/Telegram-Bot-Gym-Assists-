@@ -36,6 +36,13 @@ export const EXERCISE_WEIGHT_INVALID_OUTPUT = `
 _¡Por favor, ingresa el peso en kilogramos (kg) con el cual realizase el ejercicio!
 Ejemplo: 20_`
 
+export const EXERCISE_WEEK_INVALID_OUTPUT = `
+*📋 Semana invalida:*
+
+_Por favor, escribe el numero de la semana donde realizaste el ejercicio a eliminar.
+Ejemplo: *3* (semana 3 del mes)_`
+
+
 export const EXERCISE_WEIGHT_OUTPUT = `
 *🏋️ Peso utilizado:*
 

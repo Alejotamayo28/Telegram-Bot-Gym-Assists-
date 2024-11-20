@@ -1,6 +1,6 @@
 import { Telegraf } from "telegraf"
 import dotenv from 'dotenv'
-import { setUpHolaCommand } from "./commands/start"
+import {  setUpHolaCommand} from "./commands/start"
 
 dotenv.config()
 

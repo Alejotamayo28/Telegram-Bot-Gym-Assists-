@@ -14,3 +14,10 @@ _Por favor, escribe el dia donde realizaste el ejercicio a eliminar.
 Ejemplo: Lunes_
 
 Si prefieres, puedes seleccionar el dia de la semana sugerido a continuacion.`
+
+export const DELETE_EXERCISE_WEEK = `
+🗓️*Semana del entrenamiento:*🗓️
+
+_Por favor, escribe el numero de la semana donde realizaste el ejercicio a eliminar.
+Ejemplo: *3* (semana 3 del mes)_`
+

@@ -13,6 +13,7 @@ export interface userWorkout {
   name: string,
   reps: number[],
   kg: number,
+  week:number,
   interval: number
 }
 
@@ -21,7 +22,8 @@ export interface Exercise {
   day: weekday,
   name: string,
   reps: number[],
-  kg: number
+  kg: number,
+  week:number,
   interval: number
 }
 

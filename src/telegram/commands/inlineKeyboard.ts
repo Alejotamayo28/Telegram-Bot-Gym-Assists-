@@ -7,6 +7,8 @@ import { welcomeMessage } from "../messages/welcomeMessage";
 import { LOGIN_EXAMPLE_INFO_MESSAGE, LOGIN_REQUEST_NICKNAME_MESSAGE } from "../services/login/messages";
 import { deleteBotMessage, saveBotMessage, userStage, userStageSignUp, userStateUpdateStage } from "../../userState";
 import { SIGN_UP_NICKNAME, SING_UP_EXAMPLE_MESSAGE } from "../services/singUp/message";
+import { bot } from "../bot";
+import { message } from "telegraf/filters";
 
 export const startInlineKeyboard = Markup.inlineKeyboard([
   [Markup.button.callback(LOGIN_BUTTON, LOGIN_CALLBACK),
@@ -29,21 +31,21 @@ const CommandStartLabels: { [key in CommandStartCallbacks]: string } = {
   [CommandStartCallbacks.signUpExample]: "Ejemplo crear cuenta"
 }
 
+
 export class StartCommandHadler extends MessageTemplate {
   protected prepareMessage() {
     const message = welcomeMessage
     const keyboard: InlineKeyboardMarkup = {
-      inline_keyboard: [
-        [
-          this.createButton(CommandStartLabels.login, { action: CommandStartCallbacks.login }),
-          this.createButton(CommandStartLabels.signUp, { action: CommandStartCallbacks.signUp })
-        ],
-        [
-          this.createButton(CommandStartLabels.loginExample, { action: CommandStartCallbacks.loginExample })
-        ],
-        [
-          this.createButton(CommandStartLabels.signUpExample, { action: CommandStartCallbacks.signUpExample })
-        ]
+      inline_keyboard: [[
+        this.createButton(CommandStartLabels.login, { action: CommandStartCallbacks.login }),
+        this.createButton(CommandStartLabels.signUp, { action: CommandStartCallbacks.signUp })
+      ],
+      [
+        this.createButton(CommandStartLabels.loginExample, { action: CommandStartCallbacks.loginExample })
+      ],
+      [
+        this.createButton(CommandStartLabels.signUpExample, { action: CommandStartCallbacks.signUpExample })
+      ]
 
       ]
     }
@@ -62,31 +64,25 @@ export class StartCommandHadler extends MessageTemplate {
     }
   }
   private async handleLoginCallback(ctx: Context) {
-    const response = await ctx.reply(LOGIN_REQUEST_NICKNAME_MESSAGE, {
-      parse_mode: "Markdown",
-    })
+    const response = await ctx.reply(LOGIN_REQUEST_NICKNAME_MESSAGE, { parse_mode: "Markdown", })
     saveBotMessage(ctx, response.message_id)
-
     userStateUpdateStage(ctx, userStage.LOGIN_NICKNAME)
   }
   private async handleSignUpCallback(ctx: Context) {
-    const response = await ctx.reply(SIGN_UP_NICKNAME, {
-      parse_mode: "Markdown"
-    })
+    const response = await ctx.reply(SIGN_UP_NICKNAME, { parse_mode: "Markdown" })
     saveBotMessage(ctx, response.message_id)
     userStateUpdateStage(ctx, userStageSignUp.SIGN_UP_NICKNAME)
   }
-  //DEMAND FIXING ==>
   private async handleLoginExampleCallback(ctx: Context) {
     await ctx.reply(LOGIN_EXAMPLE_INFO_MESSAGE, {
       parse_mode: "Markdown",
-      reply_markup: startInlineKeyboard.reply_markup
+      reply_markup: this.prepareMessage().keyboard
     })
   }
   private async handleSignUpExampleCallback(ctx: Context) {
     await ctx.reply(SING_UP_EXAMPLE_MESSAGE, {
       parse_mode: "Markdown",
-      reply_markup: startInlineKeyboard.reply_markup
+      reply_markup: this.prepareMessage().keyboard
     })
   }
 }

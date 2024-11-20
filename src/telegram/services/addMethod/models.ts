@@ -1,6 +1,9 @@
+import { callback } from "telegraf/typings/button";
+import { InlineKeyboardMarkup } from "telegraf/typings/core/types/typegram"
+
 //Label
 export const ExerciseVerificationLabels = {
-  YES: 'Confirmar`',
+  YES: 'Confirmar',
   NO: 'Cancelar'
 }
 
@@ -9,3 +12,9 @@ export enum ExerciseVerificationCallbacks {
   YES = 'si',
   NO = 'no'
 }
+
+
+
+
+
+

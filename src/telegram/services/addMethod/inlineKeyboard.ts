@@ -6,7 +6,7 @@ import { PartialWorkout } from "../../../model/workout";
 import { userState } from "../../../userState"; import { onTransaction } from "../../../database/dataAccessLayer";
 import { ExerciseVerificationCallbacks, ExerciseVerificationLabels } from "./models";
 import { ExerciseQueryPost } from "./queries";
-import { returnMainMenuPage } from "../../mainMenu";
+import { redirectToMainMenuWithTaskDone } from "../../mainMenu";
 
 export class ExercisePostVerificationHandler extends MessageTemplate {
   constructor(private ctx: Context) {
@@ -35,15 +35,20 @@ export class ExercisePostVerificationHandler extends MessageTemplate {
       return handlers[action]()
     }
   }
+  private async handleResponseCallback(bot: Telegraf, message: string) {
+    await redirectToMainMenuWithTaskDone(this.ctx, bot, message)
+  }
   private async handleYesCallback(bot: Telegraf) {
     const workoutData: PartialWorkout = userState[this.ctx.from!.id];
     await onTransaction(async (transactionWorkout) => {
       await ExerciseQueryPost.ExercisePost(workoutData, this.ctx, transactionWorkout);
     });
-    returnMainMenuPage(this.ctx, bot)
+    await this.handleResponseCallback(bot,
+      `*Ejercicio agregado* 🗓️ \n\n_El ejercicio ha sido eliminado exitosamente._`)
   }
   private async handleNoCallback(bot: Telegraf) {
-    returnMainMenuPage(this.ctx, bot)
+    await this.handleResponseCallback(bot,
+      `*Accion cancelada* ❌ \n\n_La accion ha sido eliminado exitosamente._`)
   }
 }
 

@@ -186,10 +186,11 @@ _Escoge alguna de las siguientes opciones para continuar!_`
 export const verifyDeleteExercise = (data: PartialWorkout) => {
   return `*Confirmar eliminacion:*
 
-🗓 *Dia:* ${escapeMarkdown(data.day!)}
-💪 *Nombre:* ${escapeMarkdown(data.name!)}
+🗓 *Dia:* ${data.day}
+💪 *Nombre:* ${data.name}
+🔢 *Semana:* ${data.week}
 
-_Escoge alguna de las siguientes opciones para continuar\\!_`
+_Escoge alguna de las siguientes opciones para continuar!_`
 }
 export const errorMessage = (userStage: string) => {
   return `Error during ${userStage} process: `

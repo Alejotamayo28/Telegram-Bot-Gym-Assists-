@@ -7,12 +7,13 @@ import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typeg
 import { ExerciseVerificationCallbacks, ExerciseVerificationLabels } from "../addMethod/models";
 import { onTransaction } from "../../../database/dataAccessLayer";
 import { insertClientQuery } from "./queries";
-import { returnMainMenuPage } from "../../mainMenu";
+import { redirectToMainMenuWithTaskDone } from "../../mainMenu";
 import { commandStart } from "../../commands/start";
 
 export class SignUpVerificationHandler extends MessageTemplate {
   constructor(private ctx: Context, private passwordHash: string) {
-    super() }
+    super()
+  }
   userData: UserData = userState[this.ctx.from!.id]
   protected prepareMessage() {
     const { nickname, password, email } = this.userData

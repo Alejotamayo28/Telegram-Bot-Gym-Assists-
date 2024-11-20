@@ -8,7 +8,7 @@ import { ExerciseVerificationCallbacks, ExerciseVerificationLabels } from "../ad
 import { verifyExerciseOutput } from "../utils";
 import { onTransaction } from "../../../database/dataAccessLayer";
 import { workoutUpdateQuery } from "./queries";
-import { returnMainMenuPage } from "../../mainMenu";
+import { redirectToMainMenuWithTaskDone } from "../../mainMenu";
 
 export class ExerciseUpdateDayHandler extends ExerciseUpdateTemplate {
   protected updateUserState(ctx: Context, message: string): void {
@@ -74,14 +74,19 @@ export class ExerciseUpdateVerificationHandler extends MessageTemplate {
       return handlers[action]()
     }
   }
+  private async handleResponseCallback(bot: Telegraf, message: string) {
+    await redirectToMainMenuWithTaskDone(this.ctx, bot, message)
+  }
   private async handleYesCallback(ctx: Context, bot: Telegraf) {
     await onTransaction(async (clientTransaction) => {
       await workoutUpdateQuery(ctx, this.workoutData, clientTransaction)
     })
-    await returnMainMenuPage(ctx, bot)
+    await this.handleResponseCallback(bot,
+      `*Ejercicio actualizado* \n\n_El ejercicio ha sido actualizado exitosamente._`)
   }
   private async handleNoCallback(ctx: Context, bot: Telegraf) {
-    await returnMainMenuPage(ctx, bot)
+    await this.handleResponseCallback(bot,
+      `*Actualizacion cancelada* \n\n_La accion ha sido cancelada exitosamente._`)
   }
 }
 

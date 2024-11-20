@@ -36,6 +36,8 @@ export enum userStageGetExercise {
 export enum userStageDeleteExercise {
   DELETE_EXERCISE_DAY = 'deleteExerciseDay',
   DELETE_EXERCISE_NAME = 'deleteExerciseName',
+  DELETE_EXERCISE_WEEK = 'deleteExerciseWeek',
+  DELETE_CONFIRMATION = 'deleteConfirmation'
 }
 
 
@@ -44,6 +46,7 @@ interface UpdateUserStateOptions {
   name?: string;
   reps?: number[];
   kg?: number;
+  week?: number,
   interval?: number,
   stage?: string;
   nickname?: string,
@@ -102,6 +105,9 @@ export const userStateUpdateReps = (ctx: Context, reps: number[], stage?: string
 
 export const userStateUpdateKg = (ctx: Context, kg: number, stage?: string) => {
   updateUserStateExample(ctx, { kg, stage })
+}
+export const userStateUpdateWeek = (ctx: Context, week: number, stage?: string) => {
+  updateUserStateExample(ctx, { week, stage })
 }
 
 export const userStateUpdateNickname = (ctx: Context, nickname: string, stage?: string) => {

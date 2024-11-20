@@ -1,8 +1,7 @@
 import { Context, Telegraf } from "telegraf"
-import { MainMenuHandler, ReturnMainMenuHandler } from "./inlineKeyboard"
+import { MainMenuHandler, MainMenuRedirectHandler } from "./inlineKeyboard"
 import { regexPattern, tryCatch } from "../services/utils"
 import { MainMenuCallbacks, ReturnMainMenuCallbacks } from "./models"
-import { deleteBotMessage } from "../../userState"
 
 
 export const mainMenuPage = async (ctx: Context, bot: Telegraf) => {
@@ -18,8 +17,8 @@ export const mainMenuPage = async (ctx: Context, bot: Telegraf) => {
   }
 }
 
-export const returnMainMenuPage = async (ctx: Context, bot: Telegraf) => {
-  const response = new ReturnMainMenuHandler()
+export const redirectToMainMenuWithTaskDone = async (ctx: Context, bot: Telegraf, taskDone?: string) => {
+  const response = new MainMenuRedirectHandler(taskDone)
   try {
     const message = await response.sendCompleteMessage(ctx)
     bot.action(regexPattern(ReturnMainMenuCallbacks), async (ctx) => {

@@ -6,7 +6,7 @@ import { ExercisePostHandler } from "../telegram/services/addMethod/functions";
 import { message } from 'telegraf/filters'
 import { NarrowedContext, Context } from "telegraf";
 import { Update, Message } from "telegraf/typings/core/types/typegram";
-import { handleDeleteExerciseDay } from "../telegram/services/deleteMethod/functions";
+import { handleDeleteExerciseDay, handleDeleteExerciseName, handleDeleteExerciseWeekAndConfirmation } from "../telegram/services/deleteMethod/functions";
 import { handleUpdateExerciseDay, handleUpdateExerciseName, handlerUpdateExerciseReps, handlerUpdateExerciseKg, findExerciseByDayName, handleExerciseNotFound } from "../telegram/services/updateMethod/functions";
 import { handleLoginNickname, handleLoginPassword } from "../telegram/services/login/functions";
 import { deleteLastMessage } from "../telegram/services/utils";
@@ -14,13 +14,10 @@ import { fetchExerciseGraphTextController } from "../telegram/services/getMethod
 import { parseInt } from "lodash";
 import { PostExerciseVerificationController } from "../telegram/services/addMethod";
 import { DataValidator } from "../validators/dataValidator";
-import { deleteExerciseVerificationController } from "../telegram/services/deleteMethod";
-import { ExerciseQueryFetcher } from "../telegram/services/getMethod/queries";
 
 export type MyContext =
   | NarrowedContext<Context<Update>, Update.MessageUpdate<Message.TextMessage>>
   | NarrowedContext<Context<Update>, Update.CallbackQueryUpdate>;
-
 
 bot.on(message("text"), async ctx => {
   const userId = ctx.from!.id;
@@ -180,6 +177,7 @@ bot.on(message("text"), async ctx => {
           saveUserMessage(ctx)
           try {
             if (await (DataValidator.validateDay(ctx, userMessage))) break
+            deleteUserMessage(ctx)
             await fetchExerciseGraphTextController(ctx, bot, userMessage)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
@@ -201,16 +199,39 @@ bot.on(message("text"), async ctx => {
           await deleteLastMessage(ctx)
           saveUserMessage(ctx)
           try {
-            userStateUpdateName(ctx, userMessage)
-            const exercise = await ExerciseQueryFetcher.ExerciseByNameRepsAndId(userId, userState[userId])
-            if (!exercise) {
-              await deleteUserMessage(ctx)
-              await handleExerciseNotFound(ctx)
-              return
-            }
-            await deleteExerciseVerificationController(ctx, bot)
+            if (await (DataValidator.validateExercise(ctx, userMessage))) break
+            await handleDeleteExerciseName(ctx, userMessage)
           } catch (error) {
-            await handleError(error, userState[userId].stage, ctx)
+            console.error(`Error: `, error)
+          }
+          break;
+        /**
+      case userStageDeleteExercise.DELETE_EXERCISE_NAME:
+        await deleteLastMessage(ctx)
+        saveUserMessage(ctx)
+        try {
+          userStateUpdateName(ctx, userMessage)
+          const exercise = await ExerciseQueryFetcher.ExerciseByNameRepsAndId(userId, userState[userId])
+          if (!exercise) {
+            await deleteUserMessage(ctx)
+            await handleExerciseNotFound(ctx)
+            return
+          }
+          await deleteExerciseVerificationController(ctx, bot)
+        } catch (error) {
+          await handleError(error, userState[userId].stage, ctx)
+        }
+        break
+        */
+
+        case userStageDeleteExercise.DELETE_EXERCISE_WEEK:
+          await deleteLastMessage(ctx)
+          saveUserMessage(ctx)
+          try {
+            if (await (DataValidator.validateWeek(ctx, userMessage))) break
+            await handleDeleteExerciseWeekAndConfirmation(ctx, bot, userMessage)
+          } catch (error) {
+            console.error(`Error: `, error)
           }
           break
 

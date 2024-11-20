@@ -1,14 +1,14 @@
 import { Context, Telegraf } from "telegraf";
 import { graphic, handleOutputDailyExercise, mapWeeklyExercise } from "./functions";
-import { deleteLastMessage, regexPattern, tryCatch } from "../utils"; import { handleExerciseNotFound } from "../updateMethod/functions";
+import { regexPattern, tryCatch } from "../utils"; import { handleExerciseNotFound } from "../updateMethod/functions";
 import { ExerciseFetchGraphTextOptions, ExerciseViewOption } from "./models";
 import { ExerciseFetchHandler, ExerciseFetchHandlerInterval, ExerciseFetchHandlerOptions } from "./inlineKeyboard";
 import { ExerciseQueryFetcher } from "./queries";
-import { returnMainMenuPage } from "../../mainMenu";
-import { deleteUserMessage, saveBotMessage } from "../../../userState";
+import { redirectToMainMenuWithTaskDone } from "../../mainMenu";
+import { deleteBotMessage, deleteUserMessage, saveBotMessage } from "../../../userState";
 
 export const handleGetDailyExercisesGraphic = async (ctx: Context, day: string, bot: Telegraf) => {
-  await ctx.deleteMessage()
+  await deleteUserMessage(ctx)
   try {
     const image = await graphic(ctx.from!.id, day)
     await ctx.replyWithPhoto({
@@ -17,14 +17,13 @@ export const handleGetDailyExercisesGraphic = async (ctx: Context, day: string, 
       caption: `_Gráfico de ejercicios del dia ${day}._`,
       parse_mode: "Markdown"
     });
-    await returnMainMenuPage(ctx, bot)
+    await redirectToMainMenuWithTaskDone(ctx, bot)
   } catch (error) {
     console.error(`Error: `, error)
   }
 }
 
 export const handleGetDailyExercisesText = async (ctx: Context, day: string, bot: Telegraf) => {
-  await deleteLastMessage(ctx)
   try {
     const exercise = await ExerciseQueryFetcher.ExerciseByIdAndDay(ctx.from!.id, day)
     if (!exercise) {
@@ -40,13 +39,14 @@ export const handleGetDailyExercisesText = async (ctx: Context, day: string, bot
         parse_mode: `MarkdownV2`
       })
     saveBotMessage(ctx, response.message_id)
-    await returnMainMenuPage(ctx, bot)
+    await redirectToMainMenuWithTaskDone(ctx, bot)
   } catch (error) {
     console.error(`Error: `, error)
   }
 }
 
 export const handleGetWeeklyExercises = async (ctx: Context) => {
+  deleteBotMessage(ctx)
   try {
     const exercise = await ExerciseQueryFetcher.ExerciseById(ctx.from!.id)
     if (!exercise.length) {
@@ -56,12 +56,12 @@ export const handleGetWeeklyExercises = async (ctx: Context) => {
     }
     const formattedExercises = mapWeeklyExercise(exercise)
     const date = new Date()
-    await ctx.reply(`
+    const response = await ctx.reply(`
 _Ejercicios semanales realizados:_ 
-
 *Fecha*: ${date.toLocaleDateString()}\n` + formattedExercises, {
       parse_mode: 'Markdown'
     })
+    saveBotMessage(ctx, response.message_id)
   } catch (error) {
     console.error(`Error: `, error)
   }
@@ -82,6 +82,7 @@ export const fetchExerciseController = async (ctx: Context, bot: Telegraf) => {
 }
 
 export const fetchExerciseIntervalController = async (ctx: Context, bot: Telegraf) => {
+
   const response = new ExerciseFetchHandlerInterval()
   try {
     const message = await response.sendCompleteMessage(ctx)
@@ -121,5 +122,14 @@ export const EXERCISE_INTERVALS_LABELS = {
   SEMANA_2: '🔹 Semana 2',
   SEMANA_3: '🔹 Semana 3'
 }
+
+
+
+
+
+
+
+
+
 
 

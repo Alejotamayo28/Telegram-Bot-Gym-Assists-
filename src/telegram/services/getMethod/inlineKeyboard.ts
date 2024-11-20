@@ -1,4 +1,4 @@
-import { Context, Markup, Telegraf } from "telegraf";
+import { Context, Telegraf } from "telegraf";
 import { saveBotMessage, userStageGetExercise, userStateUpdateStage } from "../../../userState";
 import { EXERCISE_VIEW_LABELS, ExerciseFetchGraphTextLabels, ExerciseFetchGraphTextOptions, ExerciseViewOption } from "./models";
 import { msgExerciseViewOptionsMD } from "./messages";
@@ -7,13 +7,16 @@ import { EXERCISE_INTERVALS_LABELS, ExerciseIntervalOption, fetchExerciseInterva
 import { ExerciseQueryFetcher } from "./queries";
 import { GET_EXERCISE_DAY_OUTPUT } from "../../mainMenu/messages";
 import { MessageTemplate } from "../../../template/message";
-import { returnMainMenuPage } from "../../mainMenu";
+import { redirectToMainMenuWithTaskDone } from "../../mainMenu";
 
 /**
  * ExerciseFetchHandler, allows the user to choose how to receive their exercise results
  * When active it displays options to get results at specific options:
  * 'Diario', 'Semanal', 'Intervalo'.
  */
+
+
+
 export class ExerciseFetchHandler extends MessageTemplate {
   protected prepareMessage() {
     const message = msgExerciseViewOptionsMD;
@@ -41,17 +44,16 @@ export class ExerciseFetchHandler extends MessageTemplate {
       return handlers[action]();
     }
   }
-  // WORKS
   private async handleDailyCallback(ctx: Context, bot: Telegraf) {
-    await ctx.reply(GET_EXERCISE_DAY_OUTPUT, {
+    const response = await ctx.reply(GET_EXERCISE_DAY_OUTPUT, {
       parse_mode: "MarkdownV2"
     })
+    saveBotMessage(ctx, response.message_id)
     userStateUpdateStage(ctx, userStageGetExercise.GET_EXERCISE_OPTIONS)
   }
-  // WORKING...
   private async handleWeeklyCallback(ctx: Context, bot: Telegraf) {
     await handleGetWeeklyExercises(ctx)
-    await returnMainMenuPage(ctx, bot)
+    await redirectToMainMenuWithTaskDone(ctx, bot)
   }
   private async handleIntervalCallback(ctx: Context, bot: Telegraf) {
     await fetchExerciseIntervalController(ctx, bot)
@@ -66,7 +68,7 @@ export class ExerciseFetchHandler extends MessageTemplate {
 export class ExerciseFetchHandlerInterval extends MessageTemplate {
   protected prepareMessage() {
     const message =
-      `📅 *Aquí están tus ejercicios de las últimas 3 semanas: *\n\nSelecciona una semana para ver los detalles:`
+      `📅 * Aquí están tus ejercicios de las últimas 3 semanas: *\n\nSelecciona una semana para ver los detalles: `
     const keyboard: InlineKeyboardMarkup = {
       inline_keyboard: [
         [
@@ -76,8 +78,7 @@ export class ExerciseFetchHandlerInterval extends MessageTemplate {
           this.createButton(EXERCISE_INTERVALS_LABELS.SEMANA_3, { action: ExerciseIntervalOption.WEEK_3 })
         ]
       ],
-    };
-    return { message, keyboard }
+    }; return { message, keyboard }
   }
   async handleOptions(ctx: Context, message: Message, action: string, bot: Telegraf) {
     await ctx.deleteMessage(message.message_id)

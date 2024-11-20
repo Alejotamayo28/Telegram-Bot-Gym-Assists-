@@ -6,12 +6,13 @@ import { ExerciseQueryFetcher } from "./queries";
 
 export const handleOutputDailyExercise = (data: Exercise[]): String => {
   let result = ""
-  data.map((i: any) => {
+  data.map((i: Exercise) => {
     let kg: number = i.kg
     result += `
 _Nombre:_ ${i.name}
 _Reps:_ ${i.reps}
-_Peso:_ ${Math.trunc(kg)}\n`
+_Peso:_ ${Math.trunc(kg)}\n
+_Semana:_ ${i.week}`
   })
   return result
 }
@@ -35,7 +36,8 @@ export const mapWeeklyExercise = (data: Exercise[]) => {
         result += `
 _Nombre:_  ${exercise.name}
 _Repeticiones:_  ${exercise.reps}
-_Peso:_  ${Math.trunc(exercise.kg)}\n`;
+_Peso:_  ${Math.trunc(exercise.kg)}
+_Semana:_ ${exercise.week}\n`;
       });
     }
   });

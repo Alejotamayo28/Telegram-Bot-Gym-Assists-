@@ -8,9 +8,9 @@ import { fetchExerciseController, handleGetWeeklyExercises } from '../services/g
 import { bot } from '../bot';
 import { UPDATE_EXERCISE_DAY_OUTPUT } from '../services/updateMethod/message';
 import { DELETE_EXERICISE_DAY } from '../services/deleteMethod/messages';
-import { mainMenuPage, returnMainMenuPage } from '.';
+import { mainMenuPage, redirectToMainMenuWithTaskDone } from '.';
 
-export class ReturnMainMenuHandler extends MessageTemplate {
+export class MainMenuRedirectHandler extends MessageTemplate {
   protected prepareMessage() {
     const message = `Accion confirmada, Que te gustaria hacer ahora? :)`
     const keyboard: InlineKeyboardMarkup = {
@@ -75,7 +75,7 @@ export class MainMenuHandler extends MessageTemplate {
   }
   private async handleGetExerciseWeek(ctx: Context) {
     await handleGetWeeklyExercises(ctx)
-    await returnMainMenuPage(ctx, bot)
+    await redirectToMainMenuWithTaskDone(ctx, bot)
   }
   private async handlePostExercise(ctx: Context) {
     await ctx.reply(POST_EXERCISE_DAY_OUTPUT, {
