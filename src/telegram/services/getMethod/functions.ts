@@ -1,48 +1,135 @@
-import { Exercise, userWorkout } from "../../../model/workout";
+import { Exercise } from "../../../model/workout";
 import { validateDays } from "../utils";
 import { ChartData, ChartConfiguration } from "chart.js";
 import { ChartJSNodeCanvas } from "chartjs-node-canvas";
 import { ExerciseQueryFetcher } from "./queries";
+import { validateExercises } from "../../../validators/allowedValues";
+import { Context } from "telegraf";
+import { deleteUserMessage, userStateUpdateDay, userStateUpdateMonth } from "../../../userState";
+
+export const handleGetExerciseMonth = async (ctx: Context, userMessage: string): Promise<void> => {
+  const month = userMessage.toLowerCase()
+  userStateUpdateMonth(ctx, month, 'stage')
+  await deleteUserMessage(ctx)
+  await ctx.reply(`Escribe el dia en el cual realizaste el ejercicio`, {
+    parse_mode: "Markdown"
+  })
+}
+
+export const handleGetExerciseDay = async (ctx: Context, userMessage: string): Promise<void> => {
+  const day = userMessage.toLowerCase()
+  userStateUpdateDay(ctx, day, 'stage')
+  await deleteUserMessage(ctx)
+
+}
 
 export const handleOutputDailyExercise = (data: Exercise[]): String => {
-  let result = ""
-  data.map((i: Exercise) => {
-    let kg: number = i.kg
-    result += `
-_Nombre:_ ${i.name}
-_Reps:_ ${i.reps}
-_Peso:_ ${Math.trunc(kg)}\n
-_Semana:_ ${i.week}`
-  })
-  return result
-}
-
-export const mapWeeklyExercise = (data: Exercise[]) => {
-  const groupedExercises: { [day: string]: userWorkout[] } = {}
+  const groupedData: { [exercise: string]: { [week: number]: Exercise[] } } = {}
   data.forEach((exercise: Exercise) => {
-    if (validateDays.includes(exercise.day)) {
-      if (!groupedExercises[exercise.day]) {
-        groupedExercises[exercise.day] = [];
+    if (validateExercises.includes(exercise.name)) {
+      if (!groupedData[exercise.name]) {
+        groupedData[exercise.name] = {};
       }
-      groupedExercises[exercise.day].push(exercise);
+      if (!groupedData[exercise.name][exercise.week]) {
+        groupedData[exercise.name][exercise.week] = [];
+      }
+      groupedData[exercise.name][exercise.week].push(exercise);
     }
   });
-  let result = "";
-  validateDays.forEach((day) => {
-    if (groupedExercises[day]) {
-      result += `
-*Dia:* _${day}_\n`.toUpperCase();
-      groupedExercises[day].forEach((exercise) => {
-        result += `
-_Nombre:_  ${exercise.name}
-_Repeticiones:_  ${exercise.reps}
-_Peso:_  ${Math.trunc(exercise.kg)}
-_Semana:_ ${exercise.week}\n`;
-      });
+  let result = ""
+  for (const exerciseName in groupedData) {
+    result += `\n💪 Ejercicio: ${exerciseName.toUpperCase()}\n\n`
+    for (const week in groupedData[exerciseName]) {
+      result += `🔄 Semana ${week}:\n`
+      groupedData[exerciseName][week].forEach((exercise) => {
+        result += `    - Reps: ${exercise.reps.join(' ')} | Peso: ${exercise.kg}\n`
+      })
     }
-  });
+  }
   return result.trim()
 }
+
+//Should be monthly
+export const mapWeeklyExercise = (data: Exercise[]) => {
+  const groupedData: { [day: string]: { [exercise: string]: { [week: number]: Exercise[] } } } = {}
+  data.forEach((exercise: Exercise) => {
+    if (validateDays.includes(exercise.day)) {
+      if (!groupedData[exercise.day]) {
+        groupedData[exercise.day] = {}
+      }
+      if (!groupedData[exercise.day][exercise.name]) {
+        groupedData[exercise.day][exercise.name] = {}
+      }
+      if (!groupedData[exercise.day][exercise.name][exercise.week]) {
+        groupedData[exercise.day][exercise.name][exercise.week] = []
+      }
+      groupedData[exercise.day][exercise.name][exercise.week].push(exercise)
+    }
+  })
+  let result = "";
+  for (const day in groupedData) {
+    result += `\n========================\n🔄 *Día: ${day.toUpperCase()}*\n========================\n\n`;
+
+    for (const exercise in groupedData[day]) {
+      result += `💪 *Ejercicio: ${exercise}\n*`;
+
+      for (const week in groupedData[day][exercise]) {
+        result += `   🔢 *Semana ${week}:*\n`;
+
+        groupedData[day][exercise][week].forEach((exercise) => {
+          result += `      • _Reps:_ ${exercise.reps.join(', ')} | _Peso:_ ${exercise.kg} kg\n`;
+        });
+      }
+    }
+  }
+  return testing(data);
+}
+const validateMonths = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
+export const testing = (data: Exercise[]) => {
+  const groupedData: { [year: number]: { [mes: string]: { [day: string]: { [exercise: string]: { [week: number]: Exercise[] } } } } } = {}
+  data.forEach((exercise: Exercise) => {
+    const month = validateMonths[exercise.date.getMonth()]
+    const year = exercise.date.getFullYear()
+    if (!groupedData[year]) {
+      groupedData[year] = {}
+    }
+    if (!groupedData[year][month]) {
+      groupedData[year][month] = {}
+    }
+    if (!groupedData[year][month][exercise.day]) {
+      groupedData[year][month][exercise.day] = {}
+    }
+    if (!groupedData[year][month][exercise.day][exercise.name]) {
+      groupedData[year][month][exercise.day][exercise.name] = {}
+    }
+    if (!groupedData[year][month][exercise.day][exercise.name][exercise.week]) {
+      groupedData[year][month][exercise.day][exercise.name][exercise.week] = []
+    }
+    groupedData[year][month][exercise.day][exercise.name][exercise.week].push(exercise)
+  })
+  let result = ""
+  for (const year in groupedData) {
+    for (const month in groupedData[year]) {
+      result += `\n========================\n📅 *${month.toUpperCase()}* _${year}_ \n`
+      for (const day in groupedData[year][month]) {
+        result += `\n🔄 Día: _${day.toUpperCase()}_\n----------------------------------\n\n`;
+        for (const exercise in groupedData[year][month][day]) {
+          result += `💪 Ejercicio: _${exercise}\n_`;
+          for (const week in groupedData[year][month][day][exercise]) {
+            result += `   🔢 Semana _${week}:_\n`;
+            groupedData[year][month][day][exercise][week].forEach((exercise: Exercise) => {
+              result += `      • _Reps:_ ${exercise.reps.join(', ')} | _Peso:_ ${exercise.kg} kg\n`;
+            })
+          }
+        }
+      }
+    }
+  }
+  return result.trim()
+}
+
+
+
 
 export const graphic = async (userId: number, day: string) => {
   const result = await ExerciseQueryFetcher.ExerciseByIdAndDay(userId, day)

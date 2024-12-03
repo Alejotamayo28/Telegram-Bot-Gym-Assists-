@@ -1,11 +1,11 @@
 import { Context, Telegraf } from "telegraf";
 import { graphic, handleOutputDailyExercise, mapWeeklyExercise } from "./functions";
-import { regexPattern, tryCatch } from "../utils"; import { handleExerciseNotFound } from "../updateMethod/functions";
+import { regexPattern, tryCatch } from "../utils";
 import { ExerciseFetchGraphTextOptions, ExerciseViewOption } from "./models";
 import { ExerciseFetchHandler, ExerciseFetchHandlerInterval, ExerciseFetchHandlerOptions } from "./inlineKeyboard";
 import { ExerciseQueryFetcher } from "./queries";
 import { redirectToMainMenuWithTaskDone } from "../../mainMenu";
-import { deleteBotMessage, deleteUserMessage, saveBotMessage } from "../../../userState";
+import { deleteUserMessage, saveBotMessage } from "../../../userState";
 
 export const handleGetDailyExercisesGraphic = async (ctx: Context, day: string, bot: Telegraf) => {
   await deleteUserMessage(ctx)
@@ -26,42 +26,30 @@ export const handleGetDailyExercisesGraphic = async (ctx: Context, day: string, 
 export const handleGetDailyExercisesText = async (ctx: Context, day: string, bot: Telegraf) => {
   try {
     const exercise = await ExerciseQueryFetcher.ExerciseByIdAndDay(ctx.from!.id, day)
-    if (!exercise) {
-      await ctx.deleteMessage()
-      await handleExerciseNotFound(ctx)
-      return
-    }
     const formattedOutput = handleOutputDailyExercise(exercise)
     const formattedDay = day.toUpperCase()
-    await ctx.deleteMessage()
-    const response = await ctx.reply(`*${formattedDay}:*\n${formattedOutput}`,
+    deleteUserMessage(ctx)
+    const date = new Date()
+    await ctx.reply(`*${formattedDay}  - Fecha: ${date.toLocaleDateString()}*\n\n${formattedOutput}\n`,
       {
-        parse_mode: `MarkdownV2`
+        parse_mode: `Markdown`
       })
-    saveBotMessage(ctx, response.message_id)
-    await redirectToMainMenuWithTaskDone(ctx, bot)
+    await redirectToMainMenuWithTaskDone(ctx, bot, `_Obtencion de datos se ha realizado con exito._`)
   } catch (error) {
     console.error(`Error: `, error)
   }
 }
 
-export const handleGetWeeklyExercises = async (ctx: Context) => {
-  deleteBotMessage(ctx)
+export const handleGetWeeklyExercises = async (ctx: Context, bot: Telegraf) => {
   try {
     const exercise = await ExerciseQueryFetcher.ExerciseById(ctx.from!.id)
-    if (!exercise.length) {
-      await handleExerciseNotFound(ctx)
-      deleteUserMessage(ctx)
-      return
-    }
     const formattedExercises = mapWeeklyExercise(exercise)
     const date = new Date()
-    const response = await ctx.reply(`
-_Ejercicios semanales realizados:_ 
-*Fecha*: ${date.toLocaleDateString()}\n` + formattedExercises, {
-      parse_mode: 'Markdown'
-    })
-    saveBotMessage(ctx, response.message_id)
+    await ctx.reply(`*Registro ejercicios  -  Fecha: ${date.toLocaleDateString()}* \n\n${formattedExercises}`,
+      {
+        parse_mode: 'Markdown'
+      })
+    await redirectToMainMenuWithTaskDone(ctx, bot, `_Obtencion de datos se ha realizado con exito._`)
   } catch (error) {
     console.error(`Error: `, error)
   }
@@ -72,26 +60,27 @@ export const fetchExerciseController = async (ctx: Context, bot: Telegraf) => {
   const response = new ExerciseFetchHandler()
   try {
     const message = await response.sendCompleteMessage(ctx)
+    saveBotMessage(ctx, message.message_id)
     bot.action(regexPattern(ExerciseViewOption), async (ctx) => {
       const action = ctx.match[0]
       await tryCatch(() => response.handleOptions(ctx, message, action, bot), ctx)
     })
   } catch (error) {
-    console.error(`Error in handleGetExerciseOptions :`, error)
+    console.error(`Error in handleGetExerciseOptions : `, error)
   }
 }
 
 export const fetchExerciseIntervalController = async (ctx: Context, bot: Telegraf) => {
-
   const response = new ExerciseFetchHandlerInterval()
   try {
     const message = await response.sendCompleteMessage(ctx)
+    saveBotMessage(ctx, message.message_id)
     bot.action(regexPattern(ExerciseIntervalOption), async (ctx) => {
       const action = ctx.match[0]
       await tryCatch(() => response.handleOptions(ctx, message, action, bot), ctx)
     })
   } catch (error) {
-    console.error(`Error in handleGetExerciseOptions :`, error)
+    console.error(`Error in handleGetExerciseOptions : `, error)
   }
 }
 
@@ -99,12 +88,13 @@ export const fetchExerciseGraphTextController = async (ctx: Context, bot: Telegr
   const response = new ExerciseFetchHandlerOptions()
   try {
     const message = await response.sendCompleteMessage(ctx)
+    saveBotMessage(ctx, message.message_id)
     bot.action(regexPattern(ExerciseFetchGraphTextOptions), async (ctx) => {
       const action = ctx.match[0]
       await tryCatch(() => response.handleOptions(ctx, message, action, bot, userMessage), ctx)
     })
   } catch (error) {
-    console.error(`Error in fetchExerciseGraphTextController :`, error)
+    console.error(`Error in fetchExerciseGraphTextController : `, error)
   }
 }
 

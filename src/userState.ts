@@ -30,7 +30,9 @@ export enum userStagePutExercise {
 }
 
 export enum userStageGetExercise {
-  GET_EXERCISE_OPTIONS = 'getExerciseOptions'
+  GET_EXERCISE_OPTIONS = 'getExerciseOptions',
+  GET_EXERCISE_MONTH = 'getExerciseMonth',
+  GET_EXERCISE_DAY = 'getExerciseDay'
 }
 
 export enum userStageDeleteExercise {
@@ -42,6 +44,7 @@ export enum userStageDeleteExercise {
 
 
 interface UpdateUserStateOptions {
+  month?: string,
   day?: string;
   name?: string;
   reps?: number[];
@@ -93,6 +96,10 @@ export const userStateUpdateStage = (ctx: Context, stage: string) => {
 
 export const userStateUpdateDay = (ctx: Context, day: string, stage?: string) => {
   updateUserStateExample(ctx, { day, stage })
+}
+
+export const userStateUpdateMonth = (ctx: Context, month: string, stage?: string) => {
+  updateUserStateExample(ctx, { month, stage })
 }
 
 export const userStateUpdateName = (ctx: Context, name: string, stage?: string) => {

@@ -14,6 +14,7 @@ import { fetchExerciseGraphTextController } from "../telegram/services/getMethod
 import { parseInt } from "lodash";
 import { PostExerciseVerificationController } from "../telegram/services/addMethod";
 import { DataValidator } from "../validators/dataValidator";
+import { handleGetExerciseMonth } from "../telegram/services/getMethod/functions";
 
 export type MyContext =
   | NarrowedContext<Context<Update>, Update.MessageUpdate<Message.TextMessage>>
@@ -183,6 +184,31 @@ bot.on(message("text"), async ctx => {
             await handleError(error, userState[userId].stage, ctx)
           }
           break
+
+        case userStageGetExercise.GET_EXERCISE_MONTH:
+          await deleteLastMessage(ctx)
+          saveUserMessage(ctx)
+          try {
+            if (await (DataValidator.validateMonth(ctx, userMessage))) break
+            deleteUserMessage(ctx)
+            await handleGetExerciseMonth(ctx, userMessage)
+          } catch (error) {
+            console.error(`Error: `, error)
+          }
+          break;
+
+        case userStageGetExercise.GET_EXERCISE_DAY:
+          await deleteUserMessage(ctx)
+          saveUserMessage(ctx)
+          try {
+            if (await (DataValidator.validateDay(ctx, userMessage))) break;
+            deleteUserMessage(ctx)
+            await fetchExerciseGraphTextController(ctx, bot, userMessage)
+          } catch (error) {
+            console.error(`Error: `, error)
+          }
+          break;
+
 
         case userStageDeleteExercise.DELETE_EXERCISE_DAY:
           await deleteLastMessage(ctx)

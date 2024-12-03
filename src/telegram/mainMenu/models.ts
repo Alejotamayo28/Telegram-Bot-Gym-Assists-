@@ -15,9 +15,11 @@ export const MainMenuLabels: { [key in MainMenuCallbacks]: string } = {
 }
 
 export enum ReturnMainMenuCallbacks {
-  returnMenu = 'returnMenu'
+  returnpostExercise = 'postExercise',
+  returnupdateExercise = 'updateExercise',
+  returngetExercise = 'getExercise',
+  returngetExerciseWeek = 'getExerciseWeek',
+  returndeleteExercise = 'deleteExercise'
 }
 
-export const ReturnMainMenuLabels: { [key in ReturnMainMenuCallbacks]: string } = {
-  [ReturnMainMenuCallbacks.returnMenu]: "🔄 Volver al menu principal"
-}
+

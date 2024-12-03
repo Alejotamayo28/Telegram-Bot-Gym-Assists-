@@ -53,7 +53,7 @@ export class StartCommandHadler extends MessageTemplate {
   }
   async handleOptions(ctx: Context, message: Message, action: string, bot: Telegraf) {
     await deleteBotMessage(ctx)
-    const handlers: { [key: string]: () => Promise<void> } = {
+    const handlers: { [key: string]: () => Promise<void | Message> } = {
       [CommandStartCallbacks.login]: this.handleLoginCallback.bind(this, ctx),
       [CommandStartCallbacks.signUp]: this.handleSignUpCallback.bind(this, ctx),
       [CommandStartCallbacks.loginExample]: this.handleLoginExampleCallback.bind(this, ctx),
@@ -73,14 +73,14 @@ export class StartCommandHadler extends MessageTemplate {
     saveBotMessage(ctx, response.message_id)
     userStateUpdateStage(ctx, userStageSignUp.SIGN_UP_NICKNAME)
   }
-  private async handleLoginExampleCallback(ctx: Context) {
-    await ctx.reply(LOGIN_EXAMPLE_INFO_MESSAGE, {
+  private async handleLoginExampleCallback(ctx: Context): Promise<Message> {
+    return await ctx.reply(LOGIN_EXAMPLE_INFO_MESSAGE, {
       parse_mode: "Markdown",
       reply_markup: this.prepareMessage().keyboard
     })
   }
-  private async handleSignUpExampleCallback(ctx: Context) {
-    await ctx.reply(SING_UP_EXAMPLE_MESSAGE, {
+  private async handleSignUpExampleCallback(ctx: Context): Promise<Message> {
+    return await ctx.reply(SING_UP_EXAMPLE_MESSAGE, {
       parse_mode: "Markdown",
       reply_markup: this.prepareMessage().keyboard
     })

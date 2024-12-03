@@ -3,15 +3,16 @@ import { UserCredentials, UserProfile } from "../../model/client"
 import { PartialWorkout } from "../../model/workout"
 import { Context } from "telegraf"
 import { onSession } from "../../database/dataAccessLayer"
+import { Message } from "telegraf/typings/core/types/typegram"
 
 // regetPattern para las acciones del usuario, parametro = enum
 export const regexPattern = <T extends { [key: string]: string }>(optionsEnum: T) => {
   return new RegExp(`^(${Object.values(optionsEnum).join('|')})$`)
 }
 
-export const tryCatch = async (fn: () => Promise<void>, ctx: Context) => {
+export const tryCatch = async (fn: () => Promise<void | Message>, ctx: Context) => {
   try {
-    await fn()
+    return await fn()
   } catch (error) {
     console.error(`Error: `, error)
     await ctx.reply(`An error ocurred. Please try again.`)

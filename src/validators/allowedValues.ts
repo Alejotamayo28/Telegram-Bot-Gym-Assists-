@@ -1,5 +1,10 @@
 type readOnlyValues = Readonly<string[]>
+
+export const validateMonths: readOnlyValues =
+  ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
+
 export const validateDays: readOnlyValues = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']
+
 export const validateExercises: readOnlyValues = [
   "press militar", "sentadilla", "peso muerto", "dominadas", "curl de bíceps",
   "remo con barra", "press banca", "zancadas", "press de hombros", "hip thrust",

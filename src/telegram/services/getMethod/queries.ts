@@ -47,7 +47,7 @@ export class ExerciseQueryFetcher {
   static async ExerciseByIdAndDay(userId: number, day: string): Promise<Exercise[]> {
     const response = await onSession(async (clientTransaction) => {
       return await clientTransaction.query(
-        `SELECT day, name, reps, kg FROM workout
+        `SELECT day, name, reps, kg, week FROM workout
             WHERE user_id = $1 AND day = $2`,
         [userId, day]
       );
@@ -57,7 +57,7 @@ export class ExerciseQueryFetcher {
   static async ExerciseById(userId: number): Promise<Exercise[]> {
     const response = await onSession(async (clientTransaction) => {
       return await clientTransaction.query(
-        `SELECT day, name, reps, kg, week FROM workout 
+        `SELECT day, name, reps, kg, week, date FROM workout 
             WHERE user_id = $1 ORDER BY  Date`, [userId])
     })
     return response.rows

@@ -28,12 +28,13 @@ export abstract class MessageTemplate {
           parse_mode: "Markdown",
           reply_markup: keyboard
         })
+      } else {
+        const { keyboard } = this.prepareMessage()
+        return await ctx.reply(this.taskDone, {
+          parse_mode: "Markdown",
+          reply_markup: keyboard
+        })
       }
-      const { keyboard } = this.prepareMessage()
-      return await ctx.reply(this.taskDone, {
-        parse_mode: "Markdown",
-        reply_markup: keyboard
-      })
     }
     catch (error) {
       console.error(`Error: `, error)
