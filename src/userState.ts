@@ -1,5 +1,4 @@
 import { Context } from "telegraf"
-import { message } from "telegraf/filters";
 
 export let userState: { [key: number]: any } = {}
 
@@ -32,7 +31,8 @@ export enum userStagePutExercise {
 export enum userStageGetExercise {
   GET_EXERCISE_OPTIONS = 'getExerciseOptions',
   GET_EXERCISE_MONTH = 'getExerciseMonth',
-  GET_EXERCISE_DAY = 'getExerciseDay'
+  GET_EXERCISE_DAY = 'getExerciseDay',
+  GET_EXERCISE_MONTH_STAGE = 'getExerciseMonthStage'
 }
 
 export enum userStageDeleteExercise {

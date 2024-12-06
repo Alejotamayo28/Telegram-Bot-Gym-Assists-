@@ -1,50 +1,39 @@
 import { Context, Telegraf } from "telegraf";
 import { deleteUserMessage, userStageDeleteExercise, userState, userStateUpdateDay, userStateUpdateName, userStateUpdateWeek } from "../../../userState";
-import { DELETE_EXERCISE_WEEK, EXERCISE_DELETE_NAME } from "./messages";
 import { parseInt } from "lodash";
 import { ExerciseQueryFetcher } from "../getMethod/queries";
-import { handleExerciseNotFound } from "../updateMethod/functions";
 import { deleteExerciseVerificationController } from ".";
+import { botMessages } from "../../messages";
+import { BotUtils } from "../singUp/functions";
 
-export const handleDeleteExerciseDay = async (ctx: Context, userMessage: string) => {
-  try {
-    userStateUpdateDay(ctx, userMessage, userStageDeleteExercise.DELETE_EXERCISE_NAME)
-    await deleteUserMessage(ctx)
-    await ctx.reply(EXERCISE_DELETE_NAME, {
-      parse_mode: "Markdown",
-    });
-  } catch (error) {
-    console.error(`Error: `, error)
+export class ExerciseDeleteHandler {
+  private static async handleDeleteExerciseError(ctx: Context, errorType: keyof typeof botMessages.inputRequest.prompts.getMethod.errors) {
+    const errorMessage = botMessages.inputRequest.prompts.getMethod.errors[errorType]
+    await BotUtils.sendBotMessage(ctx, errorMessage)
   }
-};
-
-export const handleDeleteExerciseName = async (ctx: Context, userMessage: string) => {
-  try {
-    userStateUpdateName(ctx, userMessage, userStageDeleteExercise.DELETE_EXERCISE_WEEK)
+  static async exerciseDay(ctx: Context, day: string): Promise<void> {
     await deleteUserMessage(ctx)
-    await ctx.reply(DELETE_EXERCISE_WEEK, {
-      parse_mode: "Markdown"
-    })
-  } catch (error) {
-    console.error(`Error: `, error)
+    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.deleteMethod.exerciseName)
+    userStateUpdateDay(ctx, day, userStageDeleteExercise.DELETE_EXERCISE_NAME)
   }
-}
-
-export const handleDeleteExerciseWeekAndConfirmation = async (ctx: Context, bot: Telegraf, userMessage: string) => {
-  try {
-    const week = parseInt(userMessage)
-    userStateUpdateWeek(ctx, week)
+  static async exerciseName(ctx: Context, name: string): Promise<void> {
+    await deleteUserMessage(ctx)
+    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.deleteMethod.exerciseWeek)
+    userStateUpdateName(ctx, name, userStageDeleteExercise.DELETE_EXERCISE_WEEK)
+  }
+  static async exerciseWeekAndConfirmation(ctx: Context, bot: Telegraf, week: string): Promise<void> {
+    await deleteUserMessage(ctx)
+    const weekNumber = parseInt(week)
+    userStateUpdateWeek(ctx, weekNumber)
     const exercise = await ExerciseQueryFetcher.ExerciseByNameRepsWeekAndId(ctx.from!.id, userState[ctx.from!.id])
     if (!exercise) {
-      await deleteUserMessage(ctx)
-      await handleExerciseNotFound(ctx)
+      await this.handleDeleteExerciseError(ctx, "exerciseNotFound")
       return
     }
     await deleteExerciseVerificationController(ctx, bot)
-  } catch (error) {
-    console.error(`Error: `, error)
   }
 }
+
 
 
 

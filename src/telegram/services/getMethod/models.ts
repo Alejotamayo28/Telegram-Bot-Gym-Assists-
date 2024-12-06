@@ -1,13 +1,13 @@
 // botones
 export const EXERCISE_VIEW_LABELS = {
   DAILY: '🔹 Por día',
-  WEEKLY: '🔹 Por semana',
+  MONTHLY: '🔹 Por mes',
   INTERVAL: '🔹 Intervalo semanal'
 };
 // acciones
 export enum ExerciseViewOption {
   DAILY = 'porDia',
-  WEEKLY = 'weekly',
+  MONTHLY = 'monthly',
   INTERVAL = 'interval'
 }
 

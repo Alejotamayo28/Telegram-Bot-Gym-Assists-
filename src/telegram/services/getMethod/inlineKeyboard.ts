@@ -3,11 +3,13 @@ import { deleteBotMessage, saveBotMessage, userStageGetExercise, userStateUpdate
 import { EXERCISE_VIEW_LABELS, ExerciseFetchGraphTextLabels, ExerciseFetchGraphTextOptions, ExerciseViewOption } from "./models";
 import { msgExerciseViewOptionsMD } from "./messages";
 import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram";
-import { EXERCISE_INTERVALS_LABELS, ExerciseIntervalOption, fetchExerciseIntervalController, handleGetDailyExercisesGraphic, handleGetDailyExercisesText, handleGetWeeklyExercises } from ".";
+import { EXERCISE_INTERVALS_LABELS, ExerciseIntervalOption, fetchExerciseIntervalController, handleGetDailyExercisesGraphic } from ".";
 import { ExerciseQueryFetcher } from "./queries";
-import { GET_EXERCISE_DAY_OUTPUT } from "../../mainMenu/messages";
 import { MessageTemplate } from "../../../template/message";
 import { redirectToMainMenuWithTaskDone } from "../../mainMenu";
+import { botMessages } from "../../messages";
+import { ExerciseGetHandler } from "./functions";
+import { BotUtils } from "../singUp/functions";
 
 export class ExerciseFetchHandler extends MessageTemplate {
   protected prepareMessage() {
@@ -16,7 +18,7 @@ export class ExerciseFetchHandler extends MessageTemplate {
       inline_keyboard: [
         [
           this.createButton(EXERCISE_VIEW_LABELS.DAILY, { action: ExerciseViewOption.DAILY }),
-          this.createButton(EXERCISE_VIEW_LABELS.WEEKLY, { action: ExerciseViewOption.WEEKLY })
+          this.createButton(EXERCISE_VIEW_LABELS.MONTHLY, { action: ExerciseViewOption.MONTHLY })
         ],
         [
           this.createButton(EXERCISE_VIEW_LABELS.INTERVAL, { action: ExerciseViewOption.INTERVAL })
@@ -29,7 +31,7 @@ export class ExerciseFetchHandler extends MessageTemplate {
     await deleteBotMessage(ctx)
     const handlers: { [key: string]: () => Promise<void> } = {
       [ExerciseViewOption.DAILY]: this.handleDailyCallback.bind(this, ctx),
-      [ExerciseViewOption.WEEKLY]: this.handleWeeklyCallback.bind(this, ctx, bot),
+      [ExerciseViewOption.MONTHLY]: this.handleMonthlyCallback.bind(this, ctx),
       [ExerciseViewOption.INTERVAL]: this.handleIntervalCallback.bind(this, ctx, bot)
     };
     if (handlers[action]) {
@@ -37,15 +39,12 @@ export class ExerciseFetchHandler extends MessageTemplate {
     }
   }
   private async handleDailyCallback(ctx: Context) {
-    const response = await ctx.reply(GET_EXERCISE_DAY_OUTPUT, {
-      parse_mode: "MarkdownV2"
-    })
-    saveBotMessage(ctx, response.message_id)
-    userStateUpdateStage(ctx, userStageGetExercise.GET_EXERCISE_OPTIONS)
+    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.getMethod.exerciseMonth)
+    userStateUpdateStage(ctx, userStageGetExercise.GET_EXERCISE_MONTH)
   }
-  private async handleWeeklyCallback(ctx: Context, bot: Telegraf) {
-    await handleGetWeeklyExercises(ctx, bot)
-    await redirectToMainMenuWithTaskDone(ctx, bot)
+  private async handleMonthlyCallback(ctx: Context) {
+    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.getMethod.exerciseMonth)
+    userStateUpdateStage(ctx, userStageGetExercise.GET_EXERCISE_MONTH_STAGE)
   }
   private async handleIntervalCallback(ctx: Context, bot: Telegraf) {
     return await fetchExerciseIntervalController(ctx, bot)
@@ -80,19 +79,16 @@ export class ExerciseFetchHandlerInterval extends MessageTemplate {
   }
   private async handleWeek1Callback(ctx: Context, bot: Telegraf): Promise<void> {
     const exercises = await ExerciseQueryFetcher.ExerciseIntervalFirtsWeek(ctx)
-    console.log(exercises)
     return await redirectToMainMenuWithTaskDone(ctx, bot,
       `Ejercicios obtenidos exitosamente.`)
   }
   private async handleWeek2Callback(ctx: Context, bot: Telegraf) {
     const exercises = await ExerciseQueryFetcher.ExeriseIntervalSecondWeek(ctx)
-    console.log(exercises)
     return await redirectToMainMenuWithTaskDone(ctx, bot,
       `Ejercicios obtenidos exitosamente.`)
   }
   private async handleWeek3Callback(ctx: Context, bot: Telegraf) {
     const exercises = await ExerciseQueryFetcher.ExeriseIntervalThirdWeek(ctx)
-    console.log(exercises)
     return await redirectToMainMenuWithTaskDone(ctx, bot,
       `Ejercicios obtenidos exitosamente.`)
   }
@@ -125,7 +121,7 @@ export class ExerciseFetchHandlerOptions extends MessageTemplate {
       return handlers[action]();
     }
   } private async handleTextCallback(ctx: Context, userMessage: string, bot: Telegraf) {
-    await handleGetDailyExercisesText(ctx, userMessage, bot)
+    await ExerciseGetHandler.getDailyExerciseText(ctx, userMessage, bot)
   }
   private async handleGraphicCallback(ctx: Context, userMessage: string, bot: Telegraf) {
     await handleGetDailyExercisesGraphic(ctx, userMessage, bot)

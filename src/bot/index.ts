@@ -1,20 +1,20 @@
 import { deleteBotMessage, deleteUserMessage, saveUserMessage, userStage, userStageDeleteExercise, userStageGetExercise, userStagePostExercise, userStagePutExercise, userStageSignUp, userState, userStateUpdateName } from "../userState";
 import { bot } from "../telegram/bot";
 import { handleError } from "../errors";
-import { handleSignUpEmail, handleSignUpNickname, handleSignUpPassword } from "../telegram/services/singUp/functions";
+import { RegisterHandler } from "../telegram/services/singUp/functions";
 import { ExercisePostHandler } from "../telegram/services/addMethod/functions";
 import { message } from 'telegraf/filters'
 import { NarrowedContext, Context } from "telegraf";
 import { Update, Message } from "telegraf/typings/core/types/typegram";
-import { handleDeleteExerciseDay, handleDeleteExerciseName, handleDeleteExerciseWeekAndConfirmation } from "../telegram/services/deleteMethod/functions";
+import { ExerciseDeleteHandler } from "../telegram/services/deleteMethod/functions";
 import { handleUpdateExerciseDay, handleUpdateExerciseName, handlerUpdateExerciseReps, handlerUpdateExerciseKg, findExerciseByDayName, handleExerciseNotFound } from "../telegram/services/updateMethod/functions";
-import { handleLoginNickname, handleLoginPassword } from "../telegram/services/login/functions";
+import { LoginHandler } from "../telegram/services/login/functions";
 import { deleteLastMessage } from "../telegram/services/utils";
 import { fetchExerciseGraphTextController } from "../telegram/services/getMethod";
 import { parseInt } from "lodash";
 import { PostExerciseVerificationController } from "../telegram/services/addMethod";
 import { DataValidator } from "../validators/dataValidator";
-import { handleGetExerciseMonth } from "../telegram/services/getMethod/functions";
+import { ExerciseGetHandler } from "../telegram/services/getMethod/functions";
 
 export type MyContext =
   | NarrowedContext<Context<Update>, Update.MessageUpdate<Message.TextMessage>>
@@ -31,7 +31,7 @@ bot.on(message("text"), async ctx => {
           await deleteBotMessage(ctx)
           saveUserMessage(ctx)
           try {
-            await handleSignUpNickname(ctx, userMessage)
+            await RegisterHandler.registerNickname(ctx, userMessage)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
@@ -41,7 +41,7 @@ bot.on(message("text"), async ctx => {
           await deleteBotMessage(ctx)
           saveUserMessage(ctx)
           try {
-            await handleSignUpPassword(ctx, userMessage)
+            await RegisterHandler.registerPassword(ctx, userMessage)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
@@ -51,7 +51,7 @@ bot.on(message("text"), async ctx => {
           await deleteBotMessage(ctx)
           saveUserMessage(ctx)
           try {
-            await handleSignUpEmail(ctx, userMessage)
+            await RegisterHandler.registerEmail(ctx, bot, userMessage)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
@@ -61,7 +61,7 @@ bot.on(message("text"), async ctx => {
           await deleteBotMessage(ctx)
           saveUserMessage(ctx)
           try {
-            await handleLoginNickname(ctx, userMessage)
+            await LoginHandler.loginNickname(ctx, userMessage)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
@@ -71,7 +71,7 @@ bot.on(message("text"), async ctx => {
           await deleteLastMessage(ctx)
           saveUserMessage(ctx)
           try {
-            await handleLoginPassword(ctx, userMessage)
+            await LoginHandler.loginPassword(ctx, bot, userMessage)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
@@ -185,25 +185,37 @@ bot.on(message("text"), async ctx => {
           }
           break
 
+        case userStageGetExercise.GET_EXERCISE_MONTH_STAGE:
+          await deleteLastMessage(ctx)
+          saveUserMessage(ctx)
+          try {
+            if (await (DataValidator.validateMonth(ctx, userMessage))) break
+            await deleteUserMessage(ctx)
+            await ExerciseGetHandler.getMonthlyExerciseText(ctx, userMessage, bot)
+          } catch (error) {
+            console.error(`Error: `, error)
+          }
+          break;
+
         case userStageGetExercise.GET_EXERCISE_MONTH:
           await deleteLastMessage(ctx)
           saveUserMessage(ctx)
           try {
             if (await (DataValidator.validateMonth(ctx, userMessage))) break
-            deleteUserMessage(ctx)
-            await handleGetExerciseMonth(ctx, userMessage)
+            await deleteUserMessage(ctx)
+            await ExerciseGetHandler.exerciseMonth(ctx, userMessage)
           } catch (error) {
             console.error(`Error: `, error)
           }
           break;
 
         case userStageGetExercise.GET_EXERCISE_DAY:
-          await deleteUserMessage(ctx)
+          await deleteBotMessage(ctx)
           saveUserMessage(ctx)
           try {
             if (await (DataValidator.validateDay(ctx, userMessage))) break;
-            deleteUserMessage(ctx)
-            await fetchExerciseGraphTextController(ctx, bot, userMessage)
+            await deleteUserMessage(ctx)
+            await ExerciseGetHandler.getDailyExerciseText(ctx, userMessage, bot)
           } catch (error) {
             console.error(`Error: `, error)
           }
@@ -215,7 +227,7 @@ bot.on(message("text"), async ctx => {
           saveUserMessage(ctx)
           try {
             if (await (DataValidator.validateDay(ctx, userMessage))) break
-            await handleDeleteExerciseDay(ctx, userMessage)
+            await ExerciseDeleteHandler.exerciseDay(ctx, userMessage)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
@@ -226,7 +238,7 @@ bot.on(message("text"), async ctx => {
           saveUserMessage(ctx)
           try {
             if (await (DataValidator.validateExercise(ctx, userMessage))) break
-            await handleDeleteExerciseName(ctx, userMessage)
+            await ExerciseDeleteHandler.exerciseName(ctx, userMessage)
           } catch (error) {
             console.error(`Error: `, error)
           }
@@ -255,7 +267,7 @@ bot.on(message("text"), async ctx => {
           saveUserMessage(ctx)
           try {
             if (await (DataValidator.validateWeek(ctx, userMessage))) break
-            await handleDeleteExerciseWeekAndConfirmation(ctx, bot, userMessage)
+            await ExerciseDeleteHandler.exerciseWeekAndConfirmation(ctx, bot, userMessage)
           } catch (error) {
             console.error(`Error: `, error)
           }

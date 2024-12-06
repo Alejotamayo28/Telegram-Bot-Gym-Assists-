@@ -9,9 +9,6 @@ Tus datos estarán seguros: se almacenarán en una base de datos protegida. 🔒
 Solo tu "nickname" será visibles para otros usuarios. 
 Tu contraseña estará encriptada, asegurando así tu privacidad._ 🛡️`
 
-export const SIGN_UP_SUCCESFULLY = `*¡Cuenta creada con éxito\\!* 🎉\n\n_¿Sigue explorando, qué te gustaría hacer ahora?_`
-
-export const SIGN_UP_NOT_SUCCESFULLY = `*¡Usuario no creado\\!* 🤕\n\n_¿Sigue explorando, qué te gustaría hacer ahora?_`
 
 export const SIGN_UP_NICKNAME = `
 🔒*Registrando cuenta*🔒

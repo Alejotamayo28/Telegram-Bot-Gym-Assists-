@@ -1,11 +1,14 @@
 import { Context, Telegraf } from "telegraf";
-import { graphic, handleOutputDailyExercise, mapWeeklyExercise } from "./functions";
+import { ExerciseGetUtils, graphic } from "./functions";
 import { regexPattern, tryCatch } from "../utils";
 import { ExerciseFetchGraphTextOptions, ExerciseViewOption } from "./models";
 import { ExerciseFetchHandler, ExerciseFetchHandlerInterval, ExerciseFetchHandlerOptions } from "./inlineKeyboard";
 import { ExerciseQueryFetcher } from "./queries";
 import { redirectToMainMenuWithTaskDone } from "../../mainMenu";
-import { deleteUserMessage, saveBotMessage } from "../../../userState";
+import { deleteUserMessage, saveBotMessage, userState } from "../../../userState";
+import { botMessages } from "../../messages";
+import { BotUtils } from "../singUp/functions";
+
 
 export const handleGetDailyExercisesGraphic = async (ctx: Context, day: string, bot: Telegraf) => {
   await deleteUserMessage(ctx)
@@ -22,39 +25,6 @@ export const handleGetDailyExercisesGraphic = async (ctx: Context, day: string, 
     console.error(`Error: `, error)
   }
 }
-
-export const handleGetDailyExercisesText = async (ctx: Context, day: string, bot: Telegraf) => {
-  try {
-    const exercise = await ExerciseQueryFetcher.ExerciseByIdAndDay(ctx.from!.id, day)
-    const formattedOutput = handleOutputDailyExercise(exercise)
-    const formattedDay = day.toUpperCase()
-    deleteUserMessage(ctx)
-    const date = new Date()
-    await ctx.reply(`*${formattedDay}  - Fecha: ${date.toLocaleDateString()}*\n\n${formattedOutput}\n`,
-      {
-        parse_mode: `Markdown`
-      })
-    await redirectToMainMenuWithTaskDone(ctx, bot, `_Obtencion de datos se ha realizado con exito._`)
-  } catch (error) {
-    console.error(`Error: `, error)
-  }
-}
-
-export const handleGetWeeklyExercises = async (ctx: Context, bot: Telegraf) => {
-  try {
-    const exercise = await ExerciseQueryFetcher.ExerciseById(ctx.from!.id)
-    const formattedExercises = mapWeeklyExercise(exercise)
-    const date = new Date()
-    await ctx.reply(`*Registro ejercicios  -  Fecha: ${date.toLocaleDateString()}* \n\n${formattedExercises}`,
-      {
-        parse_mode: 'Markdown'
-      })
-    await redirectToMainMenuWithTaskDone(ctx, bot, `_Obtencion de datos se ha realizado con exito._`)
-  } catch (error) {
-    console.error(`Error: `, error)
-  }
-}
-
 
 export const fetchExerciseController = async (ctx: Context, bot: Telegraf) => {
   const response = new ExerciseFetchHandler()

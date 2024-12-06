@@ -4,11 +4,9 @@ import { LOGIN_BUTTON, LOGIN_CALLBACK, LOGIN_EXAMPLE_BUTTON, LOGIN_EXAMPLE_CALLB
 import { MessageTemplate } from "../../template/message";
 import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram";
 import { welcomeMessage } from "../messages/welcomeMessage";
-import { LOGIN_EXAMPLE_INFO_MESSAGE, LOGIN_REQUEST_NICKNAME_MESSAGE } from "../services/login/messages";
-import { deleteBotMessage, saveBotMessage, userStage, userStageSignUp, userStateUpdateStage } from "../../userState";
-import { SIGN_UP_NICKNAME, SING_UP_EXAMPLE_MESSAGE } from "../services/singUp/message";
-import { bot } from "../bot";
-import { message } from "telegraf/filters";
+import { deleteBotMessage, userStage, userStageSignUp, userStateUpdateStage } from "../../userState";
+import { botMessages } from "../messages";
+import { BotUtils } from "../services/singUp/functions";
 
 export const startInlineKeyboard = Markup.inlineKeyboard([
   [Markup.button.callback(LOGIN_BUTTON, LOGIN_CALLBACK),
@@ -51,7 +49,7 @@ export class StartCommandHadler extends MessageTemplate {
     }
     return { message, keyboard }
   }
-  async handleOptions(ctx: Context, message: Message, action: string, bot: Telegraf) {
+  async handleOptions(ctx: Context, message: Message, action: string) {
     await deleteBotMessage(ctx)
     const handlers: { [key: string]: () => Promise<void | Message> } = {
       [CommandStartCallbacks.login]: this.handleLoginCallback.bind(this, ctx),
@@ -64,26 +62,18 @@ export class StartCommandHadler extends MessageTemplate {
     }
   }
   private async handleLoginCallback(ctx: Context) {
-    const response = await ctx.reply(LOGIN_REQUEST_NICKNAME_MESSAGE, { parse_mode: "Markdown", })
-    saveBotMessage(ctx, response.message_id)
+    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.auth.nickname)
     userStateUpdateStage(ctx, userStage.LOGIN_NICKNAME)
   }
   private async handleSignUpCallback(ctx: Context) {
-    const response = await ctx.reply(SIGN_UP_NICKNAME, { parse_mode: "Markdown" })
-    saveBotMessage(ctx, response.message_id)
+    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.register.nickname)
     userStateUpdateStage(ctx, userStageSignUp.SIGN_UP_NICKNAME)
   }
-  private async handleLoginExampleCallback(ctx: Context): Promise<Message> {
-    return await ctx.reply(LOGIN_EXAMPLE_INFO_MESSAGE, {
-      parse_mode: "Markdown",
-      reply_markup: this.prepareMessage().keyboard
-    })
+  private async handleLoginExampleCallback(ctx: Context): Promise<void> {
+    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.auth.example, this.prepareMessage().keyboard)
   }
-  private async handleSignUpExampleCallback(ctx: Context): Promise<Message> {
-    return await ctx.reply(SING_UP_EXAMPLE_MESSAGE, {
-      parse_mode: "Markdown",
-      reply_markup: this.prepareMessage().keyboard
-    })
+  private async handleSignUpExampleCallback(ctx: Context): Promise<void> {
+    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.register.example, this.prepareMessage().keyboard)
   }
 }
 

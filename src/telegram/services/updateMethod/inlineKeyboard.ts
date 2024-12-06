@@ -1,7 +1,6 @@
 import { Context, Telegraf } from "telegraf";
-import { ExerciseUpdateTemplate, MessageTemplate } from "../../../template/message";
-import { userStagePutExercise, userState, userStateUpdateDay, userStateUpdateKg, userStateUpdateName, userStateUpdateReps } from "../../../userState";
-import { UPDATE_EXERCIISE_CANCELED, UPDATE_EXERCISE_KG, UPDATE_EXERCISE_NAME, UPDATE_EXERCISE_REPS, UPDATED_EXERCISE_SUCCESFULLY } from "./message";
+import { MessageTemplate } from "../../../template/message";
+import { userState, } from "../../../userState";
 import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram";
 import { PartialWorkout } from "../../../model/workout";
 import { ExerciseVerificationCallbacks, ExerciseVerificationLabels } from "../addMethod/models";
@@ -9,43 +8,6 @@ import { verifyExerciseOutput } from "../utils";
 import { onTransaction } from "../../../database/dataAccessLayer";
 import { workoutUpdateQuery } from "./queries";
 import { redirectToMainMenuWithTaskDone } from "../../mainMenu";
-
-export class ExerciseUpdateDayHandler extends ExerciseUpdateTemplate {
-  protected updateUserState(ctx: Context, message: string): void {
-    userStateUpdateDay(ctx, message, userStagePutExercise.PUT_EXERCISE_NAME)
-  }
-  protected replyMessage(): string {
-    return UPDATE_EXERCISE_NAME
-  }
-}
-
-export class ExerciseUpdateNameHandler extends ExerciseUpdateTemplate {
-  protected updateUserState(ctx: Context, message: string): void {
-    userStateUpdateName(ctx, message, userStagePutExercise.PUT_EXERCISE_REPS)
-  }
-  protected replyMessage(): string {
-    return UPDATE_EXERCISE_REPS
-  }
-}
-
-export class ExerciseUpdateRepsHandler extends ExerciseUpdateTemplate {
-  protected updateUserState(ctx: Context, message: string): void {
-    const reps = message.split(" ").map(Number)
-    userStateUpdateReps(ctx, reps, userStagePutExercise.PUT_EXERCISE_WEIGHT)
-  }
-  protected replyMessage(): string {
-    return UPDATE_EXERCISE_KG
-  }
-}
-
-export class ExerciseUpdateKgHandler extends ExerciseUpdateTemplate {
-  protected updateUserState(ctx: Context, message: string): void {
-    userStateUpdateKg(ctx, Number(message))
-  }
-  protected replyMessage(): string {
-    return `Cambios guardados, continua...`
-  }
-}
 
 export class ExerciseUpdateVerificationHandler extends MessageTemplate {
   constructor(private ctx: Context) {

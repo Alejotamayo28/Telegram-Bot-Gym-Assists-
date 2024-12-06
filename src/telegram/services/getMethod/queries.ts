@@ -1,6 +1,8 @@
 import { Context } from "telegraf";
 import { onSession } from "../../../database/dataAccessLayer";
 import { Exercise, PartialWorkout } from "../../../model/workout";
+import { validateMonths } from "../../../validators/allowedValues";
+import { ModuleDetectionKind } from "typescript";
 
 export class ExerciseQueryFetcher {
   static async ExerciseByInterval(ctx: Context, interval: number): Promise<Exercise[]> {
@@ -77,6 +79,29 @@ export class ExerciseQueryFetcher {
       return clientTransaction.query(
         `SELECT name FROM workout WHERE name = $1 AND day = $2 AND week = $3 AND user_id = $4`,
         [name, day, week, userId])
+    })
+    return response.rows
+  }
+  static async ExerciseByIdAndDayAndMonth(userId: number, day: string, month: string): Promise<Exercise[]> {
+    let monthNumber: number = validateMonths.indexOf(month.toLowerCase()) + 1
+    const response = await onSession(async (clientTransaction) => {
+      return await clientTransaction.query(
+        `SELECT day, name, reps, kg, week, date 
+          FROM workout
+            WHERE EXTRACT(MONTH FROM date) = $1 AND day = $2 AND user_id = $3
+              ORDER by Date`,
+        [monthNumber, day, userId])
+    })
+    return response.rows
+  }
+  static async ExerciseByIdAndMonth(userId: number, month: string): Promise<Exercise[]> {
+    let monthNumber: number = validateMonths.indexOf(month.toLowerCase()) + 1
+    const response = await onSession(async (clientTransaction) => {
+      return await clientTransaction.query(
+        `SELECT day, name, reps, kg, week, date 
+          FROM workout
+            WHERE EXTRACT(MONTH FROM date) = $1 AND user_id = $2`,
+        [monthNumber, userId])
     })
     return response.rows
   }

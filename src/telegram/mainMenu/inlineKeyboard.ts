@@ -1,16 +1,16 @@
 import { Context, Telegraf } from 'telegraf';
 import { InlineKeyboardMarkup, Message } from 'telegraf/typings/core/types/typegram';
-import { MAIN_MENU_MESSAGE } from '../messages/mainMenuMessage';
+import { botMessages } from '../messages';
 import { MessageTemplate } from '../../template/message';
 import { MainMenuCallbacks, MainMenuLabels, ReturnMainMenuCallbacks } from './models';
-import { POST_EXERCISE_DAY_OUTPUT } from './messages'; import { deleteBotMessage, userStageDeleteExercise, userStagePostExercise, userStagePutExercise, userStateUpdateStage } from '../../userState';
-import { fetchExerciseController, handleGetWeeklyExercises } from '../services/getMethod';
-import { UPDATE_EXERCISE_DAY_OUTPUT } from '../services/updateMethod/message';
-import { DELETE_EXERICISE_DAY } from '../services/deleteMethod/messages';
+import { deleteBotMessage, userStageDeleteExercise, userStagePostExercise, userStagePutExercise, userStateUpdateStage } from '../../userState';
+import { fetchExerciseController } from '../services/getMethod';
+import { ExerciseGetHandler } from '../services/getMethod/functions';
+import { BotUtils } from '../services/singUp/functions';
 
 export class MainMenuHandler extends MessageTemplate {
   protected prepareMessage() {
-    const message = MAIN_MENU_MESSAGE
+    const message = botMessages.menus.mainMenu
     const keyboard: InlineKeyboardMarkup = {
       inline_keyboard: [
         [
@@ -22,51 +22,41 @@ export class MainMenuHandler extends MessageTemplate {
           this.createButton(MainMenuLabels.deleteExercise, { action: MainMenuCallbacks.deleteExercise })
         ],
         [
-          this.createButton(MainMenuLabels.getExerciseWeek, { action: MainMenuCallbacks.getExerciseWeek })
+          this.createButton(MainMenuLabels.getExerciseHistory, { action: MainMenuCallbacks.getExerciseHistory })
         ]
       ]
     }
     return { message, keyboard }
   }
   async handleOptions(ctx: Context, _: Message, action: string, bot: Telegraf) {
-    try {
-      deleteBotMessage(ctx)
-      const handlers: { [key: string]: () => Promise<void> } = {
-        [MainMenuCallbacks.postExercise]: this.handlePostExercise.bind(this, ctx),
-        [MainMenuCallbacks.getExercise]: this.handleGetExercise.bind(this, ctx, bot),
-        [MainMenuCallbacks.getExerciseWeek]: this.handleGetExerciseWeek.bind(this, ctx, bot),
-        [MainMenuCallbacks.updateExercise]: this.handleUpdateExercise.bind(this, ctx),
-        [MainMenuCallbacks.deleteExercise]: this.handleDeleteExercise.bind(this, ctx)
-      }
-      if (handlers[action]) {
-        return handlers[action]()
-      }
-    } catch (error) {
-      console.error(`Error MainMenuHandler: `, error)
+    deleteBotMessage(ctx)
+    const handlers: { [key: string]: () => Promise<void> } = {
+      [MainMenuCallbacks.postExercise]: this.handlePostExercise.bind(this, ctx),
+      [MainMenuCallbacks.getExercise]: this.handleGetExercise.bind(this, ctx, bot),
+      [MainMenuCallbacks.getExerciseHistory]: this.handleGetExerciseWeek.bind(this, ctx, bot),
+      [MainMenuCallbacks.updateExercise]: this.handleUpdateExercise.bind(this, ctx),
+      [MainMenuCallbacks.deleteExercise]: this.handleDeleteExercise.bind(this, ctx)
+    }
+    if (handlers[action]) {
+      return handlers[action]()
     }
   }
   private async handleGetExercise(ctx: Context, bot: Telegraf): Promise<void> {
     return await fetchExerciseController(ctx, bot)
   }
   private async handleGetExerciseWeek(ctx: Context, bot: Telegraf) {
-    await handleGetWeeklyExercises(ctx, bot)
+    await ExerciseGetHandler.getAllTimeExerciseText(ctx, bot)
   }
   private async handlePostExercise(ctx: Context) {
-    await ctx.reply(POST_EXERCISE_DAY_OUTPUT, {
-      parse_mode: "MarkdownV2",
-    })
+    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.postMethod.exerciseDay)
     userStateUpdateStage(ctx, userStagePostExercise.POST_EXERCISE_DAY)
   }
   private async handleUpdateExercise(ctx: Context) {
-    await ctx.reply(UPDATE_EXERCISE_DAY_OUTPUT, {
-      parse_mode: "MarkdownV2"
-    })
+    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.updateMethod.exerciseDay)
     userStateUpdateStage(ctx, userStagePutExercise.PUT_EXERCISE_DAY)
   }
   private async handleDeleteExercise(ctx: Context) {
-    await ctx.reply(DELETE_EXERICISE_DAY, {
-      parse_mode: "Markdown"
-    })
+    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.deleteMethod.exerciseDay)
     userStateUpdateStage(ctx, userStageDeleteExercise.DELETE_EXERCISE_DAY)
   }
 }
@@ -85,7 +75,7 @@ export class MainMenuHandlerWithTaskDone extends MessageTemplate {
           this.createButton(MainMenuLabels.deleteExercise, { action: ReturnMainMenuCallbacks.returndeleteExercise })
         ],
         [
-          this.createButton(MainMenuLabels.getExerciseWeek, { action: ReturnMainMenuCallbacks.returngetExerciseWeek })
+          this.createButton(MainMenuLabels.getExerciseHistory, { action: ReturnMainMenuCallbacks.returngetExerciseHistory })
         ]
       ]
     }
@@ -97,7 +87,7 @@ export class MainMenuHandlerWithTaskDone extends MessageTemplate {
       const handlers: { [key: string]: () => Promise<void> } = {
         [ReturnMainMenuCallbacks.returnpostExercise]: this.handlePostExercise.bind(this, ctx),
         [ReturnMainMenuCallbacks.returngetExercise]: this.handleGetExercise.bind(this, ctx, bot),
-        [ReturnMainMenuCallbacks.returngetExerciseWeek]: this.handleGetExerciseWeek.bind(this, ctx, bot),
+        [ReturnMainMenuCallbacks.returngetExerciseHistory]: this.handleGetExerciseWeek.bind(this, ctx, bot),
         [ReturnMainMenuCallbacks.returnupdateExercise]: this.handleUpdateExercise.bind(this, ctx),
         [ReturnMainMenuCallbacks.returndeleteExercise]: this.handleDeleteExercise.bind(this, ctx)
       }
@@ -112,24 +102,18 @@ export class MainMenuHandlerWithTaskDone extends MessageTemplate {
     return await fetchExerciseController(ctx, bot)
   }
   private async handleGetExerciseWeek(ctx: Context, bot: Telegraf) {
-    await handleGetWeeklyExercises(ctx, bot)
+    await ExerciseGetHandler.getAllTimeExerciseText(ctx, bot)
   }
   private async handlePostExercise(ctx: Context) {
-    await ctx.reply(POST_EXERCISE_DAY_OUTPUT, {
-      parse_mode: "MarkdownV2",
-    })
+    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.postMethod.exerciseDay)
     userStateUpdateStage(ctx, userStagePostExercise.POST_EXERCISE_DAY)
   }
   private async handleUpdateExercise(ctx: Context) {
-    await ctx.reply(UPDATE_EXERCISE_DAY_OUTPUT, {
-      parse_mode: "MarkdownV2"
-    })
+    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.updateMethod.exerciseDay)
     userStateUpdateStage(ctx, userStagePutExercise.PUT_EXERCISE_DAY)
   }
   private async handleDeleteExercise(ctx: Context) {
-    await ctx.reply(DELETE_EXERICISE_DAY, {
-      parse_mode: "Markdown"
-    })
+    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.deleteMethod.exerciseDay)
     userStateUpdateStage(ctx, userStageDeleteExercise.DELETE_EXERCISE_DAY)
   }
 }

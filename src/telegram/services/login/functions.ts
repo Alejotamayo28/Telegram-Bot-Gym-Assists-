@@ -1,62 +1,44 @@
 import { compare } from "bcryptjs"
 import { Client, QueryResult } from "pg"
-import { Context } from "telegraf"
+import { Context, Telegraf } from "telegraf"
 import { pool } from "../../../database/database"
-import { deleteBotMessage, deleteUserMessage, saveBotMessage, userStage, userState, userStateUpdatePassword, userStateUpdateStage } from "../../../userState"
-import { bot } from "../../bot"
+import { deleteUserMessage, userStage, userState, userStateUpdatePassword } from "../../../userState"
 import { mainMenuPage } from "../../mainMenu"
-import { LOGIN_NICKNAME_NOT_FOUND, LOGIN_PASSWORD_INCORRECT, LOGIN_REQUEST_PASSWORD_MESSAGE } from "./messages"
-import { Message } from "telegraf/typings/core/types/typegram"
+import { botMessages } from "../../messages"
+import { BotUtils } from "../singUp/functions"
 
-export const handleLoginNickname = async (ctx: Context, userMessage: string): Promise<Message> => {
-  deleteBotMessage(ctx)
-  const user = await findUserByNickname(userMessage)
-  if (!user) {
-    await deleteUserMessage(ctx) // es un ctx.reply
-    const response = await handleUserNotFound(ctx)
-    saveBotMessage(ctx, response.message_id)
-    return response
+export class LoginHandler {
+  private static async handleLoginError(ctx: Context, errorType: keyof typeof botMessages.inputRequest.auth.errors): Promise<void> {
+    const errorMessage = botMessages.inputRequest.auth.errors[errorType]
+    await BotUtils.sendBotMessage(ctx, errorMessage)
   }
-  userStateUpdatePassword(ctx, user.password!, userStage.LOGIN_PASSWORD)
-  await deleteUserMessage(ctx)
-  return await ctx.reply(LOGIN_REQUEST_PASSWORD_MESSAGE, {
-    parse_mode: "Markdown"
-  });
-}
-
-export const handleLoginPassword = async (ctx: Context, userMessage: string): Promise<Message | void> => {
-  deleteBotMessage(ctx)
-  const isPasswordIncorrect = await verifyPassword(userMessage, userState[ctx.from!.id].password)
-  if (!isPasswordIncorrect) {
+  private static async verifyPassword(inputPassword: string, storedPassword: string): Promise<boolean> {
+    return compare(inputPassword, storedPassword)
+  }
+  static async loginNickname(ctx: Context, userMessage: string): Promise<void> {
     await deleteUserMessage(ctx)
-    const response = await handleIncorrectPassword(ctx)
-    saveBotMessage(ctx, response.message_id)
-    return response
+    const user = await findUserByNickname(userMessage)
+    if (!user) {
+      await this.handleLoginError(ctx, "invalidNickname")
+      return
+    }
+    userStateUpdatePassword(ctx, user.password!, userStage.LOGIN_PASSWORD)
+    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.auth.password)
   }
-  await deleteUserMessage(ctx)
-  delete userState[ctx.from!.id]
-  return await mainMenuPage(ctx, bot)
+  static async loginPassword(ctx: Context, bot: Telegraf, userMessage: string): Promise<void> {
+    await deleteUserMessage(ctx)
+    const isPasswordValid = await this.verifyPassword(userMessage, userState[ctx.from!.id].password)
+    if (!isPasswordValid) {
+      await this.handleLoginError(ctx, "invalidPassword")
+      return
+    }
+    delete userState[ctx.from!.id]
+    return await mainMenuPage(ctx, bot)
+  }
 }
-
 
 export const findUserByNickname = async (nickname: string): Promise<Client | undefined> => {
   const response: QueryResult = await pool.query(
     `SELECT nickname, password FROM client WHERE nickname = $1`, [nickname])
   return response.rowCount ? response.rows[0] : null
-}
-
-export const handleUserNotFound = async (ctx: Context): Promise<Message> => {
-  return await ctx.reply(LOGIN_NICKNAME_NOT_FOUND, {
-    parse_mode: "Markdown"
-  })
-}
-
-export const verifyPassword = async (inputPassword: string, storedPassword: string) => {
-  return compare(inputPassword, storedPassword)
-}
-
-export const handleIncorrectPassword = async (ctx: Context): Promise<Message> => {
-  return await ctx.reply(LOGIN_PASSWORD_INCORRECT, {
-    parse_mode: "Markdown"
-  });
 }

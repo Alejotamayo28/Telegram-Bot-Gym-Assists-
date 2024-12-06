@@ -1,52 +1,51 @@
-import { Context } from "telegraf"
+import { Context, Telegraf } from "telegraf"
 import { deleteUserMessage, saveBotMessage, userStageSignUp, userState, userStateUpdateEmail, userStateUpdateNickname, userStateUpdatePassword, userStateUpdateStage } from "../../../userState"
 import { encrypt } from "../../../middlewares/jsonWebToken/enCryptHelper"
 import { signUpVerificationController } from "."
-import { bot } from "../../bot"
 import { findUserByNickname } from "../login/functions"
-import { SIGN_UP_EMAIL, SIGN_UP_NICKNAME_NOT_AVAIBLABLE, SIGN_UP_PASSWORD } from "./message"
+import { botMessages } from "../../messages"
+import { InlineKeyboardMarkup } from "telegraf/typings/core/types/typegram"
 
-export const handleNicknameNotAvailable = async (ctx: Context) => {
-  const response = await ctx.reply(SIGN_UP_NICKNAME_NOT_AVAIBLABLE, {
-    parse_mode: "Markdown"
-  })
-  saveBotMessage(ctx, response.message_id)
-  userStateUpdateStage(ctx, userStageSignUp.SIGN_UP_NICKNAME)
-}
-
-export const handleSignUpNickname = async (ctx: Context, userMessage: string) => {
-  const user = await findUserByNickname(userMessage!.toLowerCase())
-  if (user) {
-    await handleNicknameNotAvailable(ctx)
-    await deleteUserMessage(ctx)
-    return
+export class BotUtils {
+  public static async sendBotMessage(ctx: Context, message: string, keyboard?: InlineKeyboardMarkup) {
+    if (keyboard) {
+      const response = await ctx.reply(message, { parse_mode: "Markdown", reply_markup: keyboard })
+      saveBotMessage(ctx, response.message_id)
+    } else {
+      const response = await ctx.reply(message, { parse_mode: "Markdown" })
+      saveBotMessage(ctx, response.message_id)
+    }
   }
-  await deleteUserMessage(ctx)
-  userStateUpdateNickname(ctx, userMessage, userStageSignUp.SIGN_UP_PASSWORD)
-  const response = await ctx.reply(SIGN_UP_PASSWORD, {
-    parse_mode: "Markdown"
-  })
-  saveBotMessage(ctx, response.message_id)
 }
 
-export const handleSignUpPassword = async (ctx: Context, userMessage: string) => {
-  await deleteUserMessage(ctx)
-  userStateUpdatePassword(ctx, userMessage, userStageSignUp.SIGN_UP_EMAIL)
-  const response = await ctx.reply(SIGN_UP_EMAIL, {
-    parse_mode: "Markdown"
-  })
-  saveBotMessage(ctx, response.message_id)
+export class RegisterHandler {
+  private static async handleRegistrationError(ctx: Context, errorType: keyof typeof botMessages.inputRequest.register.errors): Promise<void> {
+    const errorMessage = botMessages.inputRequest.register.errors[errorType]
+    await BotUtils.sendBotMessage(ctx, errorMessage)
+    userStateUpdateStage(ctx, userStageSignUp.SIGN_UP_NICKNAME)
+  }
+  static async registerNickname(ctx: Context, userMessage: string): Promise<void> {
+    await deleteUserMessage(ctx)
+    const user = await findUserByNickname(userMessage.toLowerCase())
+    if (user) {
+      await this.handleRegistrationError(ctx, "invalidNickname")
+      return
+    }
+    userStateUpdateNickname(ctx, userMessage, userStageSignUp.SIGN_UP_PASSWORD)
+    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.register.password)
+  }
+  static async registerPassword(ctx: Context, userMessage: string): Promise<void> {
+    await deleteUserMessage(ctx)
+    userStateUpdatePassword(ctx, userMessage, userStageSignUp.SIGN_UP_EMAIL)
+    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.register.email)
+  }
+  static async registerEmail(ctx: Context, bot: Telegraf, userMessage: string): Promise<void> {
+    await deleteUserMessage(ctx)
+    userStateUpdateEmail(ctx, userMessage)
+    const password = userState[ctx.from!.id].password
+    const passwordHash = await encrypt(password)
+    await signUpVerificationController(ctx, bot, passwordHash)
+  }
 }
-
-export const handleSignUpEmail = async (ctx: Context, userMessage: string) => {
-  await deleteUserMessage(ctx)
-  userStateUpdateEmail(ctx, userMessage)
-  const passwordHash = await encrypt(userState[ctx.from!.id].password)
-  await signUpVerificationController(ctx, bot, passwordHash)
-  delete userState[ctx.from!.id]
-}
-
-
-
 
 

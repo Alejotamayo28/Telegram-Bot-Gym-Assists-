@@ -1,135 +1,131 @@
 import { Exercise } from "../../../model/workout";
-import { validateDays } from "../utils";
 import { ChartData, ChartConfiguration } from "chart.js";
 import { ChartJSNodeCanvas } from "chartjs-node-canvas";
 import { ExerciseQueryFetcher } from "./queries";
-import { validateExercises } from "../../../validators/allowedValues";
-import { Context } from "telegraf";
-import { deleteUserMessage, userStateUpdateDay, userStateUpdateMonth } from "../../../userState";
+import { validateExercises, validateMonths } from "../../../validators/allowedValues";
+import { Context, Telegraf } from "telegraf";
+import { deleteUserMessage, userStageGetExercise, userState, userStateUpdateMonth } from "../../../userState";
+import { botMessages } from "../../messages";
+import { BotUtils } from "../singUp/functions";
+import { redirectToMainMenuWithTaskDone } from "../../mainMenu";
 
-export const handleGetExerciseMonth = async (ctx: Context, userMessage: string): Promise<void> => {
-  const month = userMessage.toLowerCase()
-  userStateUpdateMonth(ctx, month, 'stage')
-  await deleteUserMessage(ctx)
-  await ctx.reply(`Escribe el dia en el cual realizaste el ejercicio`, {
-    parse_mode: "Markdown"
-  })
-}
-
-export const handleGetExerciseDay = async (ctx: Context, userMessage: string): Promise<void> => {
-  const day = userMessage.toLowerCase()
-  userStateUpdateDay(ctx, day, 'stage')
-  await deleteUserMessage(ctx)
-
-}
-
-export const handleOutputDailyExercise = (data: Exercise[]): String => {
-  const groupedData: { [exercise: string]: { [week: number]: Exercise[] } } = {}
-  data.forEach((exercise: Exercise) => {
-    if (validateExercises.includes(exercise.name)) {
-      if (!groupedData[exercise.name]) {
-        groupedData[exercise.name] = {};
-      }
-      if (!groupedData[exercise.name][exercise.week]) {
-        groupedData[exercise.name][exercise.week] = [];
-      }
-      groupedData[exercise.name][exercise.week].push(exercise);
-    }
-  });
-  let result = ""
-  for (const exerciseName in groupedData) {
-    result += `\n💪 Ejercicio: ${exerciseName.toUpperCase()}\n\n`
-    for (const week in groupedData[exerciseName]) {
-      result += `🔄 Semana ${week}:\n`
-      groupedData[exerciseName][week].forEach((exercise) => {
-        result += `    - Reps: ${exercise.reps.join(' ')} | Peso: ${exercise.kg}\n`
-      })
+export class ExerciseGetHandler {
+  static async exerciseMonth(ctx: Context, userMessage: string): Promise<void> {
+    await deleteUserMessage(ctx)
+    const month = userMessage.toLowerCase()
+    userStateUpdateMonth(ctx, month, userStageGetExercise.GET_EXERCISE_DAY)
+    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.getMethod.exerciseDay)
+  }
+  static async getMonthlyExerciseText(ctx: Context, month: string, bot: Telegraf): Promise<void> {
+    await deleteUserMessage(ctx)
+    try {
+      const exercise = await ExerciseQueryFetcher.ExerciseByIdAndMonth(ctx.from!.id, month)
+      const formattedOutput = ExerciseGetUtils.mapExercisesByNameAndWeek(exercise)
+      const formattedMonth = month.toUpperCase()
+      const date = new Date()
+      await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.getMethod.outPut.Monthly(formattedMonth, date, formattedOutput))
+      await redirectToMainMenuWithTaskDone(ctx, bot, `_Obtencion de datos se ha realizado con exito._`)
+    } catch (error) {
+      console.error(`Error: `, error)
     }
   }
-  return result.trim()
-}
-
-//Should be monthly
-export const mapWeeklyExercise = (data: Exercise[]) => {
-  const groupedData: { [day: string]: { [exercise: string]: { [week: number]: Exercise[] } } } = {}
-  data.forEach((exercise: Exercise) => {
-    if (validateDays.includes(exercise.day)) {
-      if (!groupedData[exercise.day]) {
-        groupedData[exercise.day] = {}
-      }
-      if (!groupedData[exercise.day][exercise.name]) {
-        groupedData[exercise.day][exercise.name] = {}
-      }
-      if (!groupedData[exercise.day][exercise.name][exercise.week]) {
-        groupedData[exercise.day][exercise.name][exercise.week] = []
-      }
-      groupedData[exercise.day][exercise.name][exercise.week].push(exercise)
-    }
-  })
-  let result = "";
-  for (const day in groupedData) {
-    result += `\n========================\n🔄 *Día: ${day.toUpperCase()}*\n========================\n\n`;
-
-    for (const exercise in groupedData[day]) {
-      result += `💪 *Ejercicio: ${exercise}\n*`;
-
-      for (const week in groupedData[day][exercise]) {
-        result += `   🔢 *Semana ${week}:*\n`;
-
-        groupedData[day][exercise][week].forEach((exercise) => {
-          result += `      • _Reps:_ ${exercise.reps.join(', ')} | _Peso:_ ${exercise.kg} kg\n`;
-        });
-      }
+  static async getDailyExerciseText(ctx: Context, day: string, bot: Telegraf): Promise<void> {
+    await deleteUserMessage(ctx)
+    try {
+      const { month } = userState[ctx.from!.id]
+      const exercise = await ExerciseQueryFetcher.ExerciseByIdAndDayAndMonth(ctx.from!.id, day, month)
+      const formattedOutput = ExerciseGetUtils.mapExercisesByNameAndWeek(exercise)
+      const formattedDay = day.toUpperCase()
+      const date = new Date()
+      await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.getMethod.outPut.Daily(month, formattedDay, date, formattedOutput))
+      await redirectToMainMenuWithTaskDone(ctx, bot, `_Obtencion de datos se ha realizado con exito._`)
+    } catch (error) {
+      console.error(`Error: `, error)
     }
   }
-  return testing(data);
+  static async getAllTimeExerciseText(ctx: Context, bot: Telegraf): Promise<void> {
+    await deleteUserMessage(ctx)
+    try {
+      const exercise = await ExerciseQueryFetcher.ExerciseById(ctx.from!.id)
+      const formattedExercises = ExerciseGetUtils.mapAllTimeExercises(exercise)
+      const date = new Date()
+      await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.getMethod.outPut.Alltime(date, formattedExercises))
+      await redirectToMainMenuWithTaskDone(ctx, bot, `_Obtencion de datos se ha realizado con exito._`)
+    } catch (error) {
+      console.error(`Error: `, error)
+    }
+  }
 }
-const validateMonths = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
-export const testing = (data: Exercise[]) => {
-  const groupedData: { [year: number]: { [mes: string]: { [day: string]: { [exercise: string]: { [week: number]: Exercise[] } } } } } = {}
-  data.forEach((exercise: Exercise) => {
-    const month = validateMonths[exercise.date.getMonth()]
-    const year = exercise.date.getFullYear()
-    if (!groupedData[year]) {
-      groupedData[year] = {}
-    }
-    if (!groupedData[year][month]) {
-      groupedData[year][month] = {}
-    }
-    if (!groupedData[year][month][exercise.day]) {
-      groupedData[year][month][exercise.day] = {}
-    }
-    if (!groupedData[year][month][exercise.day][exercise.name]) {
-      groupedData[year][month][exercise.day][exercise.name] = {}
-    }
-    if (!groupedData[year][month][exercise.day][exercise.name][exercise.week]) {
-      groupedData[year][month][exercise.day][exercise.name][exercise.week] = []
-    }
-    groupedData[year][month][exercise.day][exercise.name][exercise.week].push(exercise)
-  })
-  let result = ""
-  for (const year in groupedData) {
-    for (const month in groupedData[year]) {
-      result += `\n========================\n📅 *${month.toUpperCase()}* _${year}_ \n`
-      for (const day in groupedData[year][month]) {
-        result += `\n🔄 Día: _${day.toUpperCase()}_\n----------------------------------\n\n`;
-        for (const exercise in groupedData[year][month][day]) {
-          result += `💪 Ejercicio: _${exercise}\n_`;
-          for (const week in groupedData[year][month][day][exercise]) {
-            result += `   🔢 Semana _${week}:_\n`;
-            groupedData[year][month][day][exercise][week].forEach((exercise: Exercise) => {
-              result += `      • _Reps:_ ${exercise.reps.join(', ')} | _Peso:_ ${exercise.kg} kg\n`;
-            })
+
+export class ExerciseGetUtils {
+  static mapAllTimeExercises(data: Exercise[]): string {
+    const groupedData: { [year: number]: { [mes: string]: { [day: string]: { [exercise: string]: { [week: number]: Exercise[] } } } } } = {}
+    data.forEach((exercise: Exercise) => {
+      const month = validateMonths[exercise.date.getMonth()]
+      const year = exercise.date.getFullYear()
+      if (!groupedData[year]) {
+        groupedData[year] = {}
+      }
+      if (!groupedData[year][month]) {
+        groupedData[year][month] = {}
+      }
+      if (!groupedData[year][month][exercise.day]) {
+        groupedData[year][month][exercise.day] = {}
+      }
+      if (!groupedData[year][month][exercise.day][exercise.name]) {
+        groupedData[year][month][exercise.day][exercise.name] = {}
+      }
+      if (!groupedData[year][month][exercise.day][exercise.name][exercise.week]) {
+        groupedData[year][month][exercise.day][exercise.name][exercise.week] = []
+      }
+      groupedData[year][month][exercise.day][exercise.name][exercise.week].push(exercise)
+    })
+    let result = ""
+    for (const year in groupedData) {
+      for (const month in groupedData[year]) {
+        result += `\n========================\n📅 *${month.toUpperCase()}* _${year}_ \n`
+        for (const day in groupedData[year][month]) {
+          result += `\n🔄 Día: _${day.toUpperCase()}_\n----------------------------------\n\n`;
+          for (const exercise in groupedData[year][month][day]) {
+            result += `💪 Ejercicio: _${exercise}\n_`;
+            for (const week in groupedData[year][month][day][exercise]) {
+              result += `   🔢 Semana _${week}:_\n`;
+              groupedData[year][month][day][exercise][week].forEach((exercise: Exercise) => {
+                result += `      • _Reps:_ ${exercise.reps.join(', ')} | _Peso:_ ${exercise.kg} kg\n`;
+              })
+            }
           }
         }
       }
     }
+    return result.trim()
   }
-  return result.trim()
+  static mapExercisesByNameAndWeek(data: Exercise[]): string {
+    const groupedData: { [exercise: string]: { [week: number]: Exercise[] } } = {}
+    data.forEach((exercise: Exercise) => {
+      if (validateExercises.includes(exercise.name)) {
+        if (!groupedData[exercise.name]) {
+          groupedData[exercise.name] = {};
+        }
+        if (!groupedData[exercise.name][exercise.week]) {
+          groupedData[exercise.name][exercise.week] = [];
+        }
+        groupedData[exercise.name][exercise.week].push(exercise);
+      }
+    });
+    let result = ""
+    for (const exerciseName in groupedData) {
+      result += `\n💪 Ejercicio: ${exerciseName.toUpperCase()}\n\n`
+      for (const week in groupedData[exerciseName]) {
+        result += `🔄 Semana ${week}:\n`
+        groupedData[exerciseName][week].forEach((exercise) => {
+          result += `    - Reps: ${exercise.reps.join(' ')} | Peso: ${exercise.kg}\n`
+        })
+      }
+    }
+    return result.trim()
+  }
 }
-
-
-
 
 export const graphic = async (userId: number, day: string) => {
   const result = await ExerciseQueryFetcher.ExerciseByIdAndDay(userId, day)
