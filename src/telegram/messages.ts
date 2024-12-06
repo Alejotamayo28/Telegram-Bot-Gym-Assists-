@@ -76,6 +76,17 @@ export const botMessages = {
           `*📋 Cantidad de repeticiones *\n_¡Por favor, ingresa la cantidad de repeticiones que realizaste en cada serie!_\n_Ejemplo: 10 10 10_`,
         exerciseWeight:
           `*🏋️ Peso utilizado *\n_¡Por favor, ingresa el peso en kilogramos con el cual realizaste el ejercicio!_\n_Ejemplo: 20_`,
+        outPut: {
+          exerciseSuggestions(exercises: string[]): string {
+            let result = ""
+            exercises.forEach((exercise) => {
+              let firstUpperLetter = ""
+              firstUpperLetter = exercise.charAt(0).toUpperCase() + exercise.slice(1)
+              result += `- _${firstUpperLetter}_\n`
+            })
+            return `Quisiste decir algunos de estos ejercicios: \n\n ${result}`
+          }
+        }
       },
       updateMethod: {
         exerciseName:

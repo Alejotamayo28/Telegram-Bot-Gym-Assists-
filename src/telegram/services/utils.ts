@@ -19,25 +19,6 @@ export const tryCatch = async (fn: () => Promise<void | Message>, ctx: Context) 
   }
 }
 
-export const insertWorkoutQueryTESTING = async (workoutData: PartialWorkout, ctx: Context, client: PoolClient) => {
-  await client.query(`INSERT INTO ejercicios (usuario_id, dia, fecha, nombre, reps, kg, semana)
-    VALUES ($1, $2, CURRENT_DATE, $3, $4, $5, EXTRACT(WEEK FROM CURRENT_DATE) - EXTRACT(WEEK FROM CURRENT_DATE - interval '21 days'))
-    RETURNING *;
-`, [ctx.from!.id, workoutData.day, workoutData.name, workoutData.reps, workoutData.kg])
-}
-
-export const verifyExerciseName = async (userMessage: string, ctx: Context) => {
-  const { rowCount }: QueryResult = await onSession((transactionClient) => {
-    return transactionClient.query(
-      `SELECT name from workout where name = $1 and id = $2`,
-      [userMessage, ctx.from!.id])
-  })
-  if (rowCount! > 0) {
-    return true
-  }
-  return false
-}
-
 export const validExercises = [
   "press militar", "sentadilla", "peso muerto", "dominadas", "curl de bíceps",
   "remo con barra", "press banca", "zancadas", "press de hombros", "hip thrust",

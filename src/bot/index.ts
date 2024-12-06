@@ -1,7 +1,7 @@
 import { deleteBotMessage, deleteUserMessage, saveUserMessage, userStage, userStageDeleteExercise, userStageGetExercise, userStagePostExercise, userStagePutExercise, userStageSignUp, userState, userStateUpdateName } from "../userState";
 import { bot } from "../telegram/bot";
 import { handleError } from "../errors";
-import { RegisterHandler } from "../telegram/services/singUp/functions";
+import { RegisterHandler, testingDataStructures } from "../telegram/services/singUp/functions";
 import { ExercisePostHandler } from "../telegram/services/addMethod/functions";
 import { message } from 'telegraf/filters'
 import { NarrowedContext, Context } from "telegraf";
@@ -92,6 +92,7 @@ bot.on(message("text"), async ctx => {
           await deleteLastMessage(ctx)
           saveUserMessage(ctx)
           try {
+            await testingDataStructures(ctx, userMessage)
             if (await (DataValidator.validateExercise(ctx, userMessage))) break
             await ExercisePostHandler.postExerciseName(ctx, userMessage)
           } catch (error) {

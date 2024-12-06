@@ -1,6 +1,7 @@
 import { Context } from "telegraf"
 import { deleteUserMessage, userStagePostExercise, userStateUpdateDay, userStateUpdateKg, userStateUpdateName, userStateUpdateReps } from "../../../userState"
 import { botMessages } from "../../messages"
+import { testingDataStructures } from "../singUp/functions"
 
 export class ExercisePostHandler {
   static async postExerciseDay(ctx: Context, day: string): Promise<void> {
