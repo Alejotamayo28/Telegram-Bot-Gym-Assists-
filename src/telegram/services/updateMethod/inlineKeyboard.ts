@@ -9,6 +9,15 @@ import { onTransaction } from "../../../database/dataAccessLayer";
 import { workoutUpdateQuery } from "./queries";
 import { redirectToMainMenuWithTaskDone } from "../../mainMenu";
 
+
+
+
+
+
+
+
+
+
 export class ExerciseUpdateVerificationHandler extends MessageTemplate {
   constructor(private ctx: Context) {
     super()

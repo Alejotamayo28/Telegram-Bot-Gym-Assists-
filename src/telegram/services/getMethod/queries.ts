@@ -2,7 +2,6 @@ import { Context } from "telegraf";
 import { onSession } from "../../../database/dataAccessLayer";
 import { Exercise, PartialWorkout } from "../../../model/workout";
 import { validateMonths } from "../../../validators/allowedValues";
-import { ModuleDetectionKind } from "typescript";
 
 export class ExerciseQueryFetcher {
   static async ExerciseByInterval(ctx: Context, interval: number): Promise<Exercise[]> {

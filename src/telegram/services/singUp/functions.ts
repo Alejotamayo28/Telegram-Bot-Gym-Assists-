@@ -2,10 +2,10 @@ import { Context, Telegraf } from "telegraf"
 import { deleteUserMessage, saveBotMessage, userStageSignUp, userState, userStateUpdateEmail, userStateUpdateNickname, userStateUpdatePassword, userStateUpdateStage } from "../../../userState"
 import { encrypt } from "../../../middlewares/jsonWebToken/enCryptHelper"
 import { signUpVerificationController } from "."
-import { findUserByNickname } from "../login/functions"
 import { botMessages } from "../../messages"
 import { InlineKeyboardMarkup } from "telegraf/typings/core/types/typegram"
 import { validExercises } from "../utils"
+import { UserQueryFetcher } from "../login/queries"
 
 export class BotUtils {
   public static async sendBotMessage(ctx: Context, message: string, keyboard?: InlineKeyboardMarkup) {
@@ -67,7 +67,7 @@ class Trie { // Representa el trie completo
     const dfs = (node: TrieNode, path: string) => {
       if (node.isEndOfWord) { // si el nodo actual es el final de una palabra
         suggestions.push(path)  // agrega la palabra a 'suggestions'
-       // asegura que las palabras completas que comienzan con el prefijo se guarden como sugerencias
+        // asegura que las palabras completas que comienzan con el prefijo se guarden como sugerencias
       }
       for (const [char, child] of node.children) { // recorre todos los nodos hijos del nodo actual
         dfs(child, path + char) // para cada hijo
@@ -100,19 +100,6 @@ export const testingDataStructures = async (ctx: Context, word: string) => {
   }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 export class RegisterHandler {
   private static async handleRegistrationError(ctx: Context, errorType: keyof typeof botMessages.inputRequest.register.errors): Promise<void> {
     const errorMessage = botMessages.inputRequest.register.errors[errorType]
@@ -121,7 +108,7 @@ export class RegisterHandler {
   }
   static async registerNickname(ctx: Context, userMessage: string): Promise<void> {
     await deleteUserMessage(ctx)
-    const user = await findUserByNickname(userMessage.toLowerCase())
+    const user = await UserQueryFetcher.userNicknamePasswordByNickname(userMessage.toLowerCase())
     if (user) {
       await this.handleRegistrationError(ctx, "invalidNickname")
       return
