@@ -67,7 +67,7 @@ class Trie { // Representa el trie completo
     const dfs = (node: TrieNode, path: string) => {
       if (node.isEndOfWord) { // si el nodo actual es el final de una palabra
         suggestions.push(path)  // agrega la palabra a 'suggestions'
-        // asegura que las palabras completas que comienzan con el prefijo se guarden como sugerencias
+       // asegura que las palabras completas que comienzan con el prefijo se guarden como sugerencias
       }
       for (const [char, child] of node.children) { // recorre todos los nodos hijos del nodo actual
         dfs(child, path + char) // para cada hijo

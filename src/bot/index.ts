@@ -117,7 +117,7 @@ bot.on(message("text"), async ctx => {
           try {
             if (await (DataValidator.validateWeight(ctx, userMessage))) break
             await ExercisePostHandler.postExerciseWeight(ctx, Number(userMessage))
-            await PostExerciseVerificationController(ctx, bot)
+            return await PostExerciseVerificationController(ctx, bot)
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
@@ -222,6 +222,16 @@ bot.on(message("text"), async ctx => {
           }
           break;
 
+        case userStageDeleteExercise.DELETE_EXERCISE_MONTH:
+          await deleteLastMessage(ctx)
+          saveUserMessage(ctx)
+          try {
+            if (await (DataValidator.validateMonth(ctx, userMessage))) break
+            await ExerciseDeleteHandler.exerciseMonth(ctx, userMessage)
+          } catch (error) {
+            console.error(`Error :`, error)
+          }
+          break
 
         case userStageDeleteExercise.DELETE_EXERCISE_DAY:
           await deleteLastMessage(ctx)
@@ -244,24 +254,6 @@ bot.on(message("text"), async ctx => {
             console.error(`Error: `, error)
           }
           break;
-        /**
-      case userStageDeleteExercise.DELETE_EXERCISE_NAME:
-        await deleteLastMessage(ctx)
-        saveUserMessage(ctx)
-        try {
-          userStateUpdateName(ctx, userMessage)
-          const exercise = await ExerciseQueryFetcher.ExerciseByNameRepsAndId(userId, userState[userId])
-          if (!exercise) {
-            await deleteUserMessage(ctx)
-            await handleExerciseNotFound(ctx)
-            return
-          }
-          await deleteExerciseVerificationController(ctx, bot)
-        } catch (error) {
-          await handleError(error, userState[userId].stage, ctx)
-        }
-        break
-        */
 
         case userStageDeleteExercise.DELETE_EXERCISE_WEEK:
           await deleteLastMessage(ctx)

@@ -56,8 +56,8 @@ export class MainMenuHandler extends MessageTemplate {
     userStateUpdateStage(ctx, userStagePutExercise.PUT_EXERCISE_DAY)
   }
   private async handleDeleteExercise(ctx: Context) {
-    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.deleteMethod.exerciseDay)
-    userStateUpdateStage(ctx, userStageDeleteExercise.DELETE_EXERCISE_DAY)
+    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.deleteMethod.exerciseMonth)
+    userStateUpdateStage(ctx, userStageDeleteExercise.DELETE_EXERCISE_MONTH)
   }
 }
 

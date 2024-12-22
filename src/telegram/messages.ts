@@ -64,8 +64,11 @@ export const botMessages = {
         },
         errors: {
           exerciseNotFound:
-            `*¡Ejercicio no encontrado! * 🤕\n\n_¿Sigue explorando, qué te gustaría hacer ahora ? _`
+            `*¡Ejercicio no encontrado! * 🤕\n\n_¿Sigue explorando, qué te gustaría hacer ahora ?_`,
+          exerciseEmptyData:
+            `*Ejercicios no encontrados! * 🤕\n\n_No hemos encontrado ejercicios registrados\n\n_¿Sigue explorando, qué te gustaría hacer ahora ?_`
         },
+        succesfull: `🌟 _Obtencion de datos se ha realizado con exito._`
       },
       postMethod: {
         exerciseDay:
@@ -86,7 +89,9 @@ export const botMessages = {
             })
             return `Quisiste decir algunos de estos ejercicios: \n\n ${result}`
           }
-        }
+        },
+        successful: `*Ejercicio agregado* 🗓️ \n\n_El ejercicio ha sido agregado exitosamente._`,
+        notSuccessful: `*Accion cancelada* ❌ \n\n_La accion ha sido cancelada exitosamente._`
       },
       updateMethod: {
         exerciseName:
@@ -99,6 +104,8 @@ export const botMessages = {
           `*📋 Peso realizado *\n\n_¡Por favor, ingresa el nuevo peso realizado en la serie!_\nEjemplo: _80_`,
       },
       deleteMethod: {
+        exerciseMonth:
+          `🗓️* Mes del entrenamiento *🗓️\n\n_Por favor, escribe el mes donde realizaste el ejercicio a eliminar._\n\nEjemplo: _Diciembre_`,
         exerciseName:
           `🗓️* Nombre del entrenamiento *🗓️\n\n_Por favor, escribe el dia donde realizaste el ejercicio a eliminar._\n\nEjemplo: _Press militar_`,
         exerciseDay:

@@ -69,7 +69,7 @@ export const fetchExerciseGraphTextController = async (ctx: Context, bot: Telegr
 }
 
 
-//OTRO EJEMPLO DE ESTRUCTURA
+//ENUMS QUE TENGO QUE MOVER EN UN FUTURO
 
 export enum ExerciseIntervalOption {
   WEEK_1 = 'semana1',

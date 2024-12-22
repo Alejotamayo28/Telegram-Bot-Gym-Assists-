@@ -36,6 +36,7 @@ export enum userStageGetExercise {
 }
 
 export enum userStageDeleteExercise {
+  DELETE_EXERCISE_MONTH = 'deleteExerciseMonth',
   DELETE_EXERCISE_DAY = 'deleteExerciseDay',
   DELETE_EXERCISE_NAME = 'deleteExerciseName',
   DELETE_EXERCISE_WEEK = 'deleteExerciseWeek',

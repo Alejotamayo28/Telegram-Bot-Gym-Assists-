@@ -73,12 +73,15 @@ export class ExerciseQueryFetcher {
     })
     return response.rows
   }
-  static async ExerciseByNameRepsWeekAndId(userId: number, workoutData: PartialWorkout): Promise<Exercise[]> {
-    const { name, day, week } = workoutData
+  static async ExerciseByNameDayWeekAndId(userId: number, workoutData: PartialWorkout): Promise<Exercise[]> {
+    const { month, name, day, week } = workoutData
+    const monthNumber: number = validateMonths.indexOf(month!.toLowerCase()) + 1
     const response = await onSession(async (clientTransaction) => {
       return clientTransaction.query(
-        `SELECT name FROM workout WHERE name = $1 AND day = $2 AND week = $3 AND user_id = $4`,
-        [name, day, week, userId])
+        `SELECT id, EXTRACT (YEAR FROM date) as year, EXTRACT(MONTH FROM date) as month, reps, kg
+          FROM workout 
+            WHERE EXTRACT(MONTH from date) = $1 AND name = $2 AND day = $3 AND week = $4 AND user_id = $5`,
+        [monthNumber, name, day, week, userId])
     })
     return response.rows
   }

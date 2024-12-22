@@ -9,6 +9,7 @@ enum weekday {
 }
 
 export interface userWorkout {
+  month: string,
   day: weekday,
   name: string,
   reps: number[],
@@ -18,14 +19,17 @@ export interface userWorkout {
 }
 
 export interface Exercise {
+  id:number,
   user_id: number,
   date: Date,
-  month: string, day: weekday,
+  month: string,
+  day: weekday,
   name: string,
   reps: number[],
   kg: number,
   week: number,
-  interval: number
+  interval: number,
+  year: number
 }
 
 export type PartialWorkout = Partial<userWorkout>
