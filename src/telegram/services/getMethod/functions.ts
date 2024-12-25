@@ -90,7 +90,7 @@ export class ExerciseGetUtils {
         for (const day in groupedData[year][month]) {
           result += `\n🔄 Día: _${day.toUpperCase()}_\n----------------------------------\n\n`;
           for (const exercise in groupedData[year][month][day]) {
-            result += `💪 Ejercicio: _${exercise.toUpperCase}\n_`;
+            result += `💪 Ejercicio: _${exercise.toUpperCase()}\n_`;
             for (const week in groupedData[year][month][day][exercise]) {
               result += `   🔢 Semana _${week}:_\n`;
               groupedData[year][month][day][exercise][week].forEach((exercise: Exercise) => {

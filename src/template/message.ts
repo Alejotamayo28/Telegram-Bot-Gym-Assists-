@@ -9,7 +9,7 @@ export interface CallbackData {
 }
 export abstract class MessageTemplate {
   constructor(protected taskDone?: string) { }
-  protected abstract handleOptions(ctx?: Context, message?: Message, action?: string, bot?: Telegraf, userMessage?: string): any
+  protected abstract handleOptions(ctx?: Context, message?: Message, action?: string, bot?: Telegraf, userMessage?: string, day?:string, stage?:string): any
   protected abstract prepareMessage(): {
     message: string,
     keyboard: InlineKeyboardMarkup

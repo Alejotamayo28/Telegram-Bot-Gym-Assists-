@@ -1,9 +1,10 @@
-import { PoolClient, QueryResult } from "pg"
 import { UserCredentials, UserProfile } from "../../model/client"
 import { PartialWorkout } from "../../model/workout"
-import { Context } from "telegraf"
-import { onSession } from "../../database/dataAccessLayer"
-import { Message } from "telegraf/typings/core/types/typegram"
+import { Context, Telegraf, TelegramError } from "telegraf"
+import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram"
+import { MessageTemplate } from "../../template/message"
+import { deleteBotMessage, saveBotMessage, userStateUpdateDay, userStateUpdateStage } from "../../userState"
+import { BotUtils } from "./singUp/functions"
 
 // regetPattern para las acciones del usuario, parametro = enum
 export const regexPattern = <T extends { [key: string]: string }>(optionsEnum: T) => {
@@ -33,6 +34,69 @@ export const validExercises = [
   "crunch en polea", "swing con kettlebell", "sentadilla con salto", "curl concentrado",
   "remo en polea baja", "press de pierna", "step-ups", "elevación frontal con mancuernas"
 ];
+
+export const WeekDaysLabels = {
+  LUNES: `Lunes`,
+  MARTES: 'Martes',
+  MIERCOLES: `Miercoles`,
+  JUEVES: `Jueves`,
+  VIERNES: `Viernes`,
+  SABADO: `Sabado`,
+  DOMINGO: `Domingo`
+}
+
+export enum WeekDaysCallbacks {
+  LUNES = `Lunes`,
+  MARTES = 'Martes',
+  MIERCOLES = `Miercoles`,
+  JUEVES = `Jueves`,
+  VIERNES = `Viernes`,
+  SABADO = `Sabado`,
+  DOMINGO = `Domingo`
+}
+
+
+export class TestingWeekDaysInlineKeyboardMarkup extends MessageTemplate {
+  constructor(private message: string, private stage: string, private nextMessage: string) { super() }
+  protected prepareMessage() {
+    const message = this.message
+    const keyboard: InlineKeyboardMarkup = {
+      inline_keyboard: [
+        [
+          this.createButton(`Lunes`, { action: WeekDaysCallbacks.LUNES }),
+          this.createButton(`Martes`, { action: WeekDaysCallbacks.MARTES }),
+          this.createButton(`Miercoles`, { action: WeekDaysCallbacks.MIERCOLES })
+        ], [
+          this.createButton(`Jueves`, { action: WeekDaysCallbacks.JUEVES }),
+          this.createButton(`Viernes`, { action: WeekDaysCallbacks.VIERNES })
+        ], [
+          this.createButton(`Sabado`, { action: WeekDaysCallbacks.SABADO }),
+          this.createButton(`Domingo`, { action: WeekDaysCallbacks.DOMINGO })
+        ]
+      ]
+    }
+    return { message, keyboard }
+  }
+  async handleOptions(ctx: Context, _: Message, action: string) {
+    await deleteBotMessage(ctx)
+    userStateUpdateDay(ctx, action.toLowerCase(), this.stage)
+    await BotUtils.sendBotMessage(ctx, this.nextMessage)
+  }
+}
+
+export const DaysInlineKeyboardWithMessageAndStage = async (ctx: Context, bot: Telegraf, message: string, stage: string, nextMessage: string) => {
+  const response = new TestingWeekDaysInlineKeyboardMarkup(message, stage, nextMessage)
+  try {
+    const message = await response.sendCompleteMessage(ctx)
+    saveBotMessage(ctx, message.message_id)
+    bot.action(regexPattern(WeekDaysCallbacks), async (ctx) => {
+      const action = ctx.match[0]
+      await tryCatch(() => response.handleOptions(ctx, message, action), ctx)
+    })
+  } catch (error) {
+    console.error(`Error: `, error)
+  }
+}
 
 
 
@@ -89,60 +153,6 @@ export class UserSession {
     this.UserProfile.password = '';
   }
 }
-export const menuPageGetExercises = async (client: PoolClient, id: number) => {
-  const daysOfWeek = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
-  const exercisesByDay: Record<string, { name: string, reps: string, kg: number }[]> = Object.fromEntries(daysOfWeek.map(day => [day, []]));
-
-  const response: QueryResult = await client.query(
-    'SELECT day, name, reps, kg FROM workout WHERE id = $1 ORDER BY day, name',
-    [id]
-  );
-
-  response.rows.forEach(row => {
-    const { day, name, reps, kg } = row;
-
-    if (exercisesByDay.hasOwnProperty(day)) {
-      exercisesByDay[day].push({ name, reps, kg });
-    } else {
-    }
-  });
-  return daysOfWeek
-    .map(day => {
-      const exercises = exercisesByDay[day];
-      if (exercises.length === 0) {
-        return `${day.charAt(0).toUpperCase() + day.slice(1)}:\nNo hay ejercicios`;
-      }
-      const formattedExercises = exercises
-        .reduce((acc, exercise) => {
-          const existingExercise = acc.find(e => e.name === exercise.name);
-          if (existingExercise) {
-            existingExercise.sets.push({ reps: exercise.reps, kg: exercise.kg });
-          } else {
-            acc.push({ name: exercise.name, sets: [{ reps: exercise.reps, kg: exercise.kg }] });
-          }
-          return acc;
-        }, [] as { name: string, sets: { reps: string, kg: number }[] }[])
-        .map(exercise => {
-          const setsInfo = exercise.sets
-            .map((set, index) => `  Set ${index + 1}: ${set.reps} reps, ${set.kg} kg`)
-            .join('\n');
-          return `- ${exercise.name}:\n${setsInfo}`;
-        })
-        .join('\n\n');
-
-      return `${day.charAt(0).toUpperCase() + day.slice(1)}:\n${formattedExercises}`;
-    })
-    .join('\n\n');
-};
-
-
-
-
-export const validateDays = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']
-
-export const verifyDay = (day: string) => {
-  return validateDays.includes(day)
-}
 
 export const verifyExerciseOutput = (workout: PartialWorkout) => {
   return `*Confirmación de ejercicio:*
@@ -184,10 +194,9 @@ export const errorState = async (error: Error, userStage: string, ctx: Context) 
   console.error(errorMessage(userStage), error)
   await ctx.reply(errorMessageCtx)
 }
-
-
 export function escapeMarkdown(text: string): string {
   return text.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&');
 }
+
 
 

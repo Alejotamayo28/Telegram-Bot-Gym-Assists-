@@ -7,6 +7,7 @@ import { deleteBotMessage, userStageDeleteExercise, userStagePostExercise, userS
 import { fetchExerciseController } from '../services/getMethod';
 import { ExerciseGetHandler } from '../services/getMethod/functions';
 import { BotUtils } from '../services/singUp/functions';
+import { TestingWeekDaysInlineKeyboardMarkup } from '../services/utils';
 
 export class MainMenuHandler extends MessageTemplate {
   protected prepareMessage() {
@@ -35,7 +36,7 @@ export class MainMenuHandler extends MessageTemplate {
       [MainMenuCallbacks.getExercise]: this.handleGetExercise.bind(this, ctx, bot),
       [MainMenuCallbacks.getExerciseHistory]: this.handleGetExerciseWeek.bind(this, ctx, bot),
       [MainMenuCallbacks.updateExercise]: this.handleUpdateExercise.bind(this, ctx),
-      [MainMenuCallbacks.deleteExercise]: this.handleDeleteExercise.bind(this, ctx)
+      [MainMenuCallbacks.deleteExercise]: this.handleDeleteExercise.bind(this, ctx, bot)
     }
     if (handlers[action]) {
       return handlers[action]()
@@ -55,7 +56,7 @@ export class MainMenuHandler extends MessageTemplate {
     await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.updateMethod.exerciseDay)
     userStateUpdateStage(ctx, userStagePutExercise.PUT_EXERCISE_DAY)
   }
-  private async handleDeleteExercise(ctx: Context) {
+  private async handleDeleteExercise(ctx: Context, bot: Telegraf) {
     await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.deleteMethod.exerciseMonth)
     userStateUpdateStage(ctx, userStageDeleteExercise.DELETE_EXERCISE_MONTH)
   }

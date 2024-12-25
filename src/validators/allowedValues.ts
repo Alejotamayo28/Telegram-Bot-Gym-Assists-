@@ -5,7 +5,7 @@ export const validateMonths: readOnlyValues =
 
 export const validateDays: readOnlyValues = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']
 
-export const validateExercises: readOnlyValues = [
+export const validateExercises = [
   "press militar", "sentadilla", "peso muerto", "dominadas", "curl de bíceps",
   "remo con barra", "press banca", "zancadas", "press de hombros", "hip thrust",
   "remo con mancuerna", "curl martillo", "press de pecho con mancuernas", "pull-over",

@@ -1,6 +1,6 @@
 import { Context, Telegraf } from "telegraf";
 import { PartialWorkout } from "../../../model/workout";
-import { userState } from "../../../userState";
+import { deleteBotMessage, userState } from "../../../userState";
 import { verifyDeleteExercise } from "../utils";
 import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram";
 import { MessageTemplate } from "../../../template/message";
@@ -26,8 +26,8 @@ export class ExerciseDeleteVerificationHandler extends MessageTemplate {
     }
     return { message, keyboard }
   }
-  async handleOptions(_: Context, message: Message, action: string, bot: Telegraf) {
-    await this.ctx.deleteMessage(message.message_id)
+  async handleOptions(ctx: Context, message: Message, action: string, bot: Telegraf) {
+    await deleteBotMessage(ctx)
     const handlers: { [key: string]: () => Promise<void> } = {
       [ExerciseVerificationCallbacks.YES]: this.handleYesCallback.bind(this, bot),
       [ExerciseVerificationCallbacks.NO]: this.handleNoCallback.bind(this, bot)

@@ -227,7 +227,7 @@ bot.on(message("text"), async ctx => {
           saveUserMessage(ctx)
           try {
             if (await (DataValidator.validateMonth(ctx, userMessage))) break
-            await ExerciseDeleteHandler.exerciseMonth(ctx, userMessage)
+            await ExerciseDeleteHandler.exerciseMonth(ctx, userMessage,bot)
           } catch (error) {
             console.error(`Error :`, error)
           }
@@ -236,6 +236,7 @@ bot.on(message("text"), async ctx => {
         case userStageDeleteExercise.DELETE_EXERCISE_DAY:
           await deleteLastMessage(ctx)
           saveUserMessage(ctx)
+          console.log(`no deberia entrar aqui`)
           try {
             if (await (DataValidator.validateDay(ctx, userMessage))) break
             await ExerciseDeleteHandler.exerciseDay(ctx, userMessage)
