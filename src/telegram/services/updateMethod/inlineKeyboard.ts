@@ -22,7 +22,7 @@ export class ExerciseTesting extends MessageTemplate {
       }
       return rows;
     }, []);
-    const message = `HOLAAAAAAAAAA`
+    const message = `_Se han encontrado los siguientes ejercicios en base a tus resultados:_`
     const keyboard: InlineKeyboardMarkup = {
       inline_keyboard: groupedButtons
     }
@@ -30,7 +30,7 @@ export class ExerciseTesting extends MessageTemplate {
   }
   async handleOptions(_: Context, message: Message, action: string) {
     await deleteBotMessage(this.ctx)
-    const handlers: { [key: string]: () => Promise<void> } = {}
+    const handlers: { [key: string]: () => Promise<any> } = {}
     this.data.forEach(exercise => {
       handlers[exercise.id] = async () => {
         return await this.handleExerciseSelection(exercise)
@@ -43,6 +43,7 @@ export class ExerciseTesting extends MessageTemplate {
   private async handleExerciseSelection(exercise: Exercise) {
     try {
       await this.ctx.reply(`Has seleccionado el ejercicio ${exercise.name} con el id: ${exercise.id}`)
+      return exercise
     } catch (error) {
       console.error(`Error: `, error)
     }

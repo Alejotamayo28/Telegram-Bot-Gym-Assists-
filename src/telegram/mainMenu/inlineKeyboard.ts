@@ -7,7 +7,7 @@ import { deleteBotMessage, userStageDeleteExercise, userStagePostExercise, userS
 import { fetchExerciseController } from '../services/getMethod';
 import { ExerciseGetHandler } from '../services/getMethod/functions';
 import { BotUtils } from '../services/singUp/functions';
-import { TestingWeekDaysInlineKeyboardMarkup } from '../services/utils';
+import { exerciseDeletionFlow } from '../services/deleteMethod';
 
 export class MainMenuHandler extends MessageTemplate {
   protected prepareMessage() {
@@ -57,8 +57,11 @@ export class MainMenuHandler extends MessageTemplate {
     userStateUpdateStage(ctx, userStagePutExercise.PUT_EXERCISE_DAY)
   }
   private async handleDeleteExercise(ctx: Context, bot: Telegraf) {
-    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.deleteMethod.exerciseMonth)
-    userStateUpdateStage(ctx, userStageDeleteExercise.DELETE_EXERCISE_MONTH)
+    await exerciseDeletionFlow(ctx, bot)
+    /*
+      await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.deleteMethod.exerciseMonth)
+        userStateUpdateStage(ctx, userStageDeleteExercise.DELETE_EXERCISE_MONTH)
+        */
   }
 }
 

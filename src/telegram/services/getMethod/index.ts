@@ -1,14 +1,26 @@
 import { Context, Telegraf } from "telegraf";
-import { ExerciseGetUtils, graphic } from "./functions";
+import { graphic } from "./functions";
 import { regexPattern, tryCatch } from "../utils";
 import { ExerciseFetchGraphTextOptions, ExerciseViewOption } from "./models";
 import { ExerciseFetchHandler, ExerciseFetchHandlerInterval, ExerciseFetchHandlerOptions } from "./inlineKeyboard";
-import { ExerciseQueryFetcher } from "./queries";
 import { redirectToMainMenuWithTaskDone } from "../../mainMenu";
-import { deleteUserMessage, saveBotMessage, userState } from "../../../userState";
-import { botMessages } from "../../messages";
-import { BotUtils } from "../singUp/functions";
+import { deleteUserMessage, saveBotMessage } from "../../../userState";
+import { Exercise } from "../../../model/workout";
+import { ExerciseTesting } from "../updateMethod/inlineKeyboard";
 
+export const exercisesInlineKeybaord = async (ctx: Context, bot: Telegraf, data: Exercise[]): Promise<any> => {
+  const response = new ExerciseTesting(ctx, data)
+  try {
+    const message = await response.sendCompleteMessage(ctx)
+    saveBotMessage(ctx, message.message_id)
+    bot.action(/.*/, async (ctx) => {
+      const action = ctx.match[0]
+      await response.handleOptions(ctx, message, action)
+    })
+  } catch (error) {
+    console.error(`Error: `, error)
+  }
+}
 
 export const handleGetDailyExercisesGraphic = async (ctx: Context, day: string, bot: Telegraf) => {
   await deleteUserMessage(ctx)

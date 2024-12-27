@@ -20,7 +20,6 @@ export const commandTesting = async (ctx: Context, bot: Telegraf) => {
   }
 }
 
-
 export const commandStart = async (ctx: Context, bot: Telegraf) => {
   const response = new StartCommandHadler()
   try {

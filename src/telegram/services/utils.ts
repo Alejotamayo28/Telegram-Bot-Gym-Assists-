@@ -1,10 +1,7 @@
 import { UserCredentials, UserProfile } from "../../model/client"
 import { PartialWorkout } from "../../model/workout"
-import { Context, Telegraf, TelegramError } from "telegraf"
-import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram"
-import { MessageTemplate } from "../../template/message"
-import { deleteBotMessage, saveBotMessage, userStateUpdateDay, userStateUpdateStage } from "../../userState"
-import { BotUtils } from "./singUp/functions"
+import { Context } from "telegraf"
+import { Message } from "telegraf/typings/core/types/typegram"
 
 // regetPattern para las acciones del usuario, parametro = enum
 export const regexPattern = <T extends { [key: string]: string }>(optionsEnum: T) => {
@@ -34,71 +31,6 @@ export const validExercises = [
   "crunch en polea", "swing con kettlebell", "sentadilla con salto", "curl concentrado",
   "remo en polea baja", "press de pierna", "step-ups", "elevación frontal con mancuernas"
 ];
-
-export const WeekDaysLabels = {
-  LUNES: `Lunes`,
-  MARTES: 'Martes',
-  MIERCOLES: `Miercoles`,
-  JUEVES: `Jueves`,
-  VIERNES: `Viernes`,
-  SABADO: `Sabado`,
-  DOMINGO: `Domingo`
-}
-
-export enum WeekDaysCallbacks {
-  LUNES = `Lunes`,
-  MARTES = 'Martes',
-  MIERCOLES = `Miercoles`,
-  JUEVES = `Jueves`,
-  VIERNES = `Viernes`,
-  SABADO = `Sabado`,
-  DOMINGO = `Domingo`
-}
-
-
-export class TestingWeekDaysInlineKeyboardMarkup extends MessageTemplate {
-  constructor(private message: string, private stage: string, private nextMessage: string) { super() }
-  protected prepareMessage() {
-    const message = this.message
-    const keyboard: InlineKeyboardMarkup = {
-      inline_keyboard: [
-        [
-          this.createButton(`Lunes`, { action: WeekDaysCallbacks.LUNES }),
-          this.createButton(`Martes`, { action: WeekDaysCallbacks.MARTES }),
-          this.createButton(`Miercoles`, { action: WeekDaysCallbacks.MIERCOLES })
-        ], [
-          this.createButton(`Jueves`, { action: WeekDaysCallbacks.JUEVES }),
-          this.createButton(`Viernes`, { action: WeekDaysCallbacks.VIERNES })
-        ], [
-          this.createButton(`Sabado`, { action: WeekDaysCallbacks.SABADO }),
-          this.createButton(`Domingo`, { action: WeekDaysCallbacks.DOMINGO })
-        ]
-      ]
-    }
-    return { message, keyboard }
-  }
-  async handleOptions(ctx: Context, _: Message, action: string) {
-    await deleteBotMessage(ctx)
-    userStateUpdateDay(ctx, action.toLowerCase(), this.stage)
-    await BotUtils.sendBotMessage(ctx, this.nextMessage)
-  }
-}
-
-export const DaysInlineKeyboardWithMessageAndStage = async (ctx: Context, bot: Telegraf, message: string, stage: string, nextMessage: string) => {
-  const response = new TestingWeekDaysInlineKeyboardMarkup(message, stage, nextMessage)
-  try {
-    const message = await response.sendCompleteMessage(ctx)
-    saveBotMessage(ctx, message.message_id)
-    bot.action(regexPattern(WeekDaysCallbacks), async (ctx) => {
-      const action = ctx.match[0]
-      await tryCatch(() => response.handleOptions(ctx, message, action), ctx)
-    })
-  } catch (error) {
-    console.error(`Error: `, error)
-  }
-}
-
-
 
 
 export const deleteLastMessage = async (ctx: Context) => {

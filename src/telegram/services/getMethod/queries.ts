@@ -88,7 +88,7 @@ export class ExerciseQueryFetcher {
     let monthNumber: number = validateMonths.indexOf(month.toLowerCase()) + 1
     const response = await onSession(async (clientTransaction) => {
       return await clientTransaction.query(
-        `SELECT day, name, reps, kg, week, date 
+        `SELECT id, day, name, reps, kg, week, date 
           FROM workout
             WHERE EXTRACT(MONTH FROM date) = $1 AND day = $2 AND user_id = $3
               ORDER by Date`,

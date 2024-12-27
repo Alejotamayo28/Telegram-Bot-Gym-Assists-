@@ -6,7 +6,6 @@ import { deleteExerciseVerificationController } from ".";
 import { botMessages } from "../../messages";
 import { BotUtils } from "../singUp/functions";
 import { ExerciseGetUtils } from "../getMethod/functions";
-import { DaysInlineKeyboardWithMessageAndStage } from "../utils";
 
 export class ExerciseDeleteHandler {
   private static async handleDeleteExerciseError(ctx: Context, errorType: keyof typeof botMessages.inputRequest.prompts.getMethod.errors) {
@@ -14,16 +13,13 @@ export class ExerciseDeleteHandler {
     await BotUtils.sendBotMessage(ctx, errorMessage)
   }
   static async exerciseMonth(ctx: Context, month: string, bot: Telegraf): Promise<void> {
+    //REWORKING
     await deleteUserMessage(ctx)
     userStateUpdateMonth(ctx, month)
-    const message = botMessages.inputRequest.prompts.deleteMethod.exerciseDay
-    const nextStage = userStageDeleteExercise.DELETE_EXERCISE_NAME
-    const nextMessage = botMessages.inputRequest.prompts.deleteMethod.exerciseName
-    return await DaysInlineKeyboardWithMessageAndStage(ctx, bot, message, nextStage, nextMessage)
-    //await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.deleteMethod.exerciseDay)
   }
 
   static async exerciseDay(ctx: Context, day: string): Promise<void> {
+    // SHOULD NOT ENTER HERE
     await deleteUserMessage(ctx)
     await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.deleteMethod.exerciseName)
     userStateUpdateDay(ctx, day, userStageDeleteExercise.DELETE_EXERCISE_NAME)

@@ -227,7 +227,7 @@ bot.on(message("text"), async ctx => {
           saveUserMessage(ctx)
           try {
             if (await (DataValidator.validateMonth(ctx, userMessage))) break
-            await ExerciseDeleteHandler.exerciseMonth(ctx, userMessage,bot)
+            await ExerciseDeleteHandler.exerciseMonth(ctx, userMessage, bot)
           } catch (error) {
             console.error(`Error :`, error)
           }
@@ -249,6 +249,13 @@ bot.on(message("text"), async ctx => {
           await deleteLastMessage(ctx)
           saveUserMessage(ctx)
           try {
+            /*Mostrar sugerencias de nombres, tenemos el mes, dia, vamos a asumir que es del anio actual
+            const { day, month } = userState[ctx.from!.id]
+            console.log({ day, month })
+            const data = await ExerciseQueryFetcher.ExerciseByIdAndDayAndMonth(ctx.from!.id, day, month)
+            await exercisesInlineKeybaord(ctx, bot, data)
+            */
+
             if (await (DataValidator.validateExercise(ctx, userMessage))) break
             await ExerciseDeleteHandler.exerciseName(ctx, userMessage)
           } catch (error) {
