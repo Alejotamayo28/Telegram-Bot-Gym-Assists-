@@ -18,8 +18,7 @@ export class DaysInlineKeyboard extends MessageTemplate {
           this.createButton(`Viernes`, { action: DaysCallbacks.VIERNES })
         ], [
           this.createButton(`Sabado`, { action: DaysCallbacks.SABADO }),
-          this.createButton(`Domingo`, { action: DaysCallbacks.DOMINGO })
-        ]
+          this.createButton(`Domingo`, { action: DaysCallbacks.DOMINGO }) ]
       ]
     }
     return { message, keyboard }

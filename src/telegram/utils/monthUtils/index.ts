@@ -4,7 +4,7 @@ import { regexPattern, tryCatch } from "../../services/utils"
 import { saveBotMessage } from "../../../userState"
 import { MonthCallbacks } from "./models"
 
-export const monthInlineKeyboardController = async (ctx: Context, bot: Telegraf) => {
+export const monthInlineKeyboardController = async (ctx: Context, bot: Telegraf, nextKeyboard: () => Promise<any>) => {
   const response = new MonthInlineKeybord()
   try {
     const message = await response.sendCompleteMessage(ctx)
@@ -17,3 +17,6 @@ export const monthInlineKeyboardController = async (ctx: Context, bot: Telegraf)
     console.error(`Erorr `, error)
   }
 }
+
+
+

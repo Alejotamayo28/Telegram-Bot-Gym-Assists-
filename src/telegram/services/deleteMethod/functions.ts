@@ -1,5 +1,5 @@
 import { Context, Telegraf } from "telegraf";
-import { deleteUserMessage, saveBotMessage, userStageDeleteExercise, userState, userStateUpdateDay, userStateUpdateMonth, userStateUpdateName, userStateUpdateStage, userStateUpdateWeek } from "../../../userState";
+import { deleteUserMessage, saveBotMessage, userStageDeleteExercise, userState, userStateUpdateDay, userStateUpdateMonth, userStateUpdateName, userStateUpdateWeek } from "../../../userState";
 import { parseInt } from "lodash";
 import { ExerciseQueryFetcher } from "../getMethod/queries";
 import { deleteExerciseVerificationController } from ".";
@@ -33,7 +33,7 @@ export class ExerciseDeleteHandler {
     await deleteUserMessage(ctx)
     const weekNumber = parseInt(week)
     userStateUpdateWeek(ctx, weekNumber)
-    const exercise = await ExerciseQueryFetcher.ExerciseByNameDayWeekAndId(ctx.from!.id, userState[ctx.from!.id])
+    const exercise = await ExerciseQueryFetcher.ExerciseByMonthDayWeekAndId(ctx.from!.id, userState[ctx.from!.id])
     if (!exercise) {
       await this.handleDeleteExerciseError(ctx, "exerciseNotFound")
       return

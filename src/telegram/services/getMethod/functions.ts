@@ -113,9 +113,8 @@ export class ExerciseGetUtils {
     let result = `_Se encontraron los siguientes ejercicios:_\n`
     for (const year in groupedData) {
       result += `\n========================\n📅 *${workoutData.month!.toUpperCase()}* _${year}_\n
-🔄 Ejercicio: _${workoutData.name?.toUpperCase()}_
-    Dia: _${workoutData.day?.toUpperCase()}_
-    Semana: _${workoutData.week}_\n----------------------------------\n`
+🔄 Dia: _${workoutData.day?.toUpperCase()}_
+📅 Semana: _${workoutData.week}_\n----------------------------------\n`
       groupedData[year].forEach((exercise: Exercise) => {
         result += `     • id: ${exercise.id}  |  _Reps_:  ${exercise.reps.join(', ')}  |  _Peso:_  ${exercise.kg}\n`
       })

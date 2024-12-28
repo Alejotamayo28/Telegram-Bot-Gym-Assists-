@@ -114,6 +114,8 @@ export const userStateUpdateReps = (ctx: Context, reps: number[], stage?: string
 export const userStateUpdateKg = (ctx: Context, kg: number, stage?: string) => {
   updateUserStateExample(ctx, { kg, stage })
 }
+
+
 export const userStateUpdateWeek = (ctx: Context, week: number, stage?: string) => {
   updateUserStateExample(ctx, { week, stage })
 }

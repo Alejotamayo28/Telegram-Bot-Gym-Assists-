@@ -9,8 +9,8 @@ import { onTransaction } from "../../../database/dataAccessLayer";
 import { workoutUpdateQuery } from "./queries";
 import { redirectToMainMenuWithTaskDone } from "../../mainMenu";
 
-export class ExerciseInlineKeybaord extends MessageTemplate {
-  constructor(private data: Exercise[]) { super() }
+export class ExerciseTesting extends MessageTemplate {
+  constructor(private ctx: Context, private data: Exercise[]) { super() }
   protected prepareMessage() {
     const buttonsPerRow = 2;
     const groupedButtons = this.data.reduce((rows: InlineKeyboardButton[][], exercise: Exercise, index: number) => {
@@ -28,21 +28,21 @@ export class ExerciseInlineKeybaord extends MessageTemplate {
     }
     return { message, keyboard }
   }
-  async handleOptions(ctx: Context, message: Message, action: string) {
-    await deleteBotMessage(ctx)
+  async handleOptions(_: Context, message: Message, action: string) {
+    await deleteBotMessage(this.ctx)
     const handlers: { [key: string]: () => Promise<any> } = {}
     this.data.forEach(exercise => {
       handlers[exercise.id] = async () => {
-        return await this.handleExerciseSelection(ctx, exercise)
+        return await this.handleExerciseSelection(exercise)
       }
     })
     if (handlers[action]) {
       return handlers[action]()
     }
   }
-  private async handleExerciseSelection(ctx: Context, exercise: Exercise) {
+  private async handleExerciseSelection(exercise: Exercise) {
     try {
-      await ctx.reply(`Has seleccionado el ejercicio ${exercise.name} con el id: ${exercise.id}`)
+      await this.ctx.reply(`Has seleccionado el ejercicio ${exercise.name} con el id: ${exercise.id}`)
       return exercise
     } catch (error) {
       console.error(`Error: `, error)

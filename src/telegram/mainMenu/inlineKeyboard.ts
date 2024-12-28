@@ -8,6 +8,7 @@ import { fetchExerciseController } from '../services/getMethod';
 import { ExerciseGetHandler } from '../services/getMethod/functions';
 import { BotUtils } from '../services/singUp/functions';
 import { exerciseDeletionFlow } from '../services/deleteMethod';
+import { daysInlineKeyboardController } from '../utils/daysUtils';
 
 export class MainMenuHandler extends MessageTemplate {
   protected prepareMessage() {

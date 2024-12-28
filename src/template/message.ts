@@ -9,7 +9,7 @@ export interface CallbackData {
 }
 export abstract class MessageTemplate {
   constructor(protected taskDone?: string) { }
-  protected abstract handleOptions(ctx?: Context, message?: Message, action?: string, bot?: Telegraf, userMessage?: string, day?:string, stage?:string): any
+  protected abstract handleOptions(ctx?: Context, message?: Message, action?: string | number, bot?: Telegraf, userMessage?: string, day?:string, stage?:string): any
   protected abstract prepareMessage(): {
     message: string,
     keyboard: InlineKeyboardMarkup
@@ -30,8 +30,7 @@ export abstract class MessageTemplate {
         })
       } else {
         const { keyboard } = this.prepareMessage()
-        return await ctx.reply(this.taskDone, {
-          parse_mode: "Markdown",
+        return await ctx.reply(this.taskDone, { parse_mode: "Markdown",
           reply_markup: keyboard
         })
       }
