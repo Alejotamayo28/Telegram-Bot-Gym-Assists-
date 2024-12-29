@@ -1,5 +1,5 @@
 import { Context, Telegraf } from "telegraf";
-import { regexPattern, tryCatch } from "../utils";
+import { handleKeyboardStep, regexPattern, tryCatch } from "../utils";
 import { ExerciseDeleteVerificationHandler } from "./inlineKeyboard";
 import { ExerciseVerificationCallbacks } from "../addMethod/models";
 import { deleteBotMessage, saveBotMessage, userState } from "../../../userState";
@@ -30,30 +30,6 @@ export const deleteExerciseVerificationController = async (ctx: Context, bot: Te
   }
 }
 
-interface KeyboardResponse {
-  sendCompleteMessage: (ctx: Context) => Promise<Message>;
-  handleOptions: (ctx: Context, message: Message, action: string, bot: Telegraf) => Promise<void>;
-}
-
-const handleKeyboardStep = async (ctx: Context, keyboard: KeyboardResponse, bot: Telegraf, callbackPattern?: RegExp, nextStep?: () => Promise<any>):
-  Promise<void> => {
-  const message = await keyboard.sendCompleteMessage(ctx);
-  saveBotMessage(ctx, message.message_id);
-  if (callbackPattern) {
-    bot.action(callbackPattern, async (ctx) => {
-      const action = ctx.match[0];
-      await tryCatch(() => keyboard.handleOptions(ctx, message, action, bot), ctx);
-      if (nextStep) await nextStep();
-    });
-  } else {
-    bot.action(/.*/, async (ctx) => {
-      const action = ctx.match[0];
-      await tryCatch(() => keyboard.handleOptions(ctx, message, action, bot), ctx);
-      if (nextStep) await nextStep();
-    });
-  }
-}
-
 // Flow: Month -> Days -> Week -> exerciseName
 export const exerciseDeletionFlow = async (ctx: Context, bot: Telegraf) => {
   try {
@@ -63,10 +39,10 @@ export const exerciseDeletionFlow = async (ctx: Context, bot: Telegraf) => {
       botMessages.inputRequest.prompts.deleteMethod.exerciseDay)
     const weekKeyboard = new WeekInlineKeybaord(
       botMessages.inputRequest.prompts.deleteMethod.exerciseWeek)
-
+    //Controller
     const deleteExericiseCotroller = async () => {
       const data = await ExerciseQueryFetcher.ExerciseByMonthDayWeekAndId(ctx.from!.id, userState[ctx.from!.id]);
-      await ctx.reply(ExerciseGetUtils.mapExerciseByNameDayWeekTESTING(data, ctx), {
+      await ctx.reply(ExerciseGetUtils.mapExerciseByNameDayWeekTESTING(data, ctx, "deleteMethod"), {
         parse_mode: "Markdown"
       });
       const exerciseKeyboard = new ExerciseInlineKeybaord(`deleteMethod`,

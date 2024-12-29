@@ -1,10 +1,58 @@
 import { UserCredentials, UserProfile } from "../../model/client"
-import { PartialWorkout } from "../../model/workout"
-import { Context } from "telegraf"
-import { Message } from "telegraf/typings/core/types/typegram"
+import { Exercise, PartialWorkout } from "../../model/workout"
+import { Context, Telegraf } from "telegraf"
+import { InlineKeyboardButton, Message } from "telegraf/typings/core/types/typegram"
+import { saveBotMessage } from "../../userState"
+import { CallbackData } from "../../template/message"
 
-export const exercisesMethod= {
-deleteMethod: `deleteMethod`,
+export const exercisesMethod = {
+  deleteMethod: `Eliminar`,
+}
+
+export interface KeyboardResponse {
+  sendCompleteMessage: (ctx: Context) => Promise<Message>;
+  handleOptions: (ctx: Context, message: Message, action: string, bot: Telegraf) => Promise<void>;
+}
+
+export const handleKeyboardStep = async (ctx: Context, keyboard: KeyboardResponse, bot: Telegraf, callbackPattern?: RegExp, nextStep?: () => Promise<any>):
+  Promise<void> => {
+  const message = await keyboard.sendCompleteMessage(ctx);
+  saveBotMessage(ctx, message.message_id);
+  if (callbackPattern) {
+    bot.action(callbackPattern, async (ctx) => {
+      const action = ctx.match[0];
+      await tryCatch(() => keyboard.handleOptions(ctx, message, action, bot), ctx);
+      if (nextStep) await nextStep();
+    });
+  } else {
+    bot.action(/.*/, async (ctx) => {
+      const action = ctx.match[0];
+      await tryCatch(() => keyboard.handleOptions(ctx, message, action, bot), ctx);
+      if (nextStep) await nextStep();
+    });
+  }
+}
+
+export const createButton = (text: string, callbackData: CallbackData): InlineKeyboardButton => { return {
+    text,
+    callback_data: callbackData.action
+  }
+}
+
+export const lastButton = createButton(`• Continuar`, { action: `continuar` })
+export const groupedButtonsFunction = (data: Exercise[]) => {
+  const response = data.reduce((rows: InlineKeyboardButton[][], exercise: Exercise, index: number) => {
+    const button = createButton(`• Id: ${exercise.id} | ${exercise.name}`, { action: `${exercise.id}` });
+    if (index % 2 === 0) {
+      rows.push([button]);
+    } else {
+      rows[rows.length - 1].push(button);
+    }
+    return rows
+  },
+    [])
+  response.push([lastButton])
+  return response
 }
 
 

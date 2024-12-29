@@ -1,14 +1,12 @@
 import { Context, Telegraf } from "telegraf";
 import { deleteUserMessage, saveBotMessage, userStageDeleteExercise, userState, userStateUpdateDay, userStateUpdateMonth, userStateUpdateName, userStateUpdateWeek } from "../../../userState";
-import { parseInt, toNumber } from "lodash";
+import { parseInt } from "lodash";
 import { ExerciseQueryFetcher } from "../getMethod/queries";
 import { deleteExerciseVerificationController } from ".";
 import { botMessages } from "../../messages";
 import { BotUtils } from "../singUp/functions";
 import { ExerciseGetUtils } from "../getMethod/functions";
 import { Exercise } from "../../../model/workout";
-import { validateMonths } from "../../../validators/allowedValues";
-import { getMultipartRequestOptions } from "openai/_shims";
 
 export class ExerciseDeleteHandler {
   private static async handleDeleteExerciseError(ctx: Context, errorType: keyof typeof botMessages.inputRequest.prompts.getMethod.errors) {
@@ -40,7 +38,7 @@ export class ExerciseDeleteHandler {
       await this.handleDeleteExerciseError(ctx, "exerciseNotFound")
       return
     }
-    const message = await ctx.reply(ExerciseGetUtils.mapExerciseByNameDayWeekTESTING(exercise, ctx), {
+    const message = await ctx.reply(ExerciseGetUtils.mapExerciseByNameDayWeekTESTING(exercise, ctx, "deleteMethod"), {
       parse_mode: "Markdown"
     })
     await saveBotMessage(ctx, message.message_id)

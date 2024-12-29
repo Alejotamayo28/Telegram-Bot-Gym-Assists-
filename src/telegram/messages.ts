@@ -1,3 +1,5 @@
+import { isNewExpression } from "typescript"
+
 export const botMessages = {
   menus: {
     mainMenu: `*¡Hola! Bienvenido al menú de usuario!* 👋 \n\n_En este menú encontrarás varias funciones que pueden ajustarse a tus necesidades. 🔍 Siéntete libre de explorar y utilizar todas las opciones disponibles._ 📋\n\nActualmente, estamos en la versión beta, y planeo agregar muchas más funciones en el futuro. ¡Gracias por probarlo! 🙏`,
@@ -113,9 +115,9 @@ export const botMessages = {
         exerciseWeek:
           `🗓️* Semana del entrenamiento *🗓️\n\n_Por favor, escribe el numero de la semana donde realizaste el ejercicio a eliminar._\nEjemplo: _3_`,
         selectExercisesToDeleteMessage:
-          `🗓️* Eliminando ejercicios* 🗓️\n\n_Por favor, selecciona los ejercicios que deseas eliminar de la lista:_`
+          `🗓️* Eliminando ejercicios* 🗓️\n\n_Por favor, selecciona los ejercicios que deseas eliminar de la lista:_`,
+        successfull: `❌ _Eliminacion de datos se ha realizado con exito._ `
       }
-
     }
   }
 }

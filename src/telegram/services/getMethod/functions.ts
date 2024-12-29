@@ -8,6 +8,8 @@ import { deleteUserMessage, userStageGetExercise, userState, userStateUpdateMont
 import { botMessages } from "../../messages";
 import { BotUtils } from "../singUp/functions";
 import { redirectToMainMenuWithTaskDone } from "../../mainMenu";
+import { indexOf, method } from "lodash";
+import { exercisesMethod } from "../utils";
 
 export class ExerciseGetHandler {
   static async exerciseMonth(ctx: Context, userMessage: string): Promise<void> {
@@ -83,12 +85,12 @@ export class ExerciseGetUtils {
       }
       groupedData[year][month][exercise.day][exercise.name][exercise.week].push(exercise)
     })
-    let result = ""
+    let result = `*Registro ejercicios* `
     for (const year in groupedData) {
       for (const month in groupedData[year]) {
-        result += `*Registro ejercicios \n========================\n📅 *${month.toUpperCase()}* _${year}_ \n`
+        result += `\n========================\n📅 *${month.toUpperCase()}* _${year}_ \n`
         for (const day in groupedData[year][month]) {
-          result += `\n🔄 Día: _${day.toUpperCase()}_\n----------------------------------\n\n`;
+          result += `🔄 Día: _${day.toUpperCase()}_\n----------------------------------\n`;
           for (const exercise in groupedData[year][month][day]) {
             result += `💪 Ejercicio: _${exercise.toUpperCase()}\n_`;
             for (const week in groupedData[year][month][day][exercise]) {
@@ -103,22 +105,26 @@ export class ExerciseGetUtils {
     }
     return result.trim()
   }
-  static mapExerciseByNameDayWeekTESTING(data: Exercise[], ctx: Context): string {
+  static mapExerciseByNameDayWeekTESTING(data: Exercise[], ctx: Context, method: keyof typeof exercisesMethod): string {
     const workoutData: PartialWorkout = userState[ctx.from!.id]
-    const groupedData: { [year: number]: Exercise[] } = {}
+    const groupedData: { [year: number]: { [name: string]: Exercise[] } } = {}
     data.forEach((exercise: Exercise) => {
-      groupedData[exercise.year] ??= []
-      groupedData[exercise.year].push(exercise)
+      groupedData[exercise.year] ??= {}
+      groupedData[exercise.year][exercise.name] ??= []
+      groupedData[exercise.year][exercise.name].push(exercise)
     })
     const date = new Date()
-    let result = `*Registro ejercicios - Fecha ${date.toLocaleDateString()}*\n\n_Se encontraron los siguientes ejercicios:_`
+    let result = `*Registro ejercicios - Fecha ${date.toLocaleDateString()}*\n\n_Se encontraron los siguientes ejercicios:_\nMetodo: ${exercisesMethod[method]}`
     for (const year in groupedData) {
-      result += `\n========================\n📅 *${workoutData.month!.toUpperCase()}* _${year}_
-📅 Dia: _${workoutData.day?.toUpperCase()}_
-🔄 Semana: _${workoutData.week}_\n----------------------------------\n`
-      groupedData[year].forEach((exercise: Exercise) => {
-        result += `     • id: ${exercise.id}  |  _Reps_:  ${exercise.reps.join(', ')}  |  _Peso:_  ${exercise.kg}\n`
-      })
+      result += `\n========================\n📅 * ${workoutData.month!.toUpperCase()}* _${year} _
+📅 Dia: _${workoutData.day?.toUpperCase()} _
+🔄 Semana: _${workoutData.week} _\n----------------------------------\n`
+      for (const name in groupedData[year]) {
+        result += `  🔢 _Ejercicio: ${name.toUpperCase()}: _\n`
+        groupedData[year][name].forEach((exercise: Exercise) => {
+          result += `     • id: ${exercise.id}  | _Reps_:  ${exercise.reps.join(', ')}  | _Peso:_  ${exercise.kg} \n`
+        })
+      }
     }
     return result.trim()
   }
@@ -137,11 +143,11 @@ export class ExerciseGetUtils {
     });
     let result = ""
     for (const exerciseName in groupedData) {
-      result += `\n💪 Ejercicio: ${exerciseName.toUpperCase()}\n\n`
+      result += `\n💪 Ejercicio: ${exerciseName.toUpperCase()} \n\n`
       for (const week in groupedData[exerciseName]) {
-        result += `🔄 Semana ${week}:\n`
+        result += `🔄 Semana ${week}: \n`
         groupedData[exerciseName][week].forEach((exercise) => {
-          result += `    - Reps: ${exercise.reps.join(' ')} | Peso: ${exercise.kg}\n`
+          result += `    - Reps: ${exercise.reps.join(' ')} | Peso: ${exercise.kg} \n`
         })
       }
     }
