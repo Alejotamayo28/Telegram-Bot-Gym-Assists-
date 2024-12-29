@@ -111,7 +111,9 @@ export const botMessages = {
         exerciseDay:
           `🗓️* Dia del entrenamiento *🗓️\n\n_Por favor, escribe el dia donde realizaste el ejercicio a eliminar._\n\nEjemplo: _Lunes_\nSi prefieres, puedes seleccionar el dia de la semana sugerido a continuacion.`,
         exerciseWeek:
-          `🗓️* Semana del entrenamiento *🗓️\n\n_Por favor, escribe el numero de la semana donde realizaste el ejercicio a eliminar._\nEjemplo: _3_`
+          `🗓️* Semana del entrenamiento *🗓️\n\n_Por favor, escribe el numero de la semana donde realizaste el ejercicio a eliminar._\nEjemplo: _3_`,
+        selectExercisesToDeleteMessage:
+          `🗓️* Eliminando ejercicios* 🗓️\n\n_Por favor, selecciona los ejercicios que deseas eliminar de la lista:_`
       }
 
     }

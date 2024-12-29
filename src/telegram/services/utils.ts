@@ -3,6 +3,11 @@ import { PartialWorkout } from "../../model/workout"
 import { Context } from "telegraf"
 import { Message } from "telegraf/typings/core/types/typegram"
 
+export const exercisesMethod= {
+deleteMethod: `deleteMethod`,
+}
+
+
 // regetPattern para las acciones del usuario, parametro = enum
 export const regexPattern = <T extends { [key: string]: string }>(optionsEnum: T) => {
   return new RegExp(`^(${Object.values(optionsEnum).join('|')})$`)

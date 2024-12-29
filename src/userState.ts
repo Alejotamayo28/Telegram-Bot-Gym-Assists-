@@ -44,7 +44,7 @@ export enum userStageDeleteExercise {
 }
 
 
-interface UpdateUserStateOptions {
+export interface UpdateUserStateOptions {
   month?: string,
   day?: string;
   name?: string;
@@ -56,6 +56,9 @@ interface UpdateUserStateOptions {
   nickname?: string,
   password?: string,
   email?: string,
+  exercisesId?: number[],
+  messagesId?: number[],
+  selectionDone?: boolean
 }
 
 export const botMessageTest: { [userId: number]: number } = {}
@@ -89,6 +92,16 @@ export const updateUserStateExample = (ctx: Context, updates: UpdateUserStateOpt
     ...userState[ctx.from!.id],
     ...updates
   }
+}
+export const userStateUpdateSelectionDone = (ctx: Context, selectionDone: boolean) => {
+  updateUserStateExample(ctx, { selectionDone })
+}
+export const userStateUpdateMessagesId = (ctx: Context, messagesId: number[]) => {
+  updateUserStateExample(ctx, { messagesId })
+}
+
+export const userStateUpdateExercisesId = (ctx: Context, exercisesId: number[]) => {
+  updateUserStateExample(ctx, { exercisesId })
 }
 
 export const userStateUpdateStage = (ctx: Context, stage: string) => {

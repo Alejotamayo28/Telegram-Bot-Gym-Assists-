@@ -35,69 +35,50 @@ interface KeyboardResponse {
   handleOptions: (ctx: Context, message: Message, action: string, bot: Telegraf) => Promise<void>;
 }
 
-const handleKeyboardStep = async (
-  ctx: Context,
-  keyboard: KeyboardResponse,
-  callbackPattern: RegExp,
-  bot: Telegraf,
-  nextStep?: () => Promise<any>
-): Promise<void> => {
+const handleKeyboardStep = async (ctx: Context, keyboard: KeyboardResponse, bot: Telegraf, callbackPattern?: RegExp, nextStep?: () => Promise<any>):
+  Promise<void> => {
   const message = await keyboard.sendCompleteMessage(ctx);
   saveBotMessage(ctx, message.message_id);
-  bot.action(callbackPattern, async (ctx) => {
-    const action = ctx.match[0];
-    await tryCatch(() => keyboard.handleOptions(ctx, message, action, bot), ctx);
-    if (nextStep) await nextStep();
-  });
+  if (callbackPattern) {
+    bot.action(callbackPattern, async (ctx) => {
+      const action = ctx.match[0];
+      await tryCatch(() => keyboard.handleOptions(ctx, message, action, bot), ctx);
+      if (nextStep) await nextStep();
+    });
+  } else {
+    bot.action(/.*/, async (ctx) => {
+      const action = ctx.match[0];
+      await tryCatch(() => keyboard.handleOptions(ctx, message, action, bot), ctx);
+      if (nextStep) await nextStep();
+    });
+  }
 }
 
 // Flow: Month -> Days -> Week -> exerciseName
 export const exerciseDeletionFlow = async (ctx: Context, bot: Telegraf) => {
   try {
-
-    // Initialize keyboards
     const monthKeyboard = new MonthInlineKeybord(
-      botMessages.inputRequest.prompts.deleteMethod.exerciseMonth
-    );
+      botMessages.inputRequest.prompts.deleteMethod.exerciseMonth)
     const daysKeyboard = new DaysInlineKeyboard(
-      botMessages.inputRequest.prompts.deleteMethod.exerciseDay
-    );
+      botMessages.inputRequest.prompts.deleteMethod.exerciseDay)
     const weekKeyboard = new WeekInlineKeybaord(
-      botMessages.inputRequest.prompts.deleteMethod.exerciseWeek
-    );
+      botMessages.inputRequest.prompts.deleteMethod.exerciseWeek)
 
-    const showExerciseData = async () => {
+    const deleteExericiseCotroller = async () => {
       const data = await ExerciseQueryFetcher.ExerciseByMonthDayWeekAndId(ctx.from!.id, userState[ctx.from!.id]);
       await ctx.reply(ExerciseGetUtils.mapExerciseByNameDayWeekTESTING(data, ctx), {
         parse_mode: "Markdown"
       });
-      const exerciseKeyboard = new ExerciseInlineKeybaord(data)
-      //working...
+      const exerciseKeyboard = new ExerciseInlineKeybaord(`deleteMethod`,
+        botMessages.inputRequest.prompts.deleteMethod.selectExercisesToDeleteMessage, data)
+      await handleKeyboardStep(ctx, exerciseKeyboard, bot)
     };
     // Chain flow
-    await handleKeyboardStep(
-      ctx,
-      monthKeyboard,
-      regexPattern(MonthCallbacks),
-      bot,
-      async () => {
-        await handleKeyboardStep(
-          ctx,
-          daysKeyboard,
-          regexPattern(DaysCallbacks),
-          bot,
-          async () => {
-            await handleKeyboardStep(
-              ctx,
-              weekKeyboard,
-              regexPattern(WeekCallbacks),
-              bot,
-              showExerciseData
-            );
-          }
-        );
-      }
-    );
+    await handleKeyboardStep(ctx, monthKeyboard, bot, regexPattern(MonthCallbacks), async () => {
+      await handleKeyboardStep(ctx, daysKeyboard, bot, regexPattern(DaysCallbacks), async () => {
+        await handleKeyboardStep(ctx, weekKeyboard, bot, regexPattern(WeekCallbacks), deleteExericiseCotroller);
+      })
+    })
   } catch (error) {
     console.error(`Error: `, error)
   }
