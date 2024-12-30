@@ -96,6 +96,8 @@ export const botMessages = {
         notSuccessful: `*Accion cancelada* ❌ \n\n_La accion ha sido cancelada exitosamente._`
       },
       updateMethod: {
+        exerciseMonth:
+          `*🗓️ Mes del entrenamiento *\n\n_Por favor, escribe el mes donde realizaste el ejercicio a actualizar_.\nEjemplo: _Noviembre_`,
         exerciseName:
           `*🗓️ Nombre del entrenamiento *\n\n_Por favor, escribe el nombre del ejercicio a actualizar_.\nEjemplo: _Press militar_`,
         exerciseDay:

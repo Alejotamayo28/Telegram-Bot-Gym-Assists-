@@ -8,7 +8,6 @@ import { MonthCallbacks } from "../../utils/monthUtils/models";
 import { DaysInlineKeyboard } from "../../utils/daysUtils/inlineKeyboard";
 import { DaysCallbacks } from "../../utils/daysUtils/models";
 import { botMessages } from "../../messages";
-import { Message } from "telegraf/typings/core/types/typegram";
 import { WeekInlineKeybaord } from "../../utils/weekUtils/inlineKeyboard";
 import { WeekCallbacks } from "../../utils/weekUtils/models";
 import { ExerciseQueryFetcher } from "../getMethod/queries";

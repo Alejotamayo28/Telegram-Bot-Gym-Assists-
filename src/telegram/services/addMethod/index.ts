@@ -1,7 +1,11 @@
-import { Context, Telegraf } from "telegraf"; import { regexPattern, tryCatch } from "../utils";
+import { Context, Telegraf } from "telegraf"; import { handleKeyboardStep, regexPattern, tryCatch } from "../utils";
 import { ExercisePostVerificationHandler } from "./inlineKeyboard";
 import { ExerciseVerificationCallbacks } from "./models";
-import { saveBotMessage } from "../../../userState";
+import { saveBotMessage, userStagePostExercise, userStateUpdateStage } from "../../../userState";
+import { DaysInlineKeyboard } from "../../utils/daysUtils/inlineKeyboard";
+import { botMessages } from "../../messages";
+import { DaysCallbacks } from "../../utils/daysUtils/models";
+import { BotUtils } from "../singUp/functions";
 
 export const PostExerciseVerificationController = async (ctx: Context, bot: Telegraf) => {
   const response = new ExercisePostVerificationHandler(ctx)
@@ -16,6 +20,25 @@ export const PostExerciseVerificationController = async (ctx: Context, bot: Tele
     console.error(`Error: `, error)
   }
 }
+// Idea, comparar el ejercicio de hoy con el de hace 8 dias, si existe
 
+// cambiar dia
+//AddFlow: day =>  name => repeticiones => peso => confirmar
+//flow: dayInline, askName, askReps, askWeight
 
+export const exercisePostFlow = async (ctx: Context, bot: Telegraf) => {
+  try {
+    const daysKeyboard = new DaysInlineKeyboard(
+      botMessages.inputRequest.prompts.postMethod.exerciseDay)
+    //Controller
+    const postExerciseController = async () => {
+      await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.postMethod.exerciseName)
+      userStateUpdateStage(ctx, userStagePostExercise.POST_EXERCISE_NAME)
+    }
+    //Chain flow
+    await handleKeyboardStep(ctx, daysKeyboard, bot, regexPattern(DaysCallbacks), postExerciseController)
+  } catch (error) {
+    console.error(`Error: `, error)
+  }
+}
 
