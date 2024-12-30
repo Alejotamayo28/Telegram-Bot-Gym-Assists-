@@ -9,6 +9,7 @@ import { ExerciseGetHandler } from '../services/getMethod/functions';
 import { BotUtils } from '../services/singUp/functions';
 import { exerciseDeletionFlow } from '../services/deleteMethod';
 import { daysInlineKeyboardController } from '../utils/daysUtils';
+import { exercisePostFlow } from '../services/addMethod';
 
 export class MainMenuHandler extends MessageTemplate {
   protected prepareMessage() {
@@ -33,7 +34,7 @@ export class MainMenuHandler extends MessageTemplate {
   async handleOptions(ctx: Context, _: Message, action: string, bot: Telegraf) {
     deleteBotMessage(ctx)
     const handlers: { [key: string]: () => Promise<void> } = {
-      [MainMenuCallbacks.postExercise]: this.handlePostExercise.bind(this, ctx),
+      [MainMenuCallbacks.postExercise]: this.handlePostExercise.bind(this, ctx, bot),
       [MainMenuCallbacks.getExercise]: this.handleGetExercise.bind(this, ctx, bot),
       [MainMenuCallbacks.getExerciseHistory]: this.handleGetExerciseWeek.bind(this, ctx, bot),
       [MainMenuCallbacks.updateExercise]: this.handleUpdateExercise.bind(this, ctx),
@@ -49,9 +50,8 @@ export class MainMenuHandler extends MessageTemplate {
   private async handleGetExerciseWeek(ctx: Context, bot: Telegraf) {
     await ExerciseGetHandler.getAllTimeExerciseText(ctx, bot)
   }
-  private async handlePostExercise(ctx: Context) {
-    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.postMethod.exerciseDay)
-    userStateUpdateStage(ctx, userStagePostExercise.POST_EXERCISE_DAY)
+  private async handlePostExercise(ctx: Context, bot: Telegraf) {
+    await exercisePostFlow(ctx, bot)
   }
   private async handleUpdateExercise(ctx: Context) {
     await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.updateMethod.exerciseDay)
@@ -59,10 +59,6 @@ export class MainMenuHandler extends MessageTemplate {
   }
   private async handleDeleteExercise(ctx: Context, bot: Telegraf) {
     await exerciseDeletionFlow(ctx, bot)
-    /*
-      await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.deleteMethod.exerciseMonth)
-        userStateUpdateStage(ctx, userStageDeleteExercise.DELETE_EXERCISE_MONTH)
-        */
   }
 }
 
