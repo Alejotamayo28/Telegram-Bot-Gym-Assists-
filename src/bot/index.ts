@@ -1,4 +1,4 @@
-import { deleteBotMessage, deleteUserMessage, saveUserMessage, userStage, userStageDeleteExercise, userStageGetExercise, userStagePostExercise, userStagePutExercise, userStageSignUp, userState, userStateUpdateName } from "../userState";
+import { deleteBotMessage, deleteUserMessage, saveUserMessage, userMessageTest, userStage, userStageDeleteExercise, userStageGetExercise, userStagePostExercise, userStagePutExercise, userStageSignUp, userState, userStateUpdateName } from "../userState";
 import { bot } from "../telegram/bot";
 import { handleError } from "../errors";
 import { RegisterHandler, testingDataStructures } from "../telegram/services/singUp/functions";
@@ -15,6 +15,9 @@ import { parseInt } from "lodash";
 import { PostExerciseVerificationController } from "../telegram/services/addMethod";
 import { DataValidator } from "../validators/dataValidator";
 import { ExerciseGetHandler } from "../telegram/services/getMethod/functions";
+import { validateMonths } from "../validators/allowedValues";
+import { ExerciseFetchHandler } from "../telegram/services/getMethod/inlineKeyboard";
+import { ExerciseQueryFetcher } from "../telegram/services/getMethod/queries";
 
 export type MyContext =
   | NarrowedContext<Context<Update>, Update.MessageUpdate<Message.TextMessage>>
@@ -221,6 +224,23 @@ bot.on(message("text"), async ctx => {
             console.error(`Error: `, error)
           }
           break;
+
+        case userStageGetExercise.GET_EXERCISE_RECORD:
+          await deleteBotMessage(ctx)
+          saveUserMessage(ctx)
+          try {
+            if (await (DataValidator.validateExercise(ctx, userMessage))) break;
+            await deleteUserMessage(ctx)
+            userStateUpdateName(ctx, userMessage)
+            const { month } = userState[ctx.from!.id]
+            const monthNumber = validateMonths.indexOf(month) + 1
+            const data = await ExerciseQueryFetcher.ExercisesByMonthNameAndId(ctx, monthNumber)
+            console.log(data)
+          } catch (error) {
+            console.error(`Error: `, error)
+          }
+          break;
+
 
         case userStageDeleteExercise.DELETE_EXERCISE_MONTH:
           await deleteLastMessage(ctx)

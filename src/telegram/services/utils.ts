@@ -7,6 +7,7 @@ import { CallbackData } from "../../template/message"
 
 export const exercisesMethod = {
   deleteMethod: `Eliminar`,
+  getMethod: `Obtener`
 }
 
 export interface KeyboardResponse {
@@ -33,7 +34,8 @@ export const handleKeyboardStep = async (ctx: Context, keyboard: KeyboardRespons
   }
 }
 
-export const createButton = (text: string, callbackData: CallbackData): InlineKeyboardButton => { return {
+export const createButton = (text: string, callbackData: CallbackData): InlineKeyboardButton => {
+  return {
     text,
     callback_data: callbackData.action
   }

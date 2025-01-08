@@ -32,7 +32,9 @@ export enum userStageGetExercise {
   GET_EXERCISE_OPTIONS = 'getExerciseOptions',
   GET_EXERCISE_MONTH = 'getExerciseMonth',
   GET_EXERCISE_DAY = 'getExerciseDay',
-  GET_EXERCISE_MONTH_STAGE = 'getExerciseMonthStage'
+  GET_EXERCISE_MONTH_STAGE = 'getExerciseMonthStage',
+  GET_EXERCISE_RECORD = `getExerciseRecord`
+
 }
 
 export enum userStageDeleteExercise {

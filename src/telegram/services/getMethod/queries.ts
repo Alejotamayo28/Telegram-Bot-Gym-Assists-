@@ -2,8 +2,35 @@ import { Context } from "telegraf";
 import { onSession } from "../../../database/dataAccessLayer";
 import { Exercise, PartialWorkout } from "../../../model/workout";
 import { validateMonths } from "../../../validators/allowedValues";
+import { userState } from "../../../userState";
 
 export class ExerciseQueryFetcher {
+  static async ExercisesByMonthNameAndId(ctx: Context, monthNumber: number): Promise<Exercise[]> {
+    const { name } = userState[ctx.from!.id]
+    const exercises = await onSession(async (clientTransaction) => {
+      return await clientTransaction.query(
+        `SELECT day, reps, kg 
+          FROM workout
+            WHERE date_part('month', date) = $1 
+              AND name = $2
+                AND user_id = $3 
+                  ORDER by Date`,
+        [monthNumber, name, ctx.from!.id])
+    })
+    return exercises.rows
+  }
+  static async ExcerciseLastWeekById(ctx: Context): Promise<Exercise[]> {
+    const exercises = await onSession(async (clientTransaction) => {
+      return await clientTransaction.query(
+        `SELECT day, name, reps, kg 
+          FROM workout
+            WHERE user_id = $1
+              AND date >= current_date - interval '14 days' 
+                AND date < current_date - interval '7 days'`,
+        [ctx.from!.id])
+    })
+    return exercises.rows
+  }
   static async ExerciseByInterval(ctx: Context, interval: number): Promise<Exercise[]> {
     const exercises = await onSession(async (clientTransaction) => {
       return await clientTransaction.query(

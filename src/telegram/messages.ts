@@ -49,6 +49,8 @@ export const botMessages = {
     },
     prompts: {
       getMethod: {
+        exerciseRecord:
+          `*📋 Nombre del ejercicio*\n\n_Ingresa el nombre del ejercicio ha obtener su registro_.\nEjemplo: _press militar_`,
         exerciseMonth:
           `*📋 Mes del entrenamiento*\n\n_Ingresa el nombre del mes en el cual realizaste el ejercicio_.\nEjemplo: _Noviembre:_`,
         exerciseDay:
