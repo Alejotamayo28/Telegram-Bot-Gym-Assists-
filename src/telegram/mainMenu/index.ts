@@ -5,8 +5,8 @@ import { MainMenuCallbacks, ReturnMainMenuCallbacks } from "./models"
 import { saveBotMessage } from "../../userState"
 
 
-export const mainMenuPage = async (ctx: Context, bot: Telegraf) => {
-  const response = new MainMenuHandler()
+export const mainMenuPage = async (ctx: Context, bot: Telegraf, message?: string) => {
+  const response = new MainMenuHandler(message)
   try {
     const message = await response.sendCompleteMessage(ctx)
     saveBotMessage(ctx, message.message_id)

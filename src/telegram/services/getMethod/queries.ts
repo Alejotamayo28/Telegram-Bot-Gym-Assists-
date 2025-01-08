@@ -9,7 +9,7 @@ export class ExerciseQueryFetcher {
     const { name } = userState[ctx.from!.id]
     const exercises = await onSession(async (clientTransaction) => {
       return await clientTransaction.query(
-        `SELECT day, reps, kg 
+        `SELECT day, name, reps, kg 
           FROM workout
             WHERE date_part('month', date) = $1 
               AND name = $2

@@ -8,8 +8,10 @@ import { fetchExerciseController } from '../services/getMethod';
 import { ExerciseGetHandler } from '../services/getMethod/functions';
 import { BotUtils } from '../services/singUp/functions';
 import { exerciseDeletionFlow } from '../services/deleteMethod';
-import { daysInlineKeyboardController } from '../utils/daysUtils';
 import { exercisePostFlow } from '../services/addMethod';
+import { onSession } from '../../database/dataAccessLayer';
+import { ClientInfo } from '../../model/client';
+import { mainMenuPage } from '.';
 
 export class MainMenuHandler extends MessageTemplate {
   protected prepareMessage() {
@@ -28,7 +30,8 @@ export class MainMenuHandler extends MessageTemplate {
           this.createButton(MainMenuLabels.getExerciseHistory, { action: MainMenuCallbacks.getExerciseHistory }),
         ],
         [
-          this.createButton(MainMenuLabels.setRoutine, { action: MainMenuCallbacks.setRoutine })
+          this.createButton(MainMenuLabels.setRoutine, { action: MainMenuCallbacks.setRoutine }),
+          this.createButton(MainMenuLabels.userProfile, { action: MainMenuCallbacks.userProfile })
         ]
       ]
     }
@@ -42,7 +45,8 @@ export class MainMenuHandler extends MessageTemplate {
       [MainMenuCallbacks.getExerciseHistory]: this.handleGetExerciseWeek.bind(this, ctx, bot),
       [MainMenuCallbacks.updateExercise]: this.handleUpdateExercise.bind(this, ctx),
       [MainMenuCallbacks.deleteExercise]: this.handleDeleteExercise.bind(this, ctx, bot),
-      [MainMenuCallbacks.setRoutine]: this.handleRoutine.bind(this, ctx, bot)
+      [MainMenuCallbacks.setRoutine]: this.handleRoutine.bind(this, ctx, bot),
+      [MainMenuCallbacks.userProfile]: this.handleProfileUser.bind(this, ctx, bot)
     }
     if (handlers[action]) {
       return handlers[action]()
@@ -66,6 +70,46 @@ export class MainMenuHandler extends MessageTemplate {
   }
   private async handleRoutine(ctx: Context, bot: Telegraf) {
     console.log(`not implemented yet`)
+  }
+  private static mappedClientInfo(data: ClientInfo): string {
+    let result = `
+🏋️ *Tu información personal* 🏋️
+
+🔒 _Credenciales_:
+   👤 Nickname: ${data.nickname}
+   🔑 Contraseña (encriptada): ${data.password}
+   📧 Correo: ${data.email}
+
+📋 _Datos personales_:
+   👤 Nombre: ${data.name} ${data.lastname}
+   🎂 Edad: ${data.age} años
+   ⚖️ Peso: ${data.weight} kg
+   📏 Altura: ${data.height} m
+`;
+    return result
+  }
+  private async handleProfileUser(ctx: Context, bot: Telegraf) {
+    const response = await onSession(async (clientTransaction): Promise<ClientInfo> => {
+      const response = await clientTransaction.query(`
+ select 
+   c.nickname,
+   c.password,
+   c.email,
+   ci.name,
+   ci.lastname,
+   ci.age,
+   ci.weight,
+   ci.height
+   from 
+   client c
+   join
+   clientinfo ci on c.id = ci.id 
+where c.id = $1`, [ctx.from!.id])
+      return response.rows[0]
+    })
+    const data = MainMenuHandler.mappedClientInfo(response)
+    await BotUtils.sendBotMessage(ctx, data)
+    return await mainMenuPage(ctx, bot, botMessages.inputRequest.prompts.getMethod.succesfull)
   }
 }
 

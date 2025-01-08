@@ -3,7 +3,7 @@ import { deleteBotMessage, userStageGetExercise, userStateUpdateStage } from "..
 import { EXERCISE_VIEW_LABELS, ExerciseFetchGraphTextLabels, ExerciseFetchGraphTextOptions, ExerciseViewOption } from "./models";
 import { msgExerciseViewOptionsMD } from "./messages";
 import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram";
-import { EXERCISE_INTERVALS_LABELS, ExerciseIntervalOption, handleGetDailyExercisesGraphic } from ".";
+import { handleGetDailyExercisesGraphic } from ".";
 import { ExerciseQueryFetcher } from "./queries";
 import { MessageTemplate } from "../../../template/message";
 import { redirectToMainMenuWithTaskDone } from "../../mainMenu";
@@ -14,8 +14,6 @@ import { MonthInlineKeybord } from "../../utils/monthUtils/inlineKeyboard";
 import { handleKeyboardStep, regexPattern } from "../utils";
 import { MonthCallbacks } from "../../utils/monthUtils/models";
 
-// Cambiar, 1) Semana pasada
-//          2) Seguimiento de un ejercicio
 export class ExerciseFetchHandler extends MessageTemplate {
   protected prepareMessage() {
     const message = msgExerciseViewOptionsMD;
@@ -41,11 +39,14 @@ export class ExerciseFetchHandler extends MessageTemplate {
   }
   private async handleLastWeek(ctx: Context, bot: Telegraf) {
     const data = await ExerciseQueryFetcher.ExcerciseLastWeekById(ctx)
+    if (!data.length) {
+      return await redirectToMainMenuWithTaskDone(ctx, bot, `No se han encontrado ejercicios en base a tus selecciones.`)
+    }
     const mappedData = ExerciseGetUtils.mapExercisesByDay(data, "getMethod")
     await BotUtils.sendBotMessage(ctx, mappedData)
-    await redirectToMainMenuWithTaskDone(ctx, bot, botMessages.inputRequest.prompts.getMethod.succesfull)
+    return await redirectToMainMenuWithTaskDone(ctx, bot, botMessages.inputRequest.prompts.getMethod.succesfull)
   }
-  //Mes -> nombre ejercicio
+  //Flow: Mes -> nombre ejercicio
   private async handleOneRecord(ctx: Context, bot: Telegraf) {
     const monthKeyboard = new MonthInlineKeybord(
       botMessages.inputRequest.prompts.getMethod.exerciseMonth)
@@ -54,49 +55,6 @@ export class ExerciseFetchHandler extends MessageTemplate {
       userStateUpdateStage(ctx, userStageGetExercise.GET_EXERCISE_RECORD)
     }
     await handleKeyboardStep(ctx, monthKeyboard, bot, regexPattern(MonthCallbacks), getRecordController)
-  }
-}
-
-export class ExerciseFetchHandlerInterval extends MessageTemplate {
-  protected prepareMessage() {
-    const message =
-      `📅 * Aquí están tus ejercicios de las últimas 3 semanas: *\n\nSelecciona una semana para ver los detalles: `
-    const keyboard: InlineKeyboardMarkup = {
-      inline_keyboard: [
-        [
-          this.createButton(EXERCISE_INTERVALS_LABELS.SEMANA_1, { action: ExerciseIntervalOption.WEEK_1 }),
-          this.createButton(EXERCISE_INTERVALS_LABELS.SEMANA_2, { action: ExerciseIntervalOption.WEEK_2 })],
-        [
-          this.createButton(EXERCISE_INTERVALS_LABELS.SEMANA_3, { action: ExerciseIntervalOption.WEEK_3 })
-        ]
-      ],
-    }; return { message, keyboard }
-  }
-  async handleOptions(ctx: Context, message: Message, action: string, bot: Telegraf) {
-    await deleteBotMessage(ctx)
-    const handlers: { [key: string]: () => Promise<any> } = {
-      [ExerciseIntervalOption.WEEK_1]: this.handleWeek1Callback.bind(this, ctx, bot),
-      [ExerciseIntervalOption.WEEK_2]: this.handleWeek2Callback.bind(this, ctx, bot),
-      [ExerciseIntervalOption.WEEK_3]: this.handleWeek3Callback.bind(this, ctx, bot)
-    };
-    if (handlers[action]) {
-      return handlers[action]();
-    }
-  }
-  private async handleWeek1Callback(ctx: Context, bot: Telegraf): Promise<void> {
-    const exercises = await ExerciseQueryFetcher.ExerciseIntervalFirtsWeek(ctx)
-    return await redirectToMainMenuWithTaskDone(ctx, bot,
-      `Ejercicios obtenidos exitosamente.`)
-  }
-  private async handleWeek2Callback(ctx: Context, bot: Telegraf) {
-    const exercises = await ExerciseQueryFetcher.ExeriseIntervalSecondWeek(ctx)
-    return await redirectToMainMenuWithTaskDone(ctx, bot,
-      `Ejercicios obtenidos exitosamente.`)
-  }
-  private async handleWeek3Callback(ctx: Context, bot: Telegraf) {
-    const exercises = await ExerciseQueryFetcher.ExeriseIntervalThirdWeek(ctx)
-    return await redirectToMainMenuWithTaskDone(ctx, bot,
-      `Ejercicios obtenidos exitosamente.`)
   }
 }
 
