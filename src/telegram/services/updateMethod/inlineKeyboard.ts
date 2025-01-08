@@ -1,5 +1,5 @@
 import { Context, Telegraf } from "telegraf";
-import { CallbackData, MessageTemplate } from "../../../template/message";
+import { MessageTemplate } from "../../../template/message";
 import { UpdateUserStateOptions, userState, userStateUpdateExercisesId, userStateUpdateMessagesId } from "../../../userState";
 import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram";
 import { Exercise, PartialWorkout } from "../../../model/workout";

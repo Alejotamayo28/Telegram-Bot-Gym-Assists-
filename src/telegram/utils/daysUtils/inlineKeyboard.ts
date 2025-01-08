@@ -26,10 +26,5 @@ export class DaysInlineKeyboard extends MessageTemplate {
   async handleOptions(ctx: Context, _: Message, action: string, bot: Telegraf) {
     await deleteBotMessage(ctx)
     userStateUpdateDay(ctx, action.toLowerCase())
-    /* const { month, day } = userState[ctx.from!.id]
-     const data = await ExerciseQueryFetcher.ExerciseByIdAndDayAndMonth(ctx.from!.id, day, month)
-     await exercisesInlineKeybaord(ctx, bot, data)
-     await exercisesInlineKeybaord(ctx, bot, data)
-     */
   }
 }

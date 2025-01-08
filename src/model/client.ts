@@ -1,3 +1,5 @@
+import { familyInterface } from "./family"
+
 export interface UserCredentials {
   nickname: string,
   password: string,
@@ -20,17 +22,19 @@ const UserData: UserData = {
 }
 
 export interface ClientCredentials {
-  id?: number,
+  id: number,
   nickname: string,
   password: string,
   email: string
 }
 
 export interface ClientInfo extends ClientCredentials {
-  id?: number,
+  id: number,
   name: string,
   lastname: string,
   age: number,
   weight: number,
   height: number
 }
+
+export interface ClientCredentialsAndFamily extends ClientCredentials, familyInterface { }

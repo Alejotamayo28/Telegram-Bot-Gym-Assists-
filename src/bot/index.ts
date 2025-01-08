@@ -1,4 +1,4 @@
-import { deleteBotMessage, deleteUserMessage, saveUserMessage, userMessageTest, userStage, userStageDeleteExercise, userStageGetExercise, userStagePostExercise, userStagePutExercise, userStageSignUp, userState, userStateUpdateName } from "../userState";
+import { deleteBotMessage, deleteUserMessage, saveBotMessage, saveUserMessage, userMessageTest, userStage, userStageCreateFamily, userStageDeleteExercise, userStageGetExercise, userStagePostExercise, userStagePutExercise, userStageSignUp, userState, userStateUpdateFamilyName, userStateUpdateFamilyPassword, userStateUpdateName, userStateUpdatePassword, userStateUpdateStage } from "../userState";
 import { bot } from "../telegram/bot";
 import { handleError } from "../errors";
 import { BotUtils, RegisterHandler, testingDataStructures } from "../telegram/services/singUp/functions";
@@ -17,8 +17,11 @@ import { DataValidator } from "../validators/dataValidator";
 import { ExerciseGetHandler, ExerciseGetUtils } from "../telegram/services/getMethod/functions";
 import { validateMonths } from "../validators/allowedValues";
 import { ExerciseQueryFetcher } from "../telegram/services/getMethod/queries";
-import { redirectToMainMenuWithTaskDone } from "../telegram/mainMenu";
+import { mainMenuPage, redirectToMainMenuWithTaskDone } from "../telegram/mainMenu";
 import { botMessages } from "../telegram/messages";
+import { encrypt } from "../middlewares/jsonWebToken/enCryptHelper";
+import { onSession, onTransaction } from "../database/dataAccessLayer";
+import { familyInlinekeyboardController } from "../telegram/mainMenu/inlineKeyboard";
 
 export type MyContext =
   | NarrowedContext<Context<Update>, Update.MessageUpdate<Message.TextMessage>>
@@ -298,6 +301,41 @@ bot.on(message("text"), async ctx => {
             console.error(`Error: `, error)
           }
           break
+
+        case userStageCreateFamily.POST_FAMILY_NAME:
+          await deleteBotMessage(ctx)
+          saveUserMessage(ctx)
+          try {
+            await deleteUserMessage(ctx)
+            userStateUpdateFamilyName(ctx, userMessage)
+            const message = await ctx.reply(`Digita la contrasena de tu familia...`)
+            saveBotMessage(ctx, message.message_id)
+            userStateUpdateStage(ctx, userStageCreateFamily.POST_FAMILY_PASSWORD)
+          } catch (error) {
+            console.error(`Error: `, error)
+          }
+
+          break;
+
+        case userStageCreateFamily.POST_FAMILY_PASSWORD:
+          await deleteBotMessage(ctx)
+          saveUserMessage(ctx)
+          try {
+            await deleteUserMessage(ctx)
+            const password = userMessage
+            const passwordhash = await encrypt(password)
+            userStateUpdateFamilyPassword(ctx, passwordhash)
+            await onTransaction(async (clientTransaction) => {
+              const { familyName, familyPassword } = userState[ctx.from!.id]
+              await clientTransaction.query(`INSERT INTO family (name, password, user_1) VALUES ($1 ,$2, $3)`,
+                [familyName, familyPassword, ctx.from!.id])
+            })
+            return await mainMenuPage(ctx, bot, `Familia creada satisfacctoriamente, gracias por haber creado una familia`)
+          } catch (error) {
+            console.error(`Error: `, error)
+          }
+          break;
+
 
         default:
           ctx.reply(`*Ha ocurrdio un error, vuelve a escoger la accion para volver a comenzar.*`, {
