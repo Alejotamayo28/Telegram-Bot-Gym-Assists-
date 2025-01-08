@@ -3,26 +3,28 @@ import { deleteBotMessage, userStageGetExercise, userStateUpdateStage } from "..
 import { EXERCISE_VIEW_LABELS, ExerciseFetchGraphTextLabels, ExerciseFetchGraphTextOptions, ExerciseViewOption } from "./models";
 import { msgExerciseViewOptionsMD } from "./messages";
 import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram";
-import { EXERCISE_INTERVALS_LABELS, ExerciseIntervalOption, fetchExerciseIntervalController, handleGetDailyExercisesGraphic } from ".";
+import { EXERCISE_INTERVALS_LABELS, ExerciseIntervalOption, handleGetDailyExercisesGraphic } from ".";
 import { ExerciseQueryFetcher } from "./queries";
 import { MessageTemplate } from "../../../template/message";
 import { redirectToMainMenuWithTaskDone } from "../../mainMenu";
-import { botMessages } from "../../messages";
-import { ExerciseGetHandler } from "./functions";
+import { ExerciseGetHandler, ExerciseGetUtils } from "./functions";
 import { BotUtils } from "../singUp/functions";
+import { botMessages } from "../../messages";
+import { MonthInlineKeybord } from "../../utils/monthUtils/inlineKeyboard";
+import { handleKeyboardStep, regexPattern } from "../utils";
+import { MonthCallbacks } from "../../utils/monthUtils/models";
 
+// Cambiar, 1) Semana pasada
+//          2) Seguimiento de un ejercicio
 export class ExerciseFetchHandler extends MessageTemplate {
   protected prepareMessage() {
     const message = msgExerciseViewOptionsMD;
     const keyboard: InlineKeyboardMarkup = {
       inline_keyboard: [
         [
-          this.createButton(EXERCISE_VIEW_LABELS.DAILY, { action: ExerciseViewOption.DAILY }),
-          this.createButton(EXERCISE_VIEW_LABELS.MONTHLY, { action: ExerciseViewOption.MONTHLY })
+          this.createButton(EXERCISE_VIEW_LABELS.lastWeek, { action: ExerciseViewOption.lastWeek }),
+          this.createButton(EXERCISE_VIEW_LABELS.oneExercise, { action: ExerciseViewOption.oneExercise })
         ],
-        [
-          this.createButton(EXERCISE_VIEW_LABELS.INTERVAL, { action: ExerciseViewOption.INTERVAL })
-        ]
       ],
     };
     return { message, keyboard };
@@ -30,24 +32,28 @@ export class ExerciseFetchHandler extends MessageTemplate {
   async handleOptions(ctx: Context, message: Message, action: string, bot: Telegraf) {
     await deleteBotMessage(ctx)
     const handlers: { [key: string]: () => Promise<void> } = {
-      [ExerciseViewOption.DAILY]: this.handleDailyCallback.bind(this, ctx),
-      [ExerciseViewOption.MONTHLY]: this.handleMonthlyCallback.bind(this, ctx),
-      [ExerciseViewOption.INTERVAL]: this.handleIntervalCallback.bind(this, ctx, bot)
+      [ExerciseViewOption.lastWeek]: this.handleLastWeek.bind(this, ctx, bot),
+      [ExerciseViewOption.oneExercise]: this.handleOneRecord.bind(this, ctx, bot)
     };
     if (handlers[action]) {
       return handlers[action]();
     }
   }
-  private async handleDailyCallback(ctx: Context) {
-    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.getMethod.exerciseMonth)
-    userStateUpdateStage(ctx, userStageGetExercise.GET_EXERCISE_MONTH)
+  private async handleLastWeek(ctx: Context, bot: Telegraf) {
+    const data = await ExerciseQueryFetcher.ExcerciseLastWeekById(ctx)
+    const mappedData = ExerciseGetUtils.mapExercisesByDay(data, "getMethod")
+    await BotUtils.sendBotMessage(ctx, mappedData)
+    await redirectToMainMenuWithTaskDone(ctx, bot, botMessages.inputRequest.prompts.getMethod.succesfull)
   }
-  private async handleMonthlyCallback(ctx: Context) {
-    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.getMethod.exerciseMonth)
-    userStateUpdateStage(ctx, userStageGetExercise.GET_EXERCISE_MONTH_STAGE)
-  }
-  private async handleIntervalCallback(ctx: Context, bot: Telegraf) {
-    return await fetchExerciseIntervalController(ctx, bot)
+  //Mes -> nombre ejercicio
+  private async handleOneRecord(ctx: Context, bot: Telegraf) {
+    const monthKeyboard = new MonthInlineKeybord(
+      botMessages.inputRequest.prompts.getMethod.exerciseMonth)
+    const getRecordController = async () => {
+      await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.getMethod.exerciseRecord)
+      userStateUpdateStage(ctx, userStageGetExercise.GET_EXERCISE_RECORD)
+    }
+    await handleKeyboardStep(ctx, monthKeyboard, bot, regexPattern(MonthCallbacks), getRecordController)
   }
 }
 

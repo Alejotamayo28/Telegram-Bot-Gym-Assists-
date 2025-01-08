@@ -1,7 +1,7 @@
 import { Context, Telegraf } from "telegraf";
 import { CallbackData, MessageTemplate } from "../../../template/message";
 import { UpdateUserStateOptions, userState, userStateUpdateExercisesId, userStateUpdateMessagesId } from "../../../userState";
-import { InlineKeyboardButton, InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram";
+import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram";
 import { Exercise, PartialWorkout } from "../../../model/workout";
 import { ExerciseVerificationCallbacks, ExerciseVerificationLabels } from "../addMethod/models";
 import { exercisesMethod, groupedButtonsFunction, verifyExerciseOutput } from "../utils";
@@ -62,6 +62,9 @@ export class ExerciseInlineKeybaord extends MessageTemplate {
       const mappedData = await ExerciseDeleteHandler.getDeletedExercisesMap(ctx, data)
       await BotUtils.sendBotMessage(ctx, mappedData)
       return await redirectToMainMenuWithTaskDone(ctx, bot, botMessages.inputRequest.prompts.deleteMethod.successfull)
+    },
+    getMethod: async (): Promise<void> => {
+
     }
   }
 }

@@ -1,15 +1,13 @@
-// botones
-export const EXERCISE_VIEW_LABELS = {
-  DAILY: '🔹 Por día',
-  MONTHLY: '🔹 Por mes',
-  INTERVAL: '🔹 Intervalo semanal'
-};
-// acciones
 export enum ExerciseViewOption {
-  DAILY = 'porDia',
-  MONTHLY = 'monthly',
-  INTERVAL = 'interval'
+  lastWeek = 'lastWeek',
+  oneExercise = 'oneExercise',
 }
+
+export const EXERCISE_VIEW_LABELS: { [key in ExerciseViewOption]: string } = {
+  [ExerciseViewOption.lastWeek]: `🔹 Semana pasada`,
+  [ExerciseViewOption.oneExercise]: `🔹Seguimiento ejercicio `,
+};
+
 
 export const ExerciseFetchGraphTextLabels = {
   GRAPHIC: '🔹 Grafico',

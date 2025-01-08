@@ -23,14 +23,16 @@ export const UpdateExerciseVerificationController = async (ctx: Context, bot: Te
 // Flow: day => name (INCORRECT)
 // Change: month => day => week => mostrar opciones a actualizar
 
+// Podria hacer dos cosas: 
+//    -1. 
+
+//Not inplemented yet
 export const exerciseUpdateFlow = async (ctx: Context, bot: Telegraf) => {
   try {
     const monthKeyboard = new MonthInlineKeybord(
       botMessages.inputRequest.prompts.updateMethod.exerciseMonth)
     const dayKeyboard = new DaysInlineKeyboard(
       botMessages.inputRequest.prompts.updateMethod.exerciseDay)
-const weekKeyboard = new WeekInlineKeybaord(
-    botMessages.inputRequest.prompts.updateMethod.
 
   } catch (error) {
 

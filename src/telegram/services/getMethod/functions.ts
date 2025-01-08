@@ -8,7 +8,6 @@ import { deleteUserMessage, userStageGetExercise, userState, userStateUpdateMont
 import { botMessages } from "../../messages";
 import { BotUtils } from "../singUp/functions";
 import { redirectToMainMenuWithTaskDone } from "../../mainMenu";
-import { indexOf, method } from "lodash";
 import { exercisesMethod } from "../utils";
 
 export class ExerciseGetHandler {
@@ -125,6 +124,22 @@ export class ExerciseGetUtils {
           result += `     • id: ${exercise.id}  | _Reps_:  ${exercise.reps.join(', ')}  | _Peso:_  ${exercise.kg} \n`
         })
       }
+    }
+    return result.trim()
+  }
+  static mapExercisesByDay(data: Exercise[], method: keyof typeof exercisesMethod): string {
+    const groupedData: { [day: string]: Exercise[] } = {}
+    data.forEach((exercise: Exercise) => {
+      groupedData[exercise.day] ??= []
+      groupedData[exercise.day].push(exercise)
+    })
+    const date = new Date()
+    let result = `*Registro ejercicios - Fecha ${date.toLocaleDateString()}*\n\n_Se encontraron los siguientes ejercicios:_\nMetodo: ${exercisesMethod[method]}`
+    for (const day in groupedData) {
+      result += `\n========================\n📅 * ${day.toUpperCase()}*\n----------------------------------\n`
+      groupedData[day].forEach((exercise: Exercise) => {
+        result += `     •  ${exercise.name}  |  _Reps_:  ${exercise.reps.join(', ')}  | _Peso:_  ${exercise.kg} \n`
+      })
     }
     return result.trim()
   }
