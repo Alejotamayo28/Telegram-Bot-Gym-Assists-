@@ -25,7 +25,10 @@ export class MainMenuHandler extends MessageTemplate {
           this.createButton(MainMenuLabels.deleteExercise, { action: MainMenuCallbacks.deleteExercise })
         ],
         [
-          this.createButton(MainMenuLabels.getExerciseHistory, { action: MainMenuCallbacks.getExerciseHistory })
+          this.createButton(MainMenuLabels.getExerciseHistory, { action: MainMenuCallbacks.getExerciseHistory }),
+        ],
+        [
+          this.createButton(MainMenuLabels.setRoutine, { action: MainMenuCallbacks.setRoutine })
         ]
       ]
     }
@@ -38,7 +41,8 @@ export class MainMenuHandler extends MessageTemplate {
       [MainMenuCallbacks.getExercise]: this.handleGetExercise.bind(this, ctx, bot),
       [MainMenuCallbacks.getExerciseHistory]: this.handleGetExerciseWeek.bind(this, ctx, bot),
       [MainMenuCallbacks.updateExercise]: this.handleUpdateExercise.bind(this, ctx),
-      [MainMenuCallbacks.deleteExercise]: this.handleDeleteExercise.bind(this, ctx, bot)
+      [MainMenuCallbacks.deleteExercise]: this.handleDeleteExercise.bind(this, ctx, bot),
+      [MainMenuCallbacks.setRoutine]: this.handleRoutine.bind(this, ctx, bot)
     }
     if (handlers[action]) {
       return handlers[action]()
@@ -59,6 +63,9 @@ export class MainMenuHandler extends MessageTemplate {
   }
   private async handleDeleteExercise(ctx: Context, bot: Telegraf) {
     await exerciseDeletionFlow(ctx, bot)
+  }
+  private async handleRoutine(ctx: Context, bot: Telegraf) {
+    console.log(`not implemented yet`)
   }
 }
 
