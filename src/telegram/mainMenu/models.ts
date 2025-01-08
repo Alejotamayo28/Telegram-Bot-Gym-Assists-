@@ -4,7 +4,9 @@ export enum MainMenuCallbacks {
   getExercise = 'getExercise',
   getExerciseHistory = 'getExerciseHistory',
   deleteExercise = 'deleteExercise',
-  setRoutine = 'setRoutine'
+  setRoutine = 'setRoutine',
+  userProfile = 'userProfile'
+
 }
 
 export const MainMenuLabels: { [key in MainMenuCallbacks]: string } = {
@@ -13,7 +15,8 @@ export const MainMenuLabels: { [key in MainMenuCallbacks]: string } = {
   [MainMenuCallbacks.getExercise]: "📅 Obtener ejercicios",
   [MainMenuCallbacks.getExerciseHistory]: "📅 Obtener registro ejercicios",
   [MainMenuCallbacks.deleteExercise]: "❌ Eliminar ejercicio",
-  [MainMenuCallbacks.setRoutine]: "💪 Rutina"
+  [MainMenuCallbacks.setRoutine]: "💪 Rutina",
+  [MainMenuCallbacks.userProfile]: "🔄 Perfil"
 }
 
 export enum ReturnMainMenuCallbacks {

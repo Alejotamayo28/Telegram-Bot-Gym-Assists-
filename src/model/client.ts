@@ -18,3 +18,19 @@ const UserData: UserData = {
   password: "",
   role: "admin"
 }
+
+export interface ClientCredentials {
+  id?: number,
+  nickname: string,
+  password: string,
+  email: string
+}
+
+export interface ClientInfo extends ClientCredentials {
+  id?: number,
+  name: string,
+  lastname: string,
+  age: number,
+  weight: number,
+  height: number
+}

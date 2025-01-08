@@ -1,7 +1,7 @@
 import { deleteBotMessage, deleteUserMessage, saveUserMessage, userMessageTest, userStage, userStageDeleteExercise, userStageGetExercise, userStagePostExercise, userStagePutExercise, userStageSignUp, userState, userStateUpdateName } from "../userState";
 import { bot } from "../telegram/bot";
 import { handleError } from "../errors";
-import { RegisterHandler, testingDataStructures } from "../telegram/services/singUp/functions";
+import { BotUtils, RegisterHandler, testingDataStructures } from "../telegram/services/singUp/functions";
 import { ExercisePostHandler } from "../telegram/services/addMethod/functions";
 import { message } from 'telegraf/filters'
 import { NarrowedContext, Context } from "telegraf";
@@ -14,10 +14,11 @@ import { fetchExerciseGraphTextController } from "../telegram/services/getMethod
 import { parseInt } from "lodash";
 import { PostExerciseVerificationController } from "../telegram/services/addMethod";
 import { DataValidator } from "../validators/dataValidator";
-import { ExerciseGetHandler } from "../telegram/services/getMethod/functions";
+import { ExerciseGetHandler, ExerciseGetUtils } from "../telegram/services/getMethod/functions";
 import { validateMonths } from "../validators/allowedValues";
-import { ExerciseFetchHandler } from "../telegram/services/getMethod/inlineKeyboard";
 import { ExerciseQueryFetcher } from "../telegram/services/getMethod/queries";
+import { redirectToMainMenuWithTaskDone } from "../telegram/mainMenu";
+import { botMessages } from "../telegram/messages";
 
 export type MyContext =
   | NarrowedContext<Context<Update>, Update.MessageUpdate<Message.TextMessage>>
@@ -225,6 +226,7 @@ bot.on(message("text"), async ctx => {
           }
           break;
 
+        //working
         case userStageGetExercise.GET_EXERCISE_RECORD:
           await deleteBotMessage(ctx)
           saveUserMessage(ctx)
@@ -235,7 +237,10 @@ bot.on(message("text"), async ctx => {
             const { month } = userState[ctx.from!.id]
             const monthNumber = validateMonths.indexOf(month) + 1
             const data = await ExerciseQueryFetcher.ExercisesByMonthNameAndId(ctx, monthNumber)
-            console.log(data)
+            if (!data.length) return await redirectToMainMenuWithTaskDone(ctx, bot, botMessages.inputRequest.prompts.getMethod.errors.exerciseEmptyData)
+            const mappedData = ExerciseGetUtils.mapExercisesByDay(data, "getMethod")
+            await BotUtils.sendBotMessage(ctx, mappedData)
+            return await redirectToMainMenuWithTaskDone(ctx, bot, botMessages.inputRequest.prompts.getMethod.succesfull)
           } catch (error) {
             console.error(`Error: `, error)
           }

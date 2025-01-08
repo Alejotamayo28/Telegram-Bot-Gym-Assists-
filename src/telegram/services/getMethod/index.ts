@@ -2,7 +2,7 @@ import { Context, Telegraf } from "telegraf";
 import { graphic } from "./functions";
 import { regexPattern, tryCatch } from "../utils";
 import { ExerciseFetchGraphTextOptions, ExerciseViewOption } from "./models";
-import { ExerciseFetchHandler, ExerciseFetchHandlerInterval, ExerciseFetchHandlerOptions } from "./inlineKeyboard";
+import { ExerciseFetchHandler, ExerciseFetchHandlerOptions } from "./inlineKeyboard";
 import { redirectToMainMenuWithTaskDone } from "../../mainMenu";
 import { deleteUserMessage, saveBotMessage } from "../../../userState";
 
@@ -28,20 +28,6 @@ export const fetchExerciseController = async (ctx: Context, bot: Telegraf) => {
     const message = await response.sendCompleteMessage(ctx)
     saveBotMessage(ctx, message.message_id)
     bot.action(regexPattern(ExerciseViewOption), async (ctx) => {
-      const action = ctx.match[0]
-      await tryCatch(() => response.handleOptions(ctx, message, action, bot), ctx)
-    })
-  } catch (error) {
-    console.error(`Error in handleGetExerciseOptions : `, error)
-  }
-}
-
-export const fetchExerciseIntervalController = async (ctx: Context, bot: Telegraf) => {
-  const response = new ExerciseFetchHandlerInterval()
-  try {
-    const message = await response.sendCompleteMessage(ctx)
-    saveBotMessage(ctx, message.message_id)
-    bot.action(regexPattern(ExerciseIntervalOption), async (ctx) => {
       const action = ctx.match[0]
       await tryCatch(() => response.handleOptions(ctx, message, action, bot), ctx)
     })
