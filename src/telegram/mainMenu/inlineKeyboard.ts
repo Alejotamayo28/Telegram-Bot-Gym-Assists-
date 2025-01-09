@@ -3,15 +3,21 @@ import { InlineKeyboardMarkup, Message } from 'telegraf/typings/core/types/typeg
 import { botMessages } from '../messages';
 import { MessageTemplate } from '../../template/message';
 import { MainMenuCallbacks, MainMenuLabels, ReturnMainMenuCallbacks } from './models';
-import { deleteBotMessage, userStageDeleteExercise, userStagePostExercise, userStagePutExercise, userStateUpdateStage } from '../../userState';
+import { deleteBotMessage, saveBotMessage, userStageCreateFamily, userStageDeleteExercise, userStagePostExercise, userStagePutExercise, userState, userStateUpdateFamilyId, userStateUpdateFamilyMemberId, userStateUpdateStage } from '../../userState';
 import { fetchExerciseController } from '../services/getMethod';
 import { ExerciseGetHandler } from '../services/getMethod/functions';
 import { BotUtils } from '../services/singUp/functions';
 import { exerciseDeletionFlow } from '../services/deleteMethod';
 import { exercisePostFlow } from '../services/addMethod';
 import { onSession } from '../../database/dataAccessLayer';
-import { ClientInfo } from '../../model/client';
+import { ClientCredentialsAndFamily, ClientInfo } from '../../model/client';
 import { mainMenuPage } from '.';
+import { buildFamilyInlineKeyboard, familiesMethod, groupedFamilyButtons, handleKeyboardStep, regexPattern, tryCatch } from '../services/utils';
+import { familyInterface } from '../../model/family';
+import { FamilyFlow, familyInlinekeyboardController } from '../services/family';
+import { ViewFamilyInlineKeyboard } from '../services/family/inlineKeyboard';
+
+// working file -->
 
 export class MainMenuHandler extends MessageTemplate {
   protected prepareMessage() {
@@ -28,9 +34,10 @@ export class MainMenuHandler extends MessageTemplate {
         ],
         [
           this.createButton(MainMenuLabels.getExerciseHistory, { action: MainMenuCallbacks.getExerciseHistory }),
+          this.createButton(MainMenuLabels.setRoutine, { action: MainMenuCallbacks.setRoutine }),
         ],
         [
-          this.createButton(MainMenuLabels.setRoutine, { action: MainMenuCallbacks.setRoutine }),
+          this.createButton(MainMenuLabels.userFamily, { action: MainMenuCallbacks.userFamily }),
           this.createButton(MainMenuLabels.userProfile, { action: MainMenuCallbacks.userProfile })
         ]
       ]
@@ -46,6 +53,7 @@ export class MainMenuHandler extends MessageTemplate {
       [MainMenuCallbacks.updateExercise]: this.handleUpdateExercise.bind(this, ctx),
       [MainMenuCallbacks.deleteExercise]: this.handleDeleteExercise.bind(this, ctx, bot),
       [MainMenuCallbacks.setRoutine]: this.handleRoutine.bind(this, ctx, bot),
+      [MainMenuCallbacks.userFamily]: this.handleUserFamily.bind(this, ctx, bot),
       [MainMenuCallbacks.userProfile]: this.handleProfileUser.bind(this, ctx, bot)
     }
     if (handlers[action]) {
@@ -55,25 +63,25 @@ export class MainMenuHandler extends MessageTemplate {
   private async handleGetExercise(ctx: Context, bot: Telegraf): Promise<void> {
     return await fetchExerciseController(ctx, bot)
   }
-  private async handleGetExerciseWeek(ctx: Context, bot: Telegraf) {
-    await ExerciseGetHandler.getAllTimeExerciseText(ctx, bot)
+  private async handleGetExerciseWeek(ctx: Context, bot: Telegraf): Promise<void> {
+    return await ExerciseGetHandler.getAllTimeExerciseText(ctx, bot)
   }
-  private async handlePostExercise(ctx: Context, bot: Telegraf) {
-    await exercisePostFlow(ctx, bot)
+  private async handlePostExercise(ctx: Context, bot: Telegraf): Promise<void> {
+    return await exercisePostFlow(ctx, bot)
   }
-  private async handleUpdateExercise(ctx: Context) {
+  private async handleUpdateExercise(ctx: Context): Promise<void> {
     await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.updateMethod.exerciseDay)
     userStateUpdateStage(ctx, userStagePutExercise.PUT_EXERCISE_DAY)
   }
-  private async handleDeleteExercise(ctx: Context, bot: Telegraf) {
+  private async handleDeleteExercise(ctx: Context, bot: Telegraf): Promise<void> {
     await exerciseDeletionFlow(ctx, bot)
   }
-  private async handleRoutine(ctx: Context, bot: Telegraf) {
+  private async handleRoutine(ctx: Context, bot: Telegraf): Promise<void> {
     console.log(`not implemented yet`)
   }
   private static mappedClientInfo(data: ClientInfo): string {
     let result = `
-🏋️ *Tu información personal* 🏋️
+🏋️ *Tu información personal* 
 
 🔒 _Credenciales_:
    👤 Nickname: ${data.nickname}
@@ -111,7 +119,18 @@ where c.id = $1`, [ctx.from!.id])
     await BotUtils.sendBotMessage(ctx, data)
     return await mainMenuPage(ctx, bot, botMessages.inputRequest.prompts.getMethod.succesfull)
   }
+  private async handleUserFamily(ctx: Context, bot: Telegraf) {
+    return await FamilyFlow(ctx, bot)
+  }
 }
+
+// Flow: ask (create, view) => view families OR create family 
+
+
+
+
+//working file <----
+
 
 export class MainMenuHandlerWithTaskDone extends MessageTemplate {
   protected prepareMessage() {

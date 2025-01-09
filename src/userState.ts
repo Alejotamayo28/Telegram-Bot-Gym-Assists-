@@ -2,6 +2,12 @@ import { Context } from "telegraf"
 
 export let userState: { [key: number]: any } = {}
 
+export enum userStageCreateFamily {
+  POST_FAMILY_NAME = 'postFamilyName',
+  POST_FAMILY_PASSWORD = 'postFamilyPassword'
+}
+
+
 export enum userStage {
   LOGIN_NICKNAME = 'loginNicknameStage',
   LOGIN_PASSWORD = 'loginPasswordStage',
@@ -60,7 +66,11 @@ export interface UpdateUserStateOptions {
   email?: string,
   exercisesId?: number[],
   messagesId?: number[],
-  selectionDone?: boolean
+  selectionDone?: boolean,
+  familyId?: number,
+  familyName?: string,
+  familyPassword?: string,
+  familyMemberId?: number
 }
 
 export const botMessageTest: { [userId: number]: number } = {}
@@ -95,6 +105,24 @@ export const updateUserStateExample = (ctx: Context, updates: UpdateUserStateOpt
     ...updates
   }
 }
+
+export const userStateUpdateFamilyMemberId = (ctx: Context, familyMemberId: number) => {
+  updateUserStateExample(ctx, { familyMemberId })
+}
+
+export const userStateUpdateFamilyId = (ctx: Context, familyId: number) => {
+  updateUserStateExample(ctx, { familyId })
+}
+
+export const userStateUpdateFamilyName = (ctx: Context, familyName: string) => {
+  updateUserStateExample(ctx, { familyName })
+}
+
+export const userStateUpdateFamilyPassword = (ctx: Context, familyPassword: string) => {
+  updateUserStateExample(ctx, { familyPassword })
+}
+
+
 export const userStateUpdateSelectionDone = (ctx: Context, selectionDone: boolean) => {
   updateUserStateExample(ctx, { selectionDone })
 }
