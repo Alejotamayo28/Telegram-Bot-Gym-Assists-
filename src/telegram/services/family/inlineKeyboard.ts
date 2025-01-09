@@ -6,7 +6,25 @@ import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typeg
 import { deleteBotMessage, saveBotMessage, userStageCreateFamily, userState, userStateUpdateFamilyId, userStateUpdateFamilyMemberId, userStateUpdateStage } from "../../../userState"
 import { ClientCredentialsAndFamily } from "../../../model/client"
 import { FamilyInlinekeyboardAction } from "./models"
-import { familiesMembersDataQuery } from "."
+
+/* How does it work? ->
+1. Main Menu (FamilyInlineKeybaord):
+  - If the user clicks on 'Familias' the main menu keyboard is displayed. 
+    Familias ->
+    This menu will offer multiple features (some are still under development) :
+    - `Visualizar familas`: shows another inline keyboard (ViewFamilyInlineKeybaord):
+    A welcome message is displayed along with the inline keyboard.
+    The keyboard dynamically generates options based on the families the user belongs to.
+      - Once a family is selected, a third keyboard is displayed with the members of the selected family
+  - If ther user click on 'Crear familia' a following questions will be displayed:
+    - Nombre de la familia
+    - Contrasena de la familia
+    (Automaticamente el usuario que haya creado una familia sera insertado en aquella familia)
+
+Sumarry:
+This module handles the inline keyboard navigation for the families service, allowing users to interactively view and manage their families and members.
+
+*/
 
 //MENU FAMILIAS
 export class FamilyInlineKeyboard extends MessageTemplate {
@@ -38,7 +56,7 @@ export class FamilyInlineKeyboard extends MessageTemplate {
   private async handleCreateFamily(bot: Telegraf) {
     const message = await this.ctx.reply(`digita el nombre de tu familia...:`)
     saveBotMessage(this.ctx, message.message_id)
-    userStateUpdateStage(this.ctx, userStageCreateFamily.POST_FAMILY_NAME)
+    return userStateUpdateStage(this.ctx, userStageCreateFamily.POST_FAMILY_NAME)
   }
 }
 
@@ -58,20 +76,20 @@ export class ViewFamilyInlineKeyboard extends MessageTemplate {
     return { message, keyboard }
   }
   async handleOptions(ctx: Context, message: Message, action: string, bot: Telegraf): Promise<void> {
-    await deleteBotMessage(ctx)
-    let familyId
-    const selectedFamily = this.data.find((family) => {
-      familyId = family.id
-      return `family_${family.id}` == action
+    const handlers: { [key: string]: () => Promise<void> } = {}
+    this.data.forEach(family => {
+      handlers[`family_${family.id}`] = async () => {
+        userStateUpdateFamilyId(ctx, family.id)
+        return this.options[this.method](ctx, bot)
+      }
     })
-    if (selectedFamily) {
-      userStateUpdateFamilyId(ctx, familyId!)
-      return await viewFamilyMembersController(ctx, bot)
+    if (handlers[action]) {
+      return await handlers[action]()
     }
   }
   private options: { [key in keyof typeof familiesMethod]: (ctx: Context, bot: Telegraf) => Promise<void> } = {
     getMethod: async (ctx: Context, bot: Telegraf): Promise<void> => {
-      //return await viewFamilyMembersController(ctx, bot)
+      return await viewFamilyMembersController(ctx, bot)
     }
   }
 }
@@ -92,17 +110,19 @@ export class ViewFamilyMembersInlineKeybaordNotWorking extends MessageTemplate {
     return { message, keyboard }
   }
   public async handleOptions(ctx: Context, message: Message, action: string, bot: Telegraf): Promise<void> {
-    let memberNickname
-    const selectedFamily = this.data.find((family) => {
-      memberNickname = family.nickname
-      return `member_${family.nickname}` === action
+    const handlers: { [key: string]: () => Promise<void> } = {}
+    this.data.forEach(family => {
+      handlers[`member_${family.nickname}`] = async () => {
+        return this.options[this.method](ctx, bot, family.nickname)
+      }
     })
-    if (selectedFamily) {
-      await ctx!.reply(`hola has seleccionado al usuario de tu familia: ${memberNickname}`)
+    if (handlers[action]) {
+      return await handlers[action]()
     }
   }
-  private options: { [key in keyof typeof familiesMethod]: (ctx: Context, bot: Telegraf) => Promise<void> } = {
-    getMethod: async (ctx: Context, bot: Telegraf): Promise<void> => {
+  private options: { [key in keyof typeof familiesMethod]: (ctx: Context, bot: Telegraf, nickname?: string) => Promise<void> } = {
+    getMethod: async (ctx: Context, bot: Telegraf, nickname?: string): Promise<void> => {
+      await ctx!.reply(`hola has seleccionado al usuario de tu familia: ${nickname}`)
     }
   }
 }
