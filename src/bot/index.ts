@@ -21,7 +21,6 @@ import { mainMenuPage, redirectToMainMenuWithTaskDone } from "../telegram/mainMe
 import { botMessages } from "../telegram/messages";
 import { encrypt } from "../middlewares/jsonWebToken/enCryptHelper";
 import { onSession, onTransaction } from "../database/dataAccessLayer";
-import { familyInlinekeyboardController } from "../telegram/mainMenu/inlineKeyboard";
 
 export type MyContext =
   | NarrowedContext<Context<Update>, Update.MessageUpdate<Message.TextMessage>>

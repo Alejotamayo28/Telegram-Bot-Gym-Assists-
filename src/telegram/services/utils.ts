@@ -2,9 +2,11 @@ import { ClientCredentialsAndFamily, UserCredentials, UserProfile } from "../../
 import { Exercise, PartialWorkout } from "../../model/workout"
 import { Context, Telegraf } from "telegraf"
 import { InlineKeyboardButton, Message } from "telegraf/typings/core/types/typegram"
-import { saveBotMessage } from "../../userState"
+import { saveBotMessage, userState } from "../../userState"
 import { CallbackData } from "../../template/message"
 import { familyInterface } from "../../model/family"
+import { familiesDataQuery, familiesMembersDataQuery } from "./family"
+import { ViewFamilyInlineKeyboard, ViewFamilyMembersInlineKeybaordNotWorking } from "./family/inlineKeyboard"
 
 export const exercisesMethod = {
   deleteMethod: `Eliminar`,
@@ -19,6 +21,51 @@ export interface KeyboardResponse {
   sendCompleteMessage: (ctx: Context) => Promise<Message>;
   handleOptions: (ctx: Context, message: Message, action: string, bot: Telegraf) => Promise<void>;
 }
+
+export const viewFamilesController = async (ctx: Context, bot: Telegraf): Promise<void> => {
+  const responseData = await familiesDataQuery(ctx)
+  const response = new ViewFamilyInlineKeyboard("getMethod", responseData)
+  try {
+    const message = await response.sendCompleteMessage(ctx)
+    await saveBotMessage(ctx, message.message_id)
+    bot.action(/^family_.*/, async (ctx) => {
+      const action = ctx.match[0]
+      return await tryCatch(() => response.handleOptions(ctx, message, action, bot), ctx)
+    }) } catch (error) {
+    console.error(`Error: `, error)
+  }
+}
+
+export const viewFamilyMembersController = async (ctx: Context, bot: Telegraf): Promise<void> => {
+  const responseData = await familiesMembersDataQuery(ctx)
+  const response = new ViewFamilyMembersInlineKeybaordNotWorking("getMethod", responseData)
+  try {
+    const message = await response.sendCompleteMessage(ctx)
+    await saveBotMessage(ctx, message.message_id)
+    bot.action(/^member_.*/, async (ctxContext) => {
+      const action = ctxContext.match[0]
+      return tryCatch(() => response.handleOptions(ctx, message, action, bot), ctx)
+    })
+  } catch (error) {
+    console.error(`Error: `, error)
+  }
+}
+
+export const handleKeyboardStepTest = async (ctx: Context, keyboard: KeyboardResponse, bot: Telegraf, options: {
+  callbackPattern?: RegExp,
+  nextStep?: () => Promise<any>,
+} = {},):
+  Promise<void> => {
+  const message = await keyboard.sendCompleteMessage(ctx);
+  saveBotMessage(ctx, message.message_id);
+  const pattern = options.callbackPattern || /^[a-zA-Z0-9]+$/;
+  bot.action(pattern, async (ctx) => {
+    const action = ctx.match[0];
+    await tryCatch(() => keyboard.handleOptions(ctx, message, action, bot), ctx);
+    if (options.nextStep) await options.nextStep();
+  });
+}
+
 
 export const handleKeyboardStep = async (ctx: Context, keyboard: KeyboardResponse, bot: Telegraf, callbackPattern?: RegExp, nextStep?: () => Promise<any>):
   Promise<void> => {
@@ -47,6 +94,7 @@ export const createButton = (text: string, callbackData: CallbackData): InlineKe
 }
 
 export const lastButton = createButton(`• Continuar`, { action: `continuar` })
+
 export const groupedButtonsFunction = (data: Exercise[]) => {
   const response = data.reduce((rows: InlineKeyboardButton[][], exercise: Exercise, index: number) => {
     const button = createButton(`• Id: ${exercise.id} | ${exercise.name}`, { action: `${exercise.id}` });
@@ -64,7 +112,7 @@ export const groupedButtonsFunction = (data: Exercise[]) => {
 
 export const groupedFamilyButtons = (data: familyInterface[]) => {
   const response = data.reduce((rows: InlineKeyboardButton[][], family: familyInterface, index: number) => {
-    const button = createButton(`• Nombre: ${family.name.toUpperCase()}`, { action: `${family.id}` });
+    const button = createButton(`• Nombre: ${family.name.toUpperCase()}`, { action: `family_${family.id}` });
     if (index % 2 === 0) {
       rows.push([button]);
     } else {
@@ -76,9 +124,9 @@ export const groupedFamilyButtons = (data: familyInterface[]) => {
   return response
 }
 
-export const buildFamilyInlineKeyboard = <T extends ClientCredentialsAndFamily>(data: T[]) => {
-  const response = data.reduce((rows: InlineKeyboardButton[][], family: T, index: number) => {
-    const button = createButton(`• ${family.nickname.toUpperCase()}`, { action: `${family.id}` });
+export const buildFamilyInlineKeyboard = (data: ClientCredentialsAndFamily[]) => {
+  const response = data.reduce((rows: InlineKeyboardButton[][], family: ClientCredentialsAndFamily, index: number) => {
+    const button = createButton(`• ${family.nickname.toUpperCase()}`, { action: `member_${family.nickname}` });
     if (index % 2 === 0) {
       rows.push([button]);
     } else {
@@ -87,6 +135,7 @@ export const buildFamilyInlineKeyboard = <T extends ClientCredentialsAndFamily>(
     return rows
   },
     [])
+  response.push([lastButton])
   return response
 }
 
