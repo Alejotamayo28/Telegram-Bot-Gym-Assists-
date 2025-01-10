@@ -1,12 +1,56 @@
-import { ClientCredentialsAndFamily, UserCredentials, UserProfile } from "../../model/client"
+import { UserCredentials, UserProfile } from "../../model/client"
 import { Exercise, PartialWorkout } from "../../model/workout"
 import { Context, Telegraf } from "telegraf"
 import { InlineKeyboardButton, Message } from "telegraf/typings/core/types/typegram"
-import { saveBotMessage, userState } from "../../userState"
 import { CallbackData } from "../../template/message"
-import { familyInterface } from "../../model/family"
-import { familiesDataQuery, familiesMembersDataQuery } from "./family"
-import { ViewFamilyInlineKeyboard, ViewFamilyMembersInlineKeybaordNotWorking } from "./family/inlineKeyboard"
+
+export enum FamilyType {
+  MEMBER = 'member',
+  FAMILY = 'family'
+}
+
+type ValidatePattern = `${FamilyType}_${string}`
+
+type KeyboardHandlerOptionsTest = {
+  callbackPattern?: RegExp,
+  callbackManualPattern?: FamilyType,
+  nextStep?: () => Promise<void>
+}
+
+function isValidPattern(pattern: string): pattern is ValidatePattern {
+  return Object.values(FamilyType).some(type =>
+    pattern.startsWith(`${type}_`)
+  )
+}
+
+export const setUpKeyboardIteration = async (
+  ctx: Context,
+  keyboard: KeyboardResponse,
+  bot: Telegraf,
+  options: KeyboardHandlerOptionsTest
+) => {
+  const message = await keyboard.sendCompleteMessage(ctx)
+  const pattern = options.callbackPattern ||
+    (options.callbackManualPattern ? new RegExp(`^${options.callbackManualPattern}_.*`)
+      : /.*/)
+  bot.action(pattern, async (actionCtx) => {
+    const action = actionCtx.match[0]
+    if (!options.callbackPattern) {
+      if (!isValidPattern(action)) {
+        throw new Error(`Invalid pattern: ${action}`)
+      }
+    }
+    await tryCatch(() => keyboard.handleOptions(ctx, message, action, bot), ctx);
+    if (options.nextStep) {
+      await options.nextStep()
+    }
+  })
+}
+
+export interface KeyboardResponse {
+  sendCompleteMessage: (ctx: Context) => Promise<Message>;
+  handleOptions: (ctx: Context, message: Message, action: string, bot: Telegraf) => Promise<void>;
+}
 
 export const exercisesMethod = {
   deleteMethod: `Eliminar`,
@@ -15,75 +59,6 @@ export const exercisesMethod = {
 
 export const familiesMethod = {
   getMethod: 'Obtener'
-}
-
-export interface KeyboardResponse {
-  sendCompleteMessage: (ctx: Context) => Promise<Message>;
-  handleOptions: (ctx: Context, message: Message, action: string, bot: Telegraf) => Promise<void>;
-}
-
-export const viewFamilesController = async (ctx: Context, bot: Telegraf): Promise<void> => {
-  const responseData = await familiesDataQuery(ctx)
-  const response = new ViewFamilyInlineKeyboard("getMethod", responseData)
-  try {
-    const message = await response.sendCompleteMessage(ctx)
-    await saveBotMessage(ctx, message.message_id)
-    bot.action(/^family_.*/, async (ctx) => {
-      const action = ctx.match[0]
-      return await tryCatch(() => response.handleOptions(ctx, message, action, bot), ctx)
-    }) } catch (error) {
-    console.error(`Error: `, error)
-  }
-}
-
-export const viewFamilyMembersController = async (ctx: Context, bot: Telegraf): Promise<void> => {
-  const responseData = await familiesMembersDataQuery(ctx)
-  const response = new ViewFamilyMembersInlineKeybaordNotWorking("getMethod", responseData)
-  try {
-    const message = await response.sendCompleteMessage(ctx)
-    await saveBotMessage(ctx, message.message_id)
-    bot.action(/^member_.*/, async (ctxContext) => {
-      const action = ctxContext.match[0]
-      return tryCatch(() => response.handleOptions(ctx, message, action, bot), ctx)
-    })
-  } catch (error) {
-    console.error(`Error: `, error)
-  }
-}
-
-export const handleKeyboardStepTest = async (ctx: Context, keyboard: KeyboardResponse, bot: Telegraf, options: {
-  callbackPattern?: RegExp,
-  nextStep?: () => Promise<any>,
-} = {},):
-  Promise<void> => {
-  const message = await keyboard.sendCompleteMessage(ctx);
-  saveBotMessage(ctx, message.message_id);
-  const pattern = options.callbackPattern || /^[a-zA-Z0-9]+$/;
-  bot.action(pattern, async (ctx) => {
-    const action = ctx.match[0];
-    await tryCatch(() => keyboard.handleOptions(ctx, message, action, bot), ctx);
-    if (options.nextStep) await options.nextStep();
-  });
-}
-
-
-export const handleKeyboardStep = async (ctx: Context, keyboard: KeyboardResponse, bot: Telegraf, callbackPattern?: RegExp, nextStep?: () => Promise<any>):
-  Promise<void> => {
-  const message = await keyboard.sendCompleteMessage(ctx);
-  saveBotMessage(ctx, message.message_id);
-  if (callbackPattern) {
-    bot.action(callbackPattern, async (ctx) => {
-      const action = ctx.match[0];
-      await tryCatch(() => keyboard.handleOptions(ctx, message, action, bot), ctx);
-      if (nextStep) await nextStep();
-    });
-  } else {
-    bot.action(/.*/, async (ctx) => {
-      const action = ctx.match[0];
-      await tryCatch(() => keyboard.handleOptions(ctx, message, action, bot), ctx);
-      if (nextStep) await nextStep();
-    });
-  }
 }
 
 export const createButton = (text: string, callbackData: CallbackData): InlineKeyboardButton => {
@@ -110,34 +85,6 @@ export const groupedButtonsFunction = (data: Exercise[]) => {
   return response
 }
 
-export const groupedFamilyButtons = (data: familyInterface[]) => {
-  const response = data.reduce((rows: InlineKeyboardButton[][], family: familyInterface, index: number) => {
-    const button = createButton(`• Nombre: ${family.name.toUpperCase()}`, { action: `family_${family.id}` });
-    if (index % 2 === 0) {
-      rows.push([button]);
-    } else {
-      rows[rows.length - 1].push(button);
-    }
-    return rows
-  },
-    [])
-  return response
-}
-
-export const buildFamilyInlineKeyboard = (data: ClientCredentialsAndFamily[]) => {
-  const response = data.reduce((rows: InlineKeyboardButton[][], family: ClientCredentialsAndFamily, index: number) => {
-    const button = createButton(`• ${family.nickname.toUpperCase()}`, { action: `member_${family.nickname}` });
-    if (index % 2 === 0) {
-      rows.push([button]);
-    } else {
-      rows[rows.length - 1].push(button);
-    }
-    return rows
-  },
-    [])
-  response.push([lastButton])
-  return response
-}
 
 // regetPattern para las acciones del usuario, parametro = enum
 export const regexPattern = <T extends { [key: string]: string }>(optionsEnum: T) => {
@@ -256,12 +203,12 @@ export const errorMessage = (userStage: string) => {
   return `Error during ${userStage} process: `
 }
 
-export const errorMessageCtx = `Hubo un problema. Por favor, intenta nuevamente`
 
 export const errorState = async (error: Error, userStage: string, ctx: Context) => {
   console.error(errorMessage(userStage), error)
   await ctx.reply(errorMessageCtx)
 }
+
 export function escapeMarkdown(text: string): string {
   return text.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&');
 }

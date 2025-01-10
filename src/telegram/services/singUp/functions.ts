@@ -88,7 +88,6 @@ export const testingDataStructures = async (ctx: Context, word: string) => {
   }
   const inputUser = word
   if (trie.search(inputUser)) {
-    console.log(`Ejercicio valido`)
   } else {
     const sugerencias = trie.suggest(inputUser.split(" ")[0])
     if (sugerencias.length > 0) {

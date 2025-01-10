@@ -70,7 +70,9 @@ export interface UpdateUserStateOptions {
   familyId?: number,
   familyName?: string,
   familyPassword?: string,
-  familyMemberId?: number
+  familyMemberId?: number,
+  familyMemberNickname?: string
+
 }
 
 export const botMessageTest: { [userId: number]: number } = {}
@@ -104,6 +106,9 @@ export const updateUserStateExample = (ctx: Context, updates: UpdateUserStateOpt
     ...userState[ctx.from!.id],
     ...updates
   }
+}
+export const userStateUpdataFamilyMemberNickname = (ctx: Context, familyMemberNickname: string) => {
+  updateUserStateExample(ctx, { familyMemberNickname })
 }
 
 export const userStateUpdateFamilyMemberId = (ctx: Context, familyMemberId: number) => {

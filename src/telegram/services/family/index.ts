@@ -1,7 +1,7 @@
 import { Context, Telegraf } from "telegraf"
 import { saveBotMessage } from "../../../userState"
-import { handleKeyboardStep, handleKeyboardStepTest, regexPattern, tryCatch } from "../utils"
-import { FamilyInlineKeyboard, ViewFamilyInlineKeyboard} from "./inlineKeyboard"
+import { regexPattern, setUpKeyboardIteration, tryCatch } from "../utils"
+import { FamilyInlineKeyboard } from "./inlineKeyboard"
 import { FamilyInlinekeyboardAction } from "./models"
 import { FamilyQueries } from "./queries"
 
@@ -30,22 +30,8 @@ export const familiesMembersDataQuery = async (ctx: Context) => {
 // Flow: FamiliesMenu -> ViewFamiliesYouIn -> ViewFamiliesMembers
 export const FamilyFlow = async (ctx: Context, bot: Telegraf) => {
   try {
-    //Queries
-    //Classes
     const familiesMenu = new FamilyInlineKeyboard(ctx)
-    // const familiesView = new ViewFamilyInlineKeyboard("getMethod", await familiesDataQuery(ctx))
-    //const familiesViewMembers = new ViewFamilyMembersInlineKeybaord("getMethod", await familiesMembersDataQuery(ctx))
-    //Flow
-    await handleKeyboardStepTest(ctx, familiesMenu, bot, { callbackPattern: regexPattern(FamilyInlinekeyboardAction) })
-    /* await handleKeyboardStepTest(ctx, familiesMenu, bot, {
-       nextStep: async () => {
-         await handleKeyboardStepTest(ctx, familiesView, bot, { nextStep: async () => {
-             await handleKeyboardStepTest(ctx, familiesViewMembers, bot)
-           }
-         })
-       }
-     })
-     */
+    await setUpKeyboardIteration(ctx, familiesMenu, bot, { callbackPattern: regexPattern(FamilyInlinekeyboardAction) })
   } catch (error) {
     console.error(`Error: `, error)
   }

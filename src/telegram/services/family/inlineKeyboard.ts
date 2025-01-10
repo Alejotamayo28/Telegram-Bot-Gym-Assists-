@@ -1,11 +1,13 @@
 import { Context, Telegraf } from "telegraf"
 import { MessageTemplate } from "../../../template/message"
-import { buildFamilyInlineKeyboard, familiesMethod, groupedFamilyButtons, handleKeyboardStep, handleKeyboardStepTest, viewFamilesController, viewFamilyMembersController } from "../utils"
+import { familiesMethod, FamilyType, regexPattern, setUpKeyboardIteration } from "../utils"
 import { familyInterface } from "../../../model/family"
 import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram"
-import { deleteBotMessage, saveBotMessage, userStageCreateFamily, userState, userStateUpdateFamilyId, userStateUpdateFamilyMemberId, userStateUpdateStage } from "../../../userState"
+import { deleteBotMessage, saveBotMessage, userStageCreateFamily, userState, userStateUpdataFamilyMemberNickname, userStateUpdateFamilyId, userStateUpdateFamilyMemberId, userStateUpdateStage } from "../../../userState"
 import { ClientCredentialsAndFamily } from "../../../model/client"
-import { FamilyInlinekeyboardAction } from "./models"
+import { FamilyInlinekeyboardAction, ViewFamilyMemberCallback } from "./models"
+import { BuildFamilyInline } from "./buildFamilyInline"
+import { familiesDataQuery, familiesMembersDataQuery } from "."
 
 /* How does it work? ->
 1. Main Menu (FamilyInlineKeybaord):
@@ -23,14 +25,12 @@ import { FamilyInlinekeyboardAction } from "./models"
 
 Sumarry:
 This module handles the inline keyboard navigation for the families service, allowing users to interactively view and manage their families and members.
-
 */
 
-//MENU FAMILIAS
 export class FamilyInlineKeyboard extends MessageTemplate {
   constructor(private ctx: Context) { super() }
   protected prepareMessage() {
-    const message = `menu de familias, en preparacion y todavia no esta full implementado`
+    const message = `📋 *Menú de Familias*: Estamos trabajando para implementarlo completamente. ¡Pronto estará disponible con todas sus funciones!`
     const keyboard: InlineKeyboardMarkup = {
       inline_keyboard: [
         [
@@ -51,7 +51,9 @@ export class FamilyInlineKeyboard extends MessageTemplate {
     }
   }
   private async handleViewFamilies(bot: Telegraf) {
-    return await viewFamilesController(this.ctx, bot)
+    const responseData = await familiesDataQuery(this.ctx)
+    const response = new ViewFamilyInlineKeyboard("getMethod", responseData)
+    return await setUpKeyboardIteration(this.ctx, response, bot, { callbackManualPattern: FamilyType.FAMILY })
   }
   private async handleCreateFamily(bot: Telegraf) {
     const message = await this.ctx.reply(`digita el nombre de tu familia...:`)
@@ -60,7 +62,6 @@ export class FamilyInlineKeyboard extends MessageTemplate {
   }
 }
 
-//MENU VER FAMILIAS
 export class ViewFamilyInlineKeyboard extends MessageTemplate {
   private selectedOption!: (ctx: Context, bot: Telegraf) => Promise<void>
   constructor(private method: keyof typeof familiesMethod, private data: familyInterface[]) {
@@ -68,8 +69,8 @@ export class ViewFamilyInlineKeyboard extends MessageTemplate {
     this.selectedOption = this.options[this.method]
   }
   protected prepareMessage() {
-    const grouppedButtons = groupedFamilyButtons(this.data)
-    const message = `estas son las familias a las cuales perteneces...`
+    const grouppedButtons = BuildFamilyInline.createInlineKeyboard("viewFamilies", this.data)
+    const message = `👪 _Estas son las familias a las que perteneces_.\n\nSelecciona una para ver más detalles o gestionar sus miembros.`
     const keyboard: InlineKeyboardMarkup = {
       inline_keyboard: grouppedButtons
     }
@@ -89,12 +90,14 @@ export class ViewFamilyInlineKeyboard extends MessageTemplate {
   }
   private options: { [key in keyof typeof familiesMethod]: (ctx: Context, bot: Telegraf) => Promise<void> } = {
     getMethod: async (ctx: Context, bot: Telegraf): Promise<void> => {
-      return await viewFamilyMembersController(ctx, bot)
+      await deleteBotMessage(ctx)
+      const responseData = await familiesMembersDataQuery(ctx)
+      const response = new ViewFamilyMembersInlineKeybaordNotWorking("getMethod", responseData)
+      return await setUpKeyboardIteration(ctx, response, bot, { callbackManualPattern: FamilyType.MEMBER })
     }
   }
 }
 
-//MENU VER MIEMBROS DE LA FAMILIA
 export class ViewFamilyMembersInlineKeybaordNotWorking extends MessageTemplate {
   private selectedOption!: (ctx: Context, bot: Telegraf) => Promise<void>
   constructor(private method: keyof typeof familiesMethod, private data: ClientCredentialsAndFamily[]) {
@@ -102,8 +105,8 @@ export class ViewFamilyMembersInlineKeybaordNotWorking extends MessageTemplate {
     this.selectedOption = this.options[this.method]
   }
   protected prepareMessage() {
-    const grouppedButtons = buildFamilyInlineKeyboard(this.data)
-    const message = `Estos son los integrantes de tu familia:...`
+    const grouppedButtons = BuildFamilyInline.createInlineKeyboard("viewFamiliesMember", this.data)
+    const message = `👤 _Estos son los integrantes de tu familia_.\n\nSelecciona a alguien para gestionar o ver más detalles`
     const keyboard: InlineKeyboardMarkup = {
       inline_keyboard: grouppedButtons
     }
@@ -113,18 +116,79 @@ export class ViewFamilyMembersInlineKeybaordNotWorking extends MessageTemplate {
     const handlers: { [key: string]: () => Promise<void> } = {}
     this.data.forEach(family => {
       handlers[`member_${family.nickname}`] = async () => {
-        return this.options[this.method](ctx, bot, family.nickname)
+        return this.options[this.method](ctx, bot, family)
       }
     })
     if (handlers[action]) {
       return await handlers[action]()
     }
   }
-  private options: { [key in keyof typeof familiesMethod]: (ctx: Context, bot: Telegraf, nickname?: string) => Promise<void> } = {
-    getMethod: async (ctx: Context, bot: Telegraf, nickname?: string): Promise<void> => {
-      await ctx!.reply(`hola has seleccionado al usuario de tu familia: ${nickname}`)
+  private options: { [key in keyof typeof familiesMethod]: (ctx: Context, bot: Telegraf, data?: ClientCredentialsAndFamily) => Promise<void> } = {
+    getMethod: async (ctx: Context, bot: Telegraf, data?: ClientCredentialsAndFamily): Promise<void> => {
+      userStateUpdateFamilyMemberId(ctx, data!.id)
+      userStateUpdataFamilyMemberNickname(ctx, data!.nickname)
+      const viewFamilyMemberData = new ViewFamilyMemberDataInlineKeyboard(ctx)
+      return await setUpKeyboardIteration(ctx, viewFamilyMemberData, bot, { callbackPattern: regexPattern(ViewFamilyMemberCallback) })
     }
   }
 }
+
+//Menu de iteraccion con otro usuario -> (Perfil)(Historial Ejercicios)(Ejercicios Semana Pasada)
+export class ViewFamilyMemberDataInlineKeyboard extends MessageTemplate {
+  constructor(private ctx: Context) {
+    super()
+  }
+  protected prepareMessage() {
+    const { familyMemberNickname } = userState[this.ctx.from!.id]
+    const message = `📂 _Estás viendo el perfil de: ${familyMemberNickname.toUpperCase()}_.\n\n¿Qué te gustaría hacer a continuación?`
+    const keyboard: InlineKeyboardMarkup = {
+      inline_keyboard: [
+        [
+          this.createButton(`Historial Ejercicios`, { action: ViewFamilyMemberCallback.HistorialEjercicios }),
+          this.createButton(`Ejercicios Semana Pasada`, { action: ViewFamilyMemberCallback.EjerciciosSemanaPasada })
+        ],
+        [
+          this.createButton(`Perfil`, { action: ViewFamilyMemberCallback.Perfil })
+        ]
+      ]
+    }
+    return { message, keyboard }
+  }
+  async handleOptions(_: Context, message: Message, action: string) {
+    const handlers: { [key: string]: () => Promise<void> } = {
+      [ViewFamilyMemberCallback.HistorialEjercicios]: this.handleExeriseHistory.bind(this),
+      [ViewFamilyMemberCallback.EjerciciosSemanaPasada]: this.handleExerciseLastWeek.bind(this),
+      [ViewFamilyMemberCallback.Perfil]: this.handleClientPerfil.bind(this)
+    }
+    if (handlers[action]) {
+      return await handlers[action]()
+    }
+  }
+  private async handleExeriseHistory() {
+    await this.ctx.reply(`handleExerciseHistory on development`)
+  }
+  private async handleExerciseLastWeek() {
+    await this.ctx.reply(`handleExerciseLastWeek on development`)
+  }
+  private async handleClientPerfil() {
+    await this.ctx.reply(`handleClientPerfil on development`)
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

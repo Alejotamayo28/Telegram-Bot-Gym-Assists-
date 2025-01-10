@@ -11,7 +11,7 @@ import { ExerciseGetHandler, ExerciseGetUtils } from "./functions";
 import { BotUtils } from "../singUp/functions";
 import { botMessages } from "../../messages";
 import { MonthInlineKeybord } from "../../utils/monthUtils/inlineKeyboard";
-import { handleKeyboardStep, regexPattern } from "../utils";
+import { regexPattern, setUpKeyboardIteration } from "../utils";
 import { MonthCallbacks } from "../../utils/monthUtils/models";
 
 export class ExerciseFetchHandler extends MessageTemplate {
@@ -54,7 +54,10 @@ export class ExerciseFetchHandler extends MessageTemplate {
       await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.getMethod.exerciseRecord)
       userStateUpdateStage(ctx, userStageGetExercise.GET_EXERCISE_RECORD)
     }
-    await handleKeyboardStep(ctx, monthKeyboard, bot, regexPattern(MonthCallbacks), getRecordController)
+    await setUpKeyboardIteration(ctx, monthKeyboard, bot, {
+      callbackPattern: regexPattern(MonthCallbacks),
+      nextStep: async () => await getRecordController()
+    })
   }
 }
 
