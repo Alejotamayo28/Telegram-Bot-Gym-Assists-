@@ -1,5 +1,5 @@
 import { Context, Telegraf } from "telegraf";
-import { handleKeyboardStep, regexPattern, tryCatch } from "../utils";
+import { regexPattern, setUpKeyboardIteration, tryCatch } from "../utils";
 import { ExerciseDeleteVerificationHandler } from "./inlineKeyboard";
 import { ExerciseVerificationCallbacks } from "../addMethod/models";
 import { deleteBotMessage, saveBotMessage, userState } from "../../../userState";
@@ -13,6 +13,7 @@ import { WeekCallbacks } from "../../utils/weekUtils/models";
 import { ExerciseQueryFetcher } from "../getMethod/queries";
 import { ExerciseGetUtils } from "../getMethod/functions";
 import { ExerciseInlineKeybaord } from "../updateMethod/inlineKeyboard";
+import { lt } from "lodash";
 
 export const deleteExerciseVerificationController = async (ctx: Context, bot: Telegraf) => {
   const response = new ExerciseDeleteVerificationHandler(ctx)
@@ -46,12 +47,17 @@ export const exerciseDeletionFlow = async (ctx: Context, bot: Telegraf) => {
       });
       const exerciseKeyboard = new ExerciseInlineKeybaord(`deleteMethod`,
         botMessages.inputRequest.prompts.deleteMethod.selectExercisesToDeleteMessage, data)
-      await handleKeyboardStep(ctx, exerciseKeyboard, bot)
+      await setUpKeyboardIteration(ctx, exerciseKeyboard, bot, {})
     };
     // Chain flow
-    await handleKeyboardStep(ctx, monthKeyboard, bot, regexPattern(MonthCallbacks), async () => {
-      await handleKeyboardStep(ctx, daysKeyboard, bot, regexPattern(DaysCallbacks), async () => {
-        await handleKeyboardStep(ctx, weekKeyboard, bot, regexPattern(WeekCallbacks), deleteExericiseCotroller);
+    return await setUpKeyboardIteration(ctx, monthKeyboard, bot, {
+      callbackPattern: regexPattern(MonthCallbacks),
+      nextStep: async () => await setUpKeyboardIteration(ctx, daysKeyboard, bot, {
+        callbackPattern: regexPattern(DaysCallbacks),
+        nextStep: async () => await setUpKeyboardIteration(ctx, weekKeyboard, bot, {
+          callbackPattern: regexPattern(WeekCallbacks),
+          nextStep: async () => await deleteExericiseCotroller()
+        })
       })
     })
   } catch (error) {

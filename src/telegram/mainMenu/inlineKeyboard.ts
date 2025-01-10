@@ -3,19 +3,16 @@ import { InlineKeyboardMarkup, Message } from 'telegraf/typings/core/types/typeg
 import { botMessages } from '../messages';
 import { MessageTemplate } from '../../template/message';
 import { MainMenuCallbacks, MainMenuLabels, ReturnMainMenuCallbacks } from './models';
-import { deleteBotMessage, saveBotMessage, userStageCreateFamily, userStageDeleteExercise, userStagePostExercise, userStagePutExercise, userState, userStateUpdateFamilyId, userStateUpdateFamilyMemberId, userStateUpdateStage } from '../../userState';
+import { deleteBotMessage, userStageDeleteExercise, userStagePostExercise, userStagePutExercise, userStateUpdateStage } from '../../userState';
 import { fetchExerciseController } from '../services/getMethod';
 import { ExerciseGetHandler } from '../services/getMethod/functions';
 import { BotUtils } from '../services/singUp/functions';
 import { exerciseDeletionFlow } from '../services/deleteMethod';
 import { exercisePostFlow } from '../services/addMethod';
 import { onSession } from '../../database/dataAccessLayer';
-import { ClientCredentialsAndFamily, ClientInfo } from '../../model/client';
+import { ClientInfo } from '../../model/client';
 import { mainMenuPage } from '.';
-import { buildFamilyInlineKeyboard, familiesMethod, groupedFamilyButtons, handleKeyboardStep, regexPattern, tryCatch } from '../services/utils';
-import { familyInterface } from '../../model/family';
-import { FamilyFlow, familyInlinekeyboardController } from '../services/family';
-import { ViewFamilyInlineKeyboard } from '../services/family/inlineKeyboard';
+import { FamilyFlow } from '../services/family';
 
 // working file -->
 
