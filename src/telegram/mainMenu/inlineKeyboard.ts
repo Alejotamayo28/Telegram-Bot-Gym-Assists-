@@ -9,10 +9,13 @@ import { ExerciseGetHandler } from '../services/getMethod/functions';
 import { BotUtils } from '../services/singUp/functions';
 import { exerciseDeletionFlow } from '../services/deleteMethod';
 import { exercisePostFlow } from '../services/addMethod';
-import { onSession } from '../../database/dataAccessLayer';
 import { ClientInfo } from '../../model/client';
 import { mainMenuPage } from '.';
 import { FamilyFlow } from '../services/family';
+import { ClientQueries } from '../services/client/queries';
+import { ClientDataMapped } from '../services/client/functions';
+import { ClientProfileCallbacks, ClientProfileInlineKeyboard } from '../services/client/inlineKeyboard';
+import { regexPattern, setUpKeyboardIteration } from '../services/utils';
 
 // working file -->
 
@@ -42,7 +45,7 @@ export class MainMenuHandler extends MessageTemplate {
     return { message, keyboard }
   }
   async handleOptions(ctx: Context, _: Message, action: string, bot: Telegraf) {
-    deleteBotMessage(ctx)
+    await deleteBotMessage(ctx)
     const handlers: { [key: string]: () => Promise<void> } = {
       [MainMenuCallbacks.postExercise]: this.handlePostExercise.bind(this, ctx, bot),
       [MainMenuCallbacks.getExercise]: this.handleGetExercise.bind(this, ctx, bot),
@@ -76,58 +79,16 @@ export class MainMenuHandler extends MessageTemplate {
   private async handleRoutine(ctx: Context, bot: Telegraf): Promise<void> {
     console.log(`not implemented yet`)
   }
-  private static mappedClientInfo(data: ClientInfo): string {
-    let result = `
-🏋️ *Tu información personal* 
-
-🔒 _Credenciales_:
-   👤 Nickname: ${data.nickname}
-   🔑 Contraseña (encriptada): ${data.password}
-   📧 Correo: ${data.email}
-
-📋 _Datos personales_:
-   👤 Nombre: ${data.name} ${data.lastname}
-   🎂 Edad: ${data.age} años
-   ⚖️ Peso: ${data.weight} kg
-   📏 Altura: ${data.height} m
-`;
-    return result
-  }
   private async handleProfileUser(ctx: Context, bot: Telegraf) {
-    const response = await onSession(async (clientTransaction): Promise<ClientInfo> => {
-      const response = await clientTransaction.query(`
- select 
-   c.nickname,
-   c.password,
-   c.email,
-   ci.name,
-   ci.lastname,
-   ci.age,
-   ci.weight,
-   ci.height
-   from 
-   client c
-   join
-   clientinfo ci on c.id = ci.id 
-where c.id = $1`, [ctx.from!.id])
-      return response.rows[0]
+    const response = new ClientProfileInlineKeyboard()
+    return await setUpKeyboardIteration(ctx, response, bot, {
+      callbackPattern: regexPattern(ClientProfileCallbacks)
     })
-    const data = MainMenuHandler.mappedClientInfo(response)
-    await BotUtils.sendBotMessage(ctx, data)
-    return await mainMenuPage(ctx, bot, botMessages.inputRequest.prompts.getMethod.succesfull)
   }
   private async handleUserFamily(ctx: Context, bot: Telegraf) {
     return await FamilyFlow(ctx, bot)
   }
 }
-
-// Flow: ask (create, view) => view families OR create family 
-
-
-
-
-//working file <----
-
 
 export class MainMenuHandlerWithTaskDone extends MessageTemplate {
   protected prepareMessage() {

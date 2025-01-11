@@ -2,6 +2,65 @@ import { Context } from "telegraf"
 
 export let userState: { [key: number]: any } = {}
 
+export enum UserStage {
+  INITIAL = 'INITAL',
+  REGISTERING = 'REGISTERING',
+  WORKOUT = 'WORKOUT',
+  FAMILY_SETUP = 'FAMILY_SETUP'
+}
+
+interface UserProfile {
+  nickname: string,
+  password: string,
+  email: string,
+  name?: string
+}
+
+interface WorkoutData {
+  reps?: number[],
+  kg?: number,
+  exercisesId: number[],
+  week?: number,
+}
+
+interface FamilyData {
+  familyId: number,
+  familyName: string,
+  familyPassword: string,
+  familyMemberId: number,
+  familyMemberNickname: string
+}
+
+interface TimeTracking {
+  month?: string,
+  day?: string
+}
+
+interface UserState {
+  stage: UserStage;
+  profile: Partial<UserProfile>;
+  workout?: Partial<WorkoutData>;
+  family?: Partial<FamilyData>;
+  timeTracking?: Partial<TimeTracking>;
+  messagesId?: number[];
+  selectionDone?: boolean;
+}
+
+export type UserStates = {
+  [userId: number]: UserState
+}
+
+export function updateUserState(userId: number, updates: Partial<UserState>): void {
+  userState[userId] = {
+    ...userState[userId],
+    ...updates
+  }
+}
+
+
+
+
+
 export enum userStageCreateFamily {
   POST_FAMILY_NAME = 'postFamilyName',
   POST_FAMILY_PASSWORD = 'postFamilyPassword'
@@ -72,7 +131,6 @@ export interface UpdateUserStateOptions {
   familyPassword?: string,
   familyMemberId?: number,
   familyMemberNickname?: string
-
 }
 
 export const botMessageTest: { [userId: number]: number } = {}

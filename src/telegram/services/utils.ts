@@ -6,7 +6,8 @@ import { CallbackData } from "../../template/message"
 
 export enum FamilyType {
   MEMBER = 'member',
-  FAMILY = 'family'
+  FAMILY = 'family',
+  EDIIT_PROFILE = 'editProfile'
 }
 
 type ValidatePattern = `${FamilyType}_${string}`
@@ -21,6 +22,11 @@ function isValidPattern(pattern: string): pattern is ValidatePattern {
   return Object.values(FamilyType).some(type =>
     pattern.startsWith(`${type}_`)
   )
+}
+
+export interface KeyboardResponse {
+  sendCompleteMessage: (ctx: Context) => Promise<Message>;
+  handleOptions: (ctx: Context, message: Message, action: string, bot: Telegraf) => Promise<void>;
 }
 
 export const setUpKeyboardIteration = async (
@@ -45,11 +51,6 @@ export const setUpKeyboardIteration = async (
       await options.nextStep()
     }
   })
-}
-
-export interface KeyboardResponse {
-  sendCompleteMessage: (ctx: Context) => Promise<Message>;
-  handleOptions: (ctx: Context, message: Message, action: string, bot: Telegraf) => Promise<void>;
 }
 
 export const exercisesMethod = {
@@ -206,7 +207,6 @@ export const errorMessage = (userStage: string) => {
 
 export const errorState = async (error: Error, userStage: string, ctx: Context) => {
   console.error(errorMessage(userStage), error)
-  await ctx.reply(errorMessageCtx)
 }
 
 export function escapeMarkdown(text: string): string {

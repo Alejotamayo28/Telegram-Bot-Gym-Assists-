@@ -1,4 +1,4 @@
-import { deleteBotMessage, deleteUserMessage, saveBotMessage, saveUserMessage, userMessageTest, userStage, userStageCreateFamily, userStageDeleteExercise, userStageGetExercise, userStagePostExercise, userStagePutExercise, userStageSignUp, userState, userStateUpdateFamilyName, userStateUpdateFamilyPassword, userStateUpdateName, userStateUpdatePassword, userStateUpdateStage } from "../userState";
+import { deleteBotMessage, deleteUserMessage, saveBotMessage, saveUserMessage, userMessageTest, userStage, userStageCreateFamily, userStageDeleteExercise, userStageGetExercise, userStagePostExercise, userStagePutExercise, userStageSignUp, userState, userStateUpdateFamilyName, userStateUpdateFamilyPassword, userStateUpdateName, userStateUpdateStage } from "../userState";
 import { bot } from "../telegram/bot";
 import { handleError } from "../errors";
 import { BotUtils, RegisterHandler, testingDataStructures } from "../telegram/services/singUp/functions";
@@ -20,7 +20,7 @@ import { ExerciseQueryFetcher } from "../telegram/services/getMethod/queries";
 import { mainMenuPage, redirectToMainMenuWithTaskDone } from "../telegram/mainMenu";
 import { botMessages } from "../telegram/messages";
 import { encrypt } from "../middlewares/jsonWebToken/enCryptHelper";
-import { onSession, onTransaction } from "../database/dataAccessLayer";
+import { onTransaction } from "../database/dataAccessLayer";
 
 export type MyContext =
   | NarrowedContext<Context<Update>, Update.MessageUpdate<Message.TextMessage>>
