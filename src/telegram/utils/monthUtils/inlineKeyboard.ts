@@ -1,7 +1,7 @@
 import { botMessages } from "../../messages"
 import { MonthCallbacks } from "./models"
 import { Context, Telegraf } from "telegraf"
-import { deleteBotMessage, userState, userStateUpdateMonth } from "../../../userState"
+import { deleteBotMessage, updateUserState, userState, userStateUpdateMonth } from "../../../userState"
 import { MessageTemplate } from "../../../template/message"
 import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram"
 
@@ -36,6 +36,13 @@ export class MonthInlineKeybord extends MessageTemplate {
   }
   async handleOptions(ctx: Context, _: Message, action: string, bot: Telegraf) {
     await deleteBotMessage(ctx)
+    updateUserState(ctx.from!.id, {
+      data: {
+        exercise: {
+          month: action
+        }
+      }
+    })
     userStateUpdateMonth(ctx, action)
   }
 }

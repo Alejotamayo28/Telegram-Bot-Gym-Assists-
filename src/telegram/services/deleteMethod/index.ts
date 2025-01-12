@@ -1,5 +1,5 @@
 import { Context, Telegraf } from "telegraf";
-import { regexPattern, setUpKeyboardIteration, tryCatch } from "../utils";
+import { FamilyType, regexPattern, setUpKeyboardIteration, tryCatch } from "../utils";
 import { ExerciseDeleteVerificationHandler } from "./inlineKeyboard";
 import { ExerciseVerificationCallbacks } from "../addMethod/models";
 import { deleteBotMessage, saveBotMessage, userState } from "../../../userState";
@@ -31,7 +31,7 @@ export const deleteExerciseVerificationController = async (ctx: Context, bot: Te
 }
 
 // Flow: Month -> Days -> Week -> exerciseName
-export const exerciseDeletionFlow = async (ctx: Context, bot: Telegraf) => {
+export const exerciseDeleteFlow = async (ctx: Context, bot: Telegraf) => {
   try {
     const monthKeyboard = new MonthInlineKeybord(
       botMessages.inputRequest.prompts.deleteMethod.exerciseMonth)
@@ -64,12 +64,5 @@ export const exerciseDeletionFlow = async (ctx: Context, bot: Telegraf) => {
     console.error(`Error: `, error)
   }
 }
-
-
-
-
-
-
-
 
 

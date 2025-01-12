@@ -3,11 +3,13 @@ import { Exercise, PartialWorkout } from "../../model/workout"
 import { Context, Telegraf } from "telegraf"
 import { InlineKeyboardButton, Message } from "telegraf/typings/core/types/typegram"
 import { CallbackData } from "../../template/message"
+import { Exercise as newExercise } from "../../userState"
 
 export enum FamilyType {
   MEMBER = 'member',
   FAMILY = 'family',
-  EDIIT_PROFILE = 'editProfile'
+  EDIIT_PROFILE = 'editProfile',
+
 }
 
 type ValidatePattern = `${FamilyType}_${string}`
@@ -41,11 +43,13 @@ export const setUpKeyboardIteration = async (
       : /.*/)
   bot.action(pattern, async (actionCtx) => {
     const action = actionCtx.match[0]
-    if (!options.callbackPattern) {
+    console.log('Action: ', action)
+ /*  if (!options.callbackPattern) {
       if (!isValidPattern(action)) {
         throw new Error(`Invalid pattern: ${action}`)
       }
     }
+    */
     await tryCatch(() => keyboard.handleOptions(ctx, message, action, bot), ctx);
     if (options.nextStep) {
       await options.nextStep()
@@ -55,7 +59,8 @@ export const setUpKeyboardIteration = async (
 
 export const exercisesMethod = {
   deleteMethod: `Eliminar`,
-  getMethod: `Obtener`
+  getMethod: `Obtener`,
+  updateMethod: 'Actualizar'
 }
 
 export const familiesMethod = {
@@ -170,13 +175,14 @@ export class UserSession {
   }
 }
 
-export const verifyExerciseOutput = (workout: PartialWorkout) => {
+export const verifyExerciseOutput = (workout: newExercise) => {
+  
   return `*Confirmación de ejercicio:*
 
-🗓 *Día:* ${escapeMarkdown(workout.day!)}
-💪 *Nombre:* ${escapeMarkdown(workout.name!)}
-🔢 *Repeticiones:* ${escapeMarkdown(workout.reps!.toString())}
-⚖️ *Peso:* ${escapeMarkdown(workout.kg!.toString())} kg
+🗓 *Día:* ${workout.day}
+💪 *Nombre:* ${workout.name}
+🔢 *Repeticiones:* ${workout.reps!.toString()}
+⚖️ *Peso:* ${workout.weight!.toString()} kg
 
 _Escoge alguna de las siguientes opciones para continuar\\!_`
 }

@@ -1,71 +1,20 @@
 import { Context } from "telegraf"
-
 export let userState: { [key: number]: any } = {}
 
-export enum UserStage {
-  INITIAL = 'INITAL',
-  REGISTERING = 'REGISTERING',
-  WORKOUT = 'WORKOUT',
-  FAMILY_SETUP = 'FAMILY_SETUP'
+export enum SignUpStage {
+  NICKNAME = 'SIGN_UP_NICKNAME',
+  PASSWORD = 'SIGN_UP_PASSWORD',
+  EMAIL = 'SIGN_UP_EMAIL'
 }
 
-interface UserProfile {
-  nickname: string,
-  password: string,
-  email: string,
-  name?: string
+export function getUserState(userId: number) {
+  return userState[userId]
 }
-
-interface WorkoutData {
-  reps?: number[],
-  kg?: number,
-  exercisesId: number[],
-  week?: number,
-}
-
-interface FamilyData {
-  familyId: number,
-  familyName: string,
-  familyPassword: string,
-  familyMemberId: number,
-  familyMemberNickname: string
-}
-
-interface TimeTracking {
-  month?: string,
-  day?: string
-}
-
-interface UserState {
-  stage: UserStage;
-  profile: Partial<UserProfile>;
-  workout?: Partial<WorkoutData>;
-  family?: Partial<FamilyData>;
-  timeTracking?: Partial<TimeTracking>;
-  messagesId?: number[];
-  selectionDone?: boolean;
-}
-
-export type UserStates = {
-  [userId: number]: UserState
-}
-
-export function updateUserState(userId: number, updates: Partial<UserState>): void {
-  userState[userId] = {
-    ...userState[userId],
-    ...updates
-  }
-}
-
-
-
-
 
 export enum userStageCreateFamily {
   POST_FAMILY_NAME = 'postFamilyName',
   POST_FAMILY_PASSWORD = 'postFamilyPassword'
 }
-
 
 export enum userStage {
   LOGIN_NICKNAME = 'loginNicknameStage',
@@ -83,7 +32,8 @@ export enum userStageSignUp {
 export enum userStagePostExercise {
   POST_EXERCISE_DAY = 'postExerciseDay',
   POST_EXERCISE_NAME = 'postExerciseName',
-  POST_EXERCISE_REPS = 'postExerciseReps', POST_EXERCISE_VERIFICATION = 'postExerciseVerification'
+  POST_EXERCISE_REPS = 'postExerciseReps',
+  POST_EXERCISE_VERIFICATION = 'postExerciseVerification'
 }
 
 export enum userStagePutExercise {
@@ -110,8 +60,120 @@ export enum userStageDeleteExercise {
   DELETE_CONFIRMATION = 'deleteConfirmation'
 }
 
+interface Initial {
+  nickname?: string
+  password?: string
+}
+
+export namespace BotStage {
+  export enum Auth {
+    NICKNAME = 'LOGIN_NICKAME',
+    PASSWORD = 'LOGIN_PASSWORD'
+  }
+  export enum Register {
+    NICKNAME = 'SIGN_UP_NICKNAME',
+    PASSWORD = 'SIGN_UP_PASSWORD',
+    EMAIL = 'SIGN_UP_EMAIL'
+  }
+  export enum Exercise {
+    CREATE_NAME = 'EXERCISE_CREATE_NAME',
+    CREATE_REPS = 'EXERCISE_CREATE_REPS',
+    CREATE_WEIGHT = 'EXERCISE_CREATE_WEIGHT',
+    UPDATE_REPS = 'EXERCISE_UPDATE_REPS',
+    UPDATE_WEIGHT = 'EXERCISE_UPDATE_WEIGHT',
+    GET_NAME = 'EXERCISE_GET_NAME'
+  }
+  export enum PostFamily {
+    NAME = 'POST_FAMILY_NAME',
+    PASSWORD = 'POST_FAMILY_PASSWORD'
+  }
+}
+
+interface UserCredentials {
+  nickname?: string,
+  password?: string
+  email?: string
+}
+
+interface UserProfile {
+  name?: string,
+  lastName?: string
+}
+
+export interface Exercise {
+  month?: string
+  day?: string,
+  week?: number
+  name?: string,
+  reps?: number[]
+  weight?: number
+}
+
+interface UserState {
+  stage: BotStage.Auth | BotStage.Register | BotStage.Exercise | BotStage.PostFamily
+  data: {
+    credentials: Partial<UserCredentials>,
+    profile: Partial<UserProfile>,
+    exercise: Exercise
+  }
+}
+
+type UserStateUpdate = Partial<{
+  stage: UserState['stage'],
+  data: Partial<UserState['data']>
+}>
+
+export function updateUserState(
+  userId: number,
+  updates: UserStateUpdate)
+  : void {
+  userState[userId] = {
+    ...userState[userId],
+    ...updates,
+    data: {
+      ...userState[userId]?.data,
+      credentials: {
+        ...userState[userId]?.data?.credentials,
+        ...updates.data?.credentials
+      },
+      profile: {
+        ...userState[userId]?.data?.profile,
+        ...updates.data?.profile
+      },
+      exercise: {
+        ...userState[userId]?.data?.exercise,
+        ...updates.data?.exercise
+      }
+    }
+  }
+}
+
+export function updateUserStage(
+  userId: number,
+  stage: UserState['stage']
+): void {
+  userState[userId] = {
+    ...userState[userId],
+    stage
+  }
+}
+
+export function getUserCredentials(
+  userId: number
+): Required<UserCredentials> {
+  return userState[userId].data.credentials
+}
+
+export function getUserExercise(
+  userId: number
+): Required<Exercise> {
+  return userState[userId].data.exercise
+}
+
+
 
 export interface UpdateUserStateOptions {
+  Login?: Initial
   month?: string,
   day?: string;
   name?: string;

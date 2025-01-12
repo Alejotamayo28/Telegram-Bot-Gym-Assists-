@@ -7,7 +7,7 @@ import { deleteBotMessage, userStageDeleteExercise, userStagePostExercise, userS
 import { fetchExerciseController } from '../services/getMethod';
 import { ExerciseGetHandler } from '../services/getMethod/functions';
 import { BotUtils } from '../services/singUp/functions';
-import { exerciseDeletionFlow } from '../services/deleteMethod';
+import { exerciseDeleteFlow, exerciseDeletionFlow } from '../services/deleteMethod';
 import { exercisePostFlow } from '../services/addMethod';
 import { ClientInfo } from '../../model/client';
 import { mainMenuPage } from '.';
@@ -16,6 +16,7 @@ import { ClientQueries } from '../services/client/queries';
 import { ClientDataMapped } from '../services/client/functions';
 import { ClientProfileCallbacks, ClientProfileInlineKeyboard } from '../services/client/inlineKeyboard';
 import { regexPattern, setUpKeyboardIteration } from '../services/utils';
+import { exerciseUpdateFlow } from '../services/updateMethod';
 
 // working file -->
 
@@ -50,7 +51,7 @@ export class MainMenuHandler extends MessageTemplate {
       [MainMenuCallbacks.postExercise]: this.handlePostExercise.bind(this, ctx, bot),
       [MainMenuCallbacks.getExercise]: this.handleGetExercise.bind(this, ctx, bot),
       [MainMenuCallbacks.getExerciseHistory]: this.handleGetExerciseWeek.bind(this, ctx, bot),
-      [MainMenuCallbacks.updateExercise]: this.handleUpdateExercise.bind(this, ctx),
+      [MainMenuCallbacks.updateExercise]: this.handleUpdateExercise.bind(this, ctx, bot),
       [MainMenuCallbacks.deleteExercise]: this.handleDeleteExercise.bind(this, ctx, bot),
       [MainMenuCallbacks.setRoutine]: this.handleRoutine.bind(this, ctx, bot),
       [MainMenuCallbacks.userFamily]: this.handleUserFamily.bind(this, ctx, bot),
@@ -69,9 +70,8 @@ export class MainMenuHandler extends MessageTemplate {
   private async handlePostExercise(ctx: Context, bot: Telegraf): Promise<void> {
     return await exercisePostFlow(ctx, bot)
   }
-  private async handleUpdateExercise(ctx: Context): Promise<void> {
-    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.updateMethod.exerciseDay)
-    userStateUpdateStage(ctx, userStagePutExercise.PUT_EXERCISE_DAY)
+  private async handleUpdateExercise(ctx: Context, bot: Telegraf): Promise<void> {
+    return await exerciseUpdateFlow(ctx, bot)
   }
   private async handleDeleteExercise(ctx: Context, bot: Telegraf): Promise<void> {
     await exerciseDeletionFlow(ctx, bot)
@@ -118,7 +118,7 @@ export class MainMenuHandlerWithTaskDone extends MessageTemplate {
         [ReturnMainMenuCallbacks.returngetExercise]: this.handleGetExercise.bind(this, ctx, bot),
         [ReturnMainMenuCallbacks.returngetExerciseHistory]: this.handleGetExerciseWeek.bind(this, ctx, bot),
         [ReturnMainMenuCallbacks.returnupdateExercise]: this.handleUpdateExercise.bind(this, ctx),
-        [ReturnMainMenuCallbacks.returndeleteExercise]: this.handleDeleteExercise.bind(this, ctx)
+        [ReturnMainMenuCallbacks.returndeleteExercise]: this.handleDeleteExercise.bind(this, ctx, bot)
       }
       if (handlers[action]) {
         return handlers[action]()
@@ -141,8 +141,7 @@ export class MainMenuHandlerWithTaskDone extends MessageTemplate {
     await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.updateMethod.exerciseDay)
     userStateUpdateStage(ctx, userStagePutExercise.PUT_EXERCISE_DAY)
   }
-  private async handleDeleteExercise(ctx: Context) {
-    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.deleteMethod.exerciseDay)
-    userStateUpdateStage(ctx, userStageDeleteExercise.DELETE_EXERCISE_DAY)
+  private async handleDeleteExercise(ctx: Context, bot: Telegraf) {
+    return await exerciseDeleteFlow(ctx, bot)
   }
 }

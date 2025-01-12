@@ -2,7 +2,7 @@ import { Context } from "telegraf";
 import { onSession } from "../../../database/dataAccessLayer";
 import { Exercise, PartialWorkout } from "../../../model/workout";
 import { validateMonths } from "../../../validators/allowedValues";
-import { userState } from "../../../userState";
+import { getUserExercise, userState } from "../../../userState";
 
 export class ExerciseQueryFetcher {
   static async ExercisesByMonthNameAndId(ctx: Context, monthNumber: number): Promise<Exercise[]> {
@@ -100,18 +100,19 @@ export class ExerciseQueryFetcher {
     return response.rows
   }
   static async ExerciseByMonthDayWeekAndId(userId: number, workoutData: PartialWorkout): Promise<Exercise[]> {
-    const { month, day, week } = workoutData
-    const monthNumber: number = validateMonths.indexOf(month!.toLowerCase()) + 1
+    const data = getUserExercise(userId)
+    const monthNumber: number = validateMonths.indexOf(data.month!.toLowerCase()) + 1
     const response = await onSession(async (clientTransaction) => {
       return clientTransaction.query(
         `SELECT id, 
             date_part('year', date) as year,
-            date_part('year', date) as month,
-              name, reps, kg
+            date_part('month', date) as month,
+              day, name, reps, kg, week
                 FROM workout 
                   WHERE EXTRACT(MONTH from date) = $1 AND day = $2 AND week = $3 AND user_id = $4`,
-        [monthNumber, day, week, userId])
+        [monthNumber, data.day, data.week, userId])
     })
+    console.log(response.rows)
     return response.rows
   }
   static async ExerciseByIdAndDayAndMonth(userId: number, day: string, month: string): Promise<Exercise[]> {

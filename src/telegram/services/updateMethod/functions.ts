@@ -46,7 +46,7 @@ export const findExerciseByDayName = async (userId: number, userState: PartialWo
   const { day, name }: PartialWorkout = userState
   const response: QueryResult<PartialWorkout> = await onSession(async (clientTransaction) => {
     const { rows, rowCount }: QueryResult = await clientTransaction.query(`
-    SELECT name, reps, kg FROM workout WHERE id = $1 AND day = $2 AND name = $3`,
+    SELECT name, reps, kg FROM workout WHERE user_id = $1 AND day = $2 AND name = $3`,
       [userId, day, name])
     return rowCount ? rows[0] : null
   })

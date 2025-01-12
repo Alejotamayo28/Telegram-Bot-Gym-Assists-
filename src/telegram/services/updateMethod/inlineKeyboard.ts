@@ -1,6 +1,6 @@
 import { Context, Telegraf } from "telegraf";
 import { MessageTemplate } from "../../../template/message";
-import { UpdateUserStateOptions, userState, userStateUpdateExercisesId, userStateUpdateMessagesId } from "../../../userState";
+import { BotStage, getUserExercise, updateUserStage, UpdateUserStateOptions, userState, userStateUpdateExercisesId, userStateUpdateMessagesId } from "../../../userState";
 import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram";
 import { Exercise, PartialWorkout } from "../../../model/workout";
 import { ExerciseVerificationCallbacks, ExerciseVerificationLabels } from "../addMethod/models";
@@ -43,12 +43,12 @@ export class ExerciseInlineKeybaord extends MessageTemplate {
     })
     if (action == `continuar`) {
       const { messagesId }: UpdateUserStateOptions = userState[ctx.from!.id]
-      messagesId?.forEach((i: number) => {
-        ctx.deleteMessage(i)
+      messagesId?.forEach(async (i: number) => {
+        await ctx.deleteMessage(i)
       })
       userState[ctx.from!.id].messagesId = []
       await ctx.deleteMessage(message.message_id)
-      return this.options[this.method](ctx, bot)
+      return this.options[this.method](ctx,bot)
     }
     if (handlers[action]) {
       return handlers[action]()
@@ -56,7 +56,6 @@ export class ExerciseInlineKeybaord extends MessageTemplate {
   }
   private options: { [key in keyof typeof exercisesMethod]: (ctx: Context, bot: Telegraf) => Promise<void> } = {
     deleteMethod: async (ctx: Context, bot: Telegraf): Promise<void> => {
-      console.log(userState[ctx.from!.id].exercisesId)
       // falta el boton cancelar
       const data = await ExerciseQueryDelete.DeleteSelectedExercises(ctx)
       const mappedData = await ExerciseDeleteHandler.getDeletedExercisesMap(ctx, data)
@@ -65,6 +64,11 @@ export class ExerciseInlineKeybaord extends MessageTemplate {
     },
     getMethod: async (): Promise<void> => {
 
+    },
+    updateMethod: async (ctx: Context): Promise<void> => {
+      console.log('entro')
+      updateUserStage(ctx.from!.id, BotStage.Exercise.UPDATE_REPS)
+      await ctx.reply('digita las nuevas repeticiones ejemplo:\n\n10 10 10')
     }
   }
 }
@@ -73,7 +77,7 @@ export class ExerciseUpdateVerificationHandler extends MessageTemplate {
   constructor(private ctx: Context) {
     super()
   }
-  workoutData: PartialWorkout = userState[this.ctx.from!.id]
+  workoutData = getUserExercise(this.ctx.from!.id)
   protected prepareMessage() {
     const message = verifyExerciseOutput(this.workoutData)
     const keyboard: InlineKeyboardMarkup = {

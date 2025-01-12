@@ -1,4 +1,4 @@
-import { deleteBotMessage, deleteUserMessage, saveBotMessage, saveUserMessage, userMessageTest, userStage, userStageCreateFamily, userStageDeleteExercise, userStageGetExercise, userStagePostExercise, userStagePutExercise, userStageSignUp, userState, userStateUpdateFamilyName, userStateUpdateFamilyPassword, userStateUpdateName, userStateUpdateStage } from "../userState";
+import { BotStage, deleteBotMessage, deleteUserMessage, saveUserMessage, updateUserState, userStageCreateFamily, userStageGetExercise, userStagePostExercise, userStagePutExercise, userState, userStateUpdateFamilyPassword, userStateUpdateName } from "../userState";
 import { bot } from "../telegram/bot";
 import { handleError } from "../errors";
 import { BotUtils, RegisterHandler, testingDataStructures } from "../telegram/services/singUp/functions";
@@ -6,15 +6,13 @@ import { ExercisePostHandler } from "../telegram/services/addMethod/functions";
 import { message } from 'telegraf/filters'
 import { NarrowedContext, Context } from "telegraf";
 import { Update, Message } from "telegraf/typings/core/types/typegram";
-import { ExerciseDeleteHandler } from "../telegram/services/deleteMethod/functions";
 import { handleUpdateExerciseDay, handleUpdateExerciseName, handlerUpdateExerciseReps, handlerUpdateExerciseKg, findExerciseByDayName, handleExerciseNotFound } from "../telegram/services/updateMethod/functions";
 import { LoginHandler } from "../telegram/services/login/functions";
 import { deleteLastMessage } from "../telegram/services/utils";
-import { fetchExerciseGraphTextController } from "../telegram/services/getMethod";
 import { parseInt } from "lodash";
 import { PostExerciseVerificationController } from "../telegram/services/addMethod";
 import { DataValidator } from "../validators/dataValidator";
-import { ExerciseGetHandler, ExerciseGetUtils } from "../telegram/services/getMethod/functions";
+import { ExerciseGetUtils } from "../telegram/services/getMethod/functions";
 import { validateMonths } from "../validators/allowedValues";
 import { ExerciseQueryFetcher } from "../telegram/services/getMethod/queries";
 import { mainMenuPage, redirectToMainMenuWithTaskDone } from "../telegram/mainMenu";
@@ -33,68 +31,58 @@ bot.on(message("text"), async ctx => {
     if (userState[userId]) {
       switch (userState[userId].stage) {
 
-        case userStageSignUp.SIGN_UP_NICKNAME:
+        case BotStage.Auth.NICKNAME:
+          await deleteBotMessage(ctx)
+          saveUserMessage(ctx)
+          try {
+            LoginHandler.loginNickname(ctx, userMessage)
+          } catch (error) {
+            await handleError(error, userState[userId].stage, ctx)
+          }
+          break;
+
+        case BotStage.Auth.PASSWORD:
+          await deleteBotMessage(ctx)
+          saveUserMessage(ctx)
+          try {
+            LoginHandler.loginPassword(ctx, bot, userMessage)
+          } catch (error) {
+            console.error('Error: ', error)
+          }
+          break;
+
+
+        case BotStage.Register.NICKNAME:
           await deleteBotMessage(ctx)
           saveUserMessage(ctx)
           try {
             await RegisterHandler.registerNickname(ctx, userMessage)
           } catch (error) {
-            await handleError(error, userState[userId].stage, ctx)
+            console.error('Error: ', error)
           }
           break;
 
-        case userStageSignUp.SIGN_UP_PASSWORD:
+        case BotStage.Register.PASSWORD:
           await deleteBotMessage(ctx)
           saveUserMessage(ctx)
           try {
             await RegisterHandler.registerPassword(ctx, userMessage)
           } catch (error) {
-            await handleError(error, userState[userId].stage, ctx)
+            console.error('Error: ', error)
           }
           break;
 
-        case userStageSignUp.SIGN_UP_EMAIL:
+        case BotStage.Register.EMAIL:
           await deleteBotMessage(ctx)
           saveUserMessage(ctx)
           try {
             await RegisterHandler.registerEmail(ctx, bot, userMessage)
           } catch (error) {
-            await handleError(error, userState[userId].stage, ctx)
+            console.error('Error: ', error)
           }
           break;
 
-        case userStage.LOGIN_NICKNAME:
-          await deleteBotMessage(ctx)
-          saveUserMessage(ctx)
-          try {
-            await LoginHandler.loginNickname(ctx, userMessage)
-          } catch (error) {
-            await handleError(error, userState[userId].stage, ctx)
-          }
-          break
-
-        case userStage.LOGIN_PASSWORD:
-          await deleteLastMessage(ctx)
-          saveUserMessage(ctx)
-          try {
-            await LoginHandler.loginPassword(ctx, bot, userMessage)
-          } catch (error) {
-            await handleError(error, userState[userId].stage, ctx)
-          }
-          break
-
-        case userStagePostExercise.POST_EXERCISE_DAY:
-          await deleteLastMessage(ctx)
-          saveUserMessage(ctx)
-          try {
-            if (await (DataValidator.validateDay(ctx, userMessage))) break
-            await ExercisePostHandler.postExerciseDay(ctx, userMessage)
-          } catch (error) {
-            await handleError(error, userState[userId].stage, ctx)
-          }
-          break
-
-        case userStagePostExercise.POST_EXERCISE_NAME:
+        case BotStage.Exercise.CREATE_NAME:
           await deleteLastMessage(ctx)
           saveUserMessage(ctx)
           try {
@@ -102,22 +90,23 @@ bot.on(message("text"), async ctx => {
             if (await (DataValidator.validateExercise(ctx, userMessage))) break
             await ExercisePostHandler.postExerciseName(ctx, userMessage)
           } catch (error) {
-            await handleError(error, userState[userId].stage, ctx)
+            console.error('Error: ', error)
           }
           break
 
-        case userStagePostExercise.POST_EXERCISE_REPS:
+        case BotStage.Exercise.CREATE_REPS:
           await deleteLastMessage(ctx)
           saveUserMessage(ctx)
           try {
             if (await (DataValidator.validateReps(ctx, userMessage))) break
+
             await ExercisePostHandler.postExerciseReps(ctx, userMessage)
           } catch (error) {
-            await handleError(error, userState[userId].stage, ctx)
+            console.error('Error: ', error)
           }
           break
 
-        case userStagePostExercise.POST_EXERCISE_VERIFICATION:
+        case BotStage.Exercise.CREATE_WEIGHT:
           await deleteLastMessage(ctx)
           saveUserMessage(ctx)
           try {
@@ -125,11 +114,54 @@ bot.on(message("text"), async ctx => {
             await ExercisePostHandler.postExerciseWeight(ctx, Number(userMessage))
             return await PostExerciseVerificationController(ctx, bot)
           } catch (error) {
-            await handleError(error, userState[userId].stage, ctx)
+            console.error('Error: ', error)
           }
           break
 
+
+        case BotStage.Exercise.UPDATE_REPS:
+          await deleteLastMessage(ctx)
+          saveUserMessage(ctx)
+          try {
+            if (await (DataValidator.validateReps(ctx, userMessage))) break
+            const reps = userMessage.split(" ").map(Number)
+            updateUserState(userId, {
+              stage: BotStage.Exercise.UPDATE_WEIGHT,
+              data: {
+                exercise: {
+                  reps: reps
+                }
+              }
+            })
+            await BotUtils.sendBotMessage(ctx, 'Digita el nuevo peso a actualizar')
+          } catch (error) {
+            console.error('Error ', error)
+          }
+          break
+
+
+        case BotStage.Exercise.UPDATE_WEIGHT:
+          await deleteLastMessage(ctx)
+          saveUserMessage(ctx)
+          try {
+            if (await (DataValidator.validateWeight(ctx, userMessage))) break
+            const weight = Number(userMessage)
+            updateUserState(userId, {
+              data: {
+                exercise: {
+                  weight: weight
+                }
+              }
+            })
+            //CODIGO PARA LA QUERY
+            await ctx.reply('working...')
+          } catch (error) {
+            console.error('Error: ', error)
+          }
+          break;
+
         case userStagePutExercise.PUT_EXERCISE_DAY:
+          console.log(userStagePutExercise.PUT_EXERCISE_DAY)
           await deleteLastMessage(ctx)
           saveUserMessage(ctx)
           try {
@@ -141,6 +173,7 @@ bot.on(message("text"), async ctx => {
           break
 
         case userStagePutExercise.PUT_EXERCISE_NAME:
+          console.log(userStagePutExercise.PUT_EXERCISE_NAME)
           await deleteLastMessage(ctx)
           saveUserMessage(ctx)
           try {
@@ -159,6 +192,7 @@ bot.on(message("text"), async ctx => {
           break
 
         case userStagePutExercise.PUT_EXERCISE_REPS:
+          console.log(userStagePutExercise.PUT_EXERCISE_REPS)
           await deleteLastMessage(ctx)
           saveUserMessage(ctx)
           try {
@@ -170,66 +204,18 @@ bot.on(message("text"), async ctx => {
           break
 
         case userStagePutExercise.PUT_EXERCISE_WEIGHT:
+          console.log(userStagePutExercise.PUT_EXERCISE_WEIGHT)
           await deleteLastMessage(ctx)
           saveUserMessage(ctx)
           try {
-            if (await (DataValidator.validateWeight(ctx, userMessage))) break
-            await handlerUpdateExerciseKg(ctx, parseInt(userMessage))
           } catch (error) {
             await handleError(error, userState[userId].stage, ctx)
           }
           break
 
-        case userStageGetExercise.GET_EXERCISE_OPTIONS:
-          await deleteLastMessage(ctx)
-          saveUserMessage(ctx)
-          try {
-            if (await (DataValidator.validateDay(ctx, userMessage))) break
-            deleteUserMessage(ctx)
-            await fetchExerciseGraphTextController(ctx, bot, userMessage)
-          } catch (error) {
-            await handleError(error, userState[userId].stage, ctx)
-          }
-          break
 
-        case userStageGetExercise.GET_EXERCISE_MONTH_STAGE:
-          await deleteLastMessage(ctx)
-          saveUserMessage(ctx)
-          try {
-            if (await (DataValidator.validateMonth(ctx, userMessage))) break
-            await deleteUserMessage(ctx)
-            await ExerciseGetHandler.getMonthlyExerciseText(ctx, userMessage, bot)
-          } catch (error) {
-            console.error(`Error: `, error)
-          }
-          break;
-
-        case userStageGetExercise.GET_EXERCISE_MONTH:
-          await deleteLastMessage(ctx)
-          saveUserMessage(ctx)
-          try {
-            if (await (DataValidator.validateMonth(ctx, userMessage))) break
-            await deleteUserMessage(ctx)
-            await ExerciseGetHandler.exerciseMonth(ctx, userMessage)
-          } catch (error) {
-            console.error(`Error: `, error)
-          }
-          break;
-
-        case userStageGetExercise.GET_EXERCISE_DAY:
-          await deleteBotMessage(ctx)
-          saveUserMessage(ctx)
-          try {
-            if (await (DataValidator.validateDay(ctx, userMessage))) break;
-            await deleteUserMessage(ctx)
-            await ExerciseGetHandler.getDailyExerciseText(ctx, userMessage, bot)
-          } catch (error) {
-            console.error(`Error: `, error)
-          }
-          break;
-
-        //working
         case userStageGetExercise.GET_EXERCISE_RECORD:
+          //check
           await deleteBotMessage(ctx)
           saveUserMessage(ctx)
           try {
@@ -239,82 +225,20 @@ bot.on(message("text"), async ctx => {
             const { month } = userState[ctx.from!.id]
             const monthNumber = validateMonths.indexOf(month) + 1
             const data = await ExerciseQueryFetcher.ExercisesByMonthNameAndId(ctx, monthNumber)
-            if (!data.length) return await redirectToMainMenuWithTaskDone(ctx, bot, botMessages.inputRequest.prompts.getMethod.errors.exerciseEmptyData)
+            if (!data.length) {
+              return await redirectToMainMenuWithTaskDone(ctx, bot,
+                botMessages.inputRequest.prompts.getMethod.errors.exerciseEmptyData)
+            }
             const mappedData = ExerciseGetUtils.mapExercisesByDay(data, "getMethod")
             await BotUtils.sendBotMessage(ctx, mappedData)
-            return await redirectToMainMenuWithTaskDone(ctx, bot, botMessages.inputRequest.prompts.getMethod.succesfull)
+            return await redirectToMainMenuWithTaskDone(ctx, bot,
+              botMessages.inputRequest.prompts.getMethod.succesfull)
           } catch (error) {
             console.error(`Error: `, error)
           }
           break;
 
 
-        case userStageDeleteExercise.DELETE_EXERCISE_MONTH:
-          await deleteLastMessage(ctx)
-          saveUserMessage(ctx)
-          try {
-            if (await (DataValidator.validateMonth(ctx, userMessage))) break
-            await ExerciseDeleteHandler.exerciseMonth(ctx, userMessage, bot)
-          } catch (error) {
-            console.error(`Error :`, error)
-          }
-          break
-
-        case userStageDeleteExercise.DELETE_EXERCISE_DAY:
-          await deleteLastMessage(ctx)
-          saveUserMessage(ctx)
-          console.log(`no deberia entrar aqui`)
-          try {
-            if (await (DataValidator.validateDay(ctx, userMessage))) break
-            await ExerciseDeleteHandler.exerciseDay(ctx, userMessage)
-          } catch (error) {
-            await handleError(error, userState[userId].stage, ctx)
-          }
-          break
-
-        case userStageDeleteExercise.DELETE_EXERCISE_NAME:
-          await deleteLastMessage(ctx)
-          saveUserMessage(ctx)
-          try {
-            /*Mostrar sugerencias de nombres, tenemos el mes, dia, vamos a asumir que es del anio actual
-            const { day, month } = userState[ctx.from!.id]
-            console.log({ day, month })
-            const data = await ExerciseQueryFetcher.ExerciseByIdAndDayAndMonth(ctx.from!.id, day, month)
-            await exercisesInlineKeybaord(ctx, bot, data)
-            */
-
-            if (await (DataValidator.validateExercise(ctx, userMessage))) break
-            await ExerciseDeleteHandler.exerciseName(ctx, userMessage)
-          } catch (error) {
-            console.error(`Error: `, error)
-          }
-          break;
-
-        case userStageDeleteExercise.DELETE_EXERCISE_WEEK:
-          await deleteLastMessage(ctx)
-          saveUserMessage(ctx)
-          try {
-            if (await (DataValidator.validateWeek(ctx, userMessage))) break
-            await ExerciseDeleteHandler.exerciseWeekAndConfirmation(ctx, bot, userMessage)
-          } catch (error) {
-            console.error(`Error: `, error)
-          }
-          break
-
-        case userStageCreateFamily.POST_FAMILY_NAME:
-          await deleteBotMessage(ctx)
-          saveUserMessage(ctx)
-          try {
-            await deleteUserMessage(ctx)
-            userStateUpdateFamilyName(ctx, userMessage)
-            const message = await ctx.reply(`Digita la contrasena de tu familia...`)
-            saveBotMessage(ctx, message.message_id)
-            userStateUpdateStage(ctx, userStageCreateFamily.POST_FAMILY_PASSWORD)
-          } catch (error) {
-            console.error(`Error: `, error)
-          }
-
-          break;
 
         case userStageCreateFamily.POST_FAMILY_PASSWORD:
           await deleteBotMessage(ctx)
@@ -326,10 +250,12 @@ bot.on(message("text"), async ctx => {
             userStateUpdateFamilyPassword(ctx, passwordhash)
             await onTransaction(async (clientTransaction) => {
               const { familyName, familyPassword } = userState[ctx.from!.id]
-              await clientTransaction.query(`INSERT INTO family (name, password, user_1) VALUES ($1 ,$2, $3)`,
+              await clientTransaction.query(
+                `INSERT INTO family (name, password, user_1) VALUES ($1 ,$2, $3)`,
                 [familyName, familyPassword, ctx.from!.id])
             })
-            return await mainMenuPage(ctx, bot, `Familia creada satisfacctoriamente, gracias por haber creado una familia`)
+            return await mainMenuPage(ctx, bot,
+              `Familia creada satisfacctoriamente, gracias por haber creado una familia`)
           } catch (error) {
             console.error(`Error: `, error)
           }

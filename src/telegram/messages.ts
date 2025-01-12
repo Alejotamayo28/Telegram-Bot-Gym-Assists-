@@ -68,9 +68,9 @@ export const botMessages = {
         },
         errors: {
           exerciseNotFound:
-            `*¡Ejercicio no encontrado! * 🤕\n\n_¿Sigue explorando, qué te gustaría hacer ahora ?_`,
+            `*¡Ejercicio no encontrado!* 🤕\n\n_¿Sigue explorando, qué te gustaría hacer ahora ?_`,
           exerciseEmptyData:
-            `*Ejercicios no encontrados! * 🤕\n\n_No hemos encontrado ejercicios registrados\n\n_¿Sigue explorando, qué te gustaría hacer ahora ?_`
+            `*Ejercicios no encontrados!* 🤕\n\n_No hemos encontrado ejercicios registrados_\n\n_¿Sigue explorando, qué te gustaría hacer ahora ?_`
         },
         succesfull: `🌟 _Obtencion de datos se ha realizado con exito._`
       },
@@ -105,7 +105,8 @@ export const botMessages = {
         exerciseDay:
           `*🗓️ Dia del entrenamiento *\n\n_Por favor, escribe el dia donde realizaste el ejercicio a actualizar_.\nEjemplo: _Lunes_\nSi prefieres, puedes seleccionar el dia de la semana sugerido a continuacion.`,
         exerciseReps:
-          `*📋 Cantidad de repeticiones *\n\n_¡Por favor, ingresa la cantidad de repeticiones que realizaste en cada serie_.\nEjemplo: 10 10 10_`,
+          `*📋 Cantidad de repeticiones *\n\n_¡Por favor, ingresa la cantidad de repeticiones que realizaste en cada serie_.\nEjemplo: _10 10 10_`,
+        exerciseWeek: `*📋 Semana del ejercicio*\n\n_Por favor, escribe el numero de la semana donde realizaste el ejercicio a actualizar!_.\nEjemplo: _3_`,
         exerciseWeight:
           `*📋 Peso realizado *\n\n_¡Por favor, ingresa el nuevo peso realizado en la serie!_\nEjemplo: _80_`,
       },
