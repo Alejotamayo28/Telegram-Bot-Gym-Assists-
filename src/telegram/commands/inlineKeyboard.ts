@@ -4,7 +4,7 @@ import { LOGIN_BUTTON, LOGIN_CALLBACK, LOGIN_EXAMPLE_BUTTON, LOGIN_EXAMPLE_CALLB
 import { MessageTemplate } from "../../template/message";
 import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram";
 import { welcomeMessage } from "../messages/welcomeMessage";
-import { deleteBotMessage, userStage, userStageSignUp, userStateUpdateStage } from "../../userState";
+import { BotStage, deleteBotMessage, updateUserStage, userStage, userStageSignUp, userStateUpdateStage } from "../../userState";
 import { botMessages } from "../messages";
 import { BotUtils } from "../services/singUp/functions";
 
@@ -63,11 +63,11 @@ export class StartCommandHadler extends MessageTemplate {
   }
   private async handleLoginCallback(ctx: Context) {
     await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.auth.nickname)
-    userStateUpdateStage(ctx, userStage.LOGIN_NICKNAME)
+    updateUserStage(ctx.from!.id, BotStage.Auth.NICKNAME)
   }
   private async handleSignUpCallback(ctx: Context) {
     await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.register.nickname)
-    userStateUpdateStage(ctx, userStageSignUp.SIGN_UP_NICKNAME)
+    updateUserStage(ctx.from!.id, BotStage.Register.NICKNAME)
   }
   private async handleLoginExampleCallback(ctx: Context): Promise<void> {
     await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.auth.example, this.prepareMessage().keyboard)

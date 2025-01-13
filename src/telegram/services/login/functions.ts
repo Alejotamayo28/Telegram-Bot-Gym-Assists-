@@ -1,6 +1,6 @@
 import { compare } from "bcryptjs"
 import { Context, Telegraf } from "telegraf"
-import { deleteUserMessage, userStage, userState, userStateUpdatePassword } from "../../../userState"
+import { BotStage, deleteUserMessage, getUserState, updateUserState, userStage, userState, userStateUpdatePassword } from "../../../userState"
 import { mainMenuPage } from "../../mainMenu"
 import { botMessages } from "../../messages"
 import { BotUtils } from "../singUp/functions"
@@ -21,17 +21,25 @@ export class LoginHandler {
       await this.handleLoginError(ctx, "invalidNickname")
       return
     }
-    userStateUpdatePassword(ctx, user.password, userStage.LOGIN_PASSWORD)
+    updateUserState(ctx.from!.id, {
+      stage: BotStage.Auth.PASSWORD,
+      data: {
+        credentials: {
+          nickname: user.nickname,
+          password: user.password
+        }
+      }
+    })
     await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.auth.password)
   }
   static async loginPassword(ctx: Context, bot: Telegraf, userMessage: string): Promise<void> {
     await deleteUserMessage(ctx)
-    const isPasswordValid = await this.verifyPassword(userMessage, userState[ctx.from!.id].password)
+    const isPasswordValid = await this.verifyPassword(userMessage,
+      userState[ctx.from!.id].data.credentials.password)
     if (!isPasswordValid) {
       await this.handleLoginError(ctx, "invalidPassword")
       return
     }
-    delete userState[ctx.from!.id]
     return await mainMenuPage(ctx, bot)
   }
 }

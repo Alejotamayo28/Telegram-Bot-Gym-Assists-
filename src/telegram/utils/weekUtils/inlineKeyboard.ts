@@ -2,7 +2,7 @@ import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typeg
 import { MessageTemplate } from "../../../template/message";
 import { WeekCallbacks } from "./models";
 import { Context, Telegraf } from "telegraf";
-import { deleteBotMessage, userState, userStateUpdateWeek } from "../../../userState";
+import { deleteBotMessage, updateUserState} from "../../../userState";
 import { toNumber } from "lodash";
 
 export class WeekInlineKeybaord extends MessageTemplate {
@@ -24,6 +24,12 @@ export class WeekInlineKeybaord extends MessageTemplate {
   }
   async handleOptions(ctx: Context, _: Message, action: string, bot: Telegraf) {
     await deleteBotMessage(ctx)
-    userStateUpdateWeek(ctx, toNumber(action))
+    updateUserState(ctx.from!.id, {
+      data: {
+        exercise: {
+          week: toNumber(action)
+        }
+      }
+    })
   }
 }

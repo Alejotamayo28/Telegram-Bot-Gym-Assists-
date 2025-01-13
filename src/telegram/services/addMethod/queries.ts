@@ -1,9 +1,10 @@
 import { PoolClient } from "pg";
 import { PartialWorkout } from "../../../model/workout";
 import { Context } from "telegraf";
+import { Exercise } from "../../../userState";
 
 export class ExerciseQueryPost {
-  static async ExercisePost(workoutData: PartialWorkout, ctx: Context, client: PoolClient): Promise<void> {
+  static async ExercisePost(workoutData: Exercise, ctx: Context, client: PoolClient): Promise<void> {
     const date = new Date
     const weekDay = (date: Date): number => {
       const day = date.getDate();
@@ -13,7 +14,7 @@ export class ExerciseQueryPost {
       return 4
     }
     await client.query(`INSERT INTO workout(user_id, date, day, name, reps, kg, week) VALUES($1, $2, $3, $4, $5, $6, $7)`,
-      [ctx.from!.id, date, workoutData.day, workoutData.name, workoutData.reps, workoutData.kg, weekDay(date)])
+      [ctx.from!.id, date, workoutData.day, workoutData.name, workoutData.reps, workoutData.weight, weekDay(date)])
   }
   static async ExercisePostTesting(workoutData: PartialWorkout, ctx: Context, client: PoolClient): Promise<void> {
     await client.query(

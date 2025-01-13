@@ -1,5 +1,5 @@
 import { Context } from "telegraf"
-import { deleteUserMessage, userStagePostExercise, userStateUpdateDay, userStateUpdateKg, userStateUpdateName, userStateUpdateReps } from "../../../userState"
+import { BotStage, deleteUserMessage, getUserState, updateUserState, userStagePostExercise, userStateUpdateDay, userStateUpdateKg, userStateUpdateName, userStateUpdateReps } from "../../../userState"
 import { botMessages } from "../../messages"
 import { testingDataStructures } from "../singUp/functions"
 
@@ -12,7 +12,14 @@ export class ExercisePostHandler {
     })
   }
   static async postExerciseName(ctx: Context, name: string): Promise<void> {
-    userStateUpdateName(ctx, name, userStagePostExercise.POST_EXERCISE_REPS)
+    updateUserState(ctx.from!.id, {
+      stage: BotStage.Exercise.CREATE_REPS,
+      data: {
+        exercise: {
+          name: name
+        }
+      }
+    })
     await deleteUserMessage(ctx)
     await ctx.reply(botMessages.inputRequest.prompts.postMethod.exerciseReps, {
       parse_mode: "Markdown"
@@ -20,14 +27,28 @@ export class ExercisePostHandler {
   }
   static async postExerciseReps(ctx: Context, userMessage: string): Promise<void> {
     const reps = userMessage.split(" ").map(Number)
-    userStateUpdateReps(ctx, reps, userStagePostExercise.POST_EXERCISE_VERIFICATION)
+    updateUserState(ctx.from!.id, {
+      stage: BotStage.Exercise.CREATE_WEIGHT,
+      data: {
+        exercise: {
+          reps: reps
+        }
+      }
+    })
     await deleteUserMessage(ctx)
     await ctx.reply(botMessages.inputRequest.prompts.postMethod.exerciseWeight, {
       parse_mode: "Markdown"
     })
   }
   static async postExerciseWeight(ctx: Context, weight: number): Promise<void> {
-    userStateUpdateKg(ctx, weight)
+    updateUserState(ctx.from!.id, {
+      data: {
+        exercise: {
+          weight: weight
+        }
+      }
+    })
+    console.log(getUserState(ctx.from!.id))
     await deleteUserMessage(ctx)
   }
 }

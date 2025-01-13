@@ -1,12 +1,12 @@
 import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram"
 import { MessageTemplate } from "../../../template/message"
-import { deleteBotMessage, userStateUpdateDay } from "../../../userState"
+import { deleteBotMessage, updateUserState, userStateUpdateDay } from "../../../userState"
 import { Context, Telegraf } from "telegraf"
 import { DaysCallbacks } from "./models"
 
 export class DaysInlineKeyboard extends MessageTemplate {
   protected prepareMessage() {
-    const message = `holaaaaaaaaaa`
+    const message = `Escoge el dia para seguir con el flow (cambiar esto):`
     const keyboard: InlineKeyboardMarkup = {
       inline_keyboard: [
         [
@@ -18,13 +18,19 @@ export class DaysInlineKeyboard extends MessageTemplate {
           this.createButton(`Viernes`, { action: DaysCallbacks.VIERNES })
         ], [
           this.createButton(`Sabado`, { action: DaysCallbacks.SABADO }),
-          this.createButton(`Domingo`, { action: DaysCallbacks.DOMINGO }) ]
+          this.createButton(`Domingo`, { action: DaysCallbacks.DOMINGO })]
       ]
     }
     return { message, keyboard }
   }
   async handleOptions(ctx: Context, _: Message, action: string, bot: Telegraf) {
     await deleteBotMessage(ctx)
-    userStateUpdateDay(ctx, action.toLowerCase())
+    updateUserState(ctx.from!.id, {
+      data: {
+        exercise: {
+          day: action.toLowerCase()
+        }
+      }
+    })
   }
 }

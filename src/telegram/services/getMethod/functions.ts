@@ -4,7 +4,7 @@ import { ChartJSNodeCanvas } from "chartjs-node-canvas";
 import { ExerciseQueryFetcher } from "./queries";
 import { validateExercises, validateMonths } from "../../../validators/allowedValues";
 import { Context, Telegraf } from "telegraf";
-import { deleteUserMessage, userStageGetExercise, userState, userStateUpdateMonth } from "../../../userState";
+import { deleteUserMessage, getUserState, userStageGetExercise, userState, userStateUpdateMonth, Exercise as newExercise, getUserExercise } from "../../../userState";
 import { botMessages } from "../../messages";
 import { BotUtils } from "../singUp/functions";
 import { redirectToMainMenuWithTaskDone } from "../../mainMenu";
@@ -104,8 +104,9 @@ export class ExerciseGetUtils {
     }
     return result.trim()
   }
-  static mapExerciseByNameDayWeekTESTING(data: Exercise[], ctx: Context, method: keyof typeof exercisesMethod): string {
-    const workoutData: PartialWorkout = userState[ctx.from!.id]
+  static mapExerciseByNameDayWeekTESTING(data: Exercise[], ctx: Context,
+    method: keyof typeof exercisesMethod): string {
+    const workoutData: Required<newExercise> = getUserExercise(ctx.from!.id)
     const groupedData: { [year: number]: { [name: string]: Exercise[] } } = {}
     data.forEach((exercise: Exercise) => {
       groupedData[exercise.year] ??= {}

@@ -1,12 +1,20 @@
 import { Context } from "telegraf"
-
 export let userState: { [key: number]: any } = {}
+
+export enum SignUpStage {
+  NICKNAME = 'SIGN_UP_NICKNAME',
+  PASSWORD = 'SIGN_UP_PASSWORD',
+  EMAIL = 'SIGN_UP_EMAIL'
+}
+
+export function getUserState(userId: number) {
+  return userState[userId]
+}
 
 export enum userStageCreateFamily {
   POST_FAMILY_NAME = 'postFamilyName',
   POST_FAMILY_PASSWORD = 'postFamilyPassword'
 }
-
 
 export enum userStage {
   LOGIN_NICKNAME = 'loginNicknameStage',
@@ -24,7 +32,8 @@ export enum userStageSignUp {
 export enum userStagePostExercise {
   POST_EXERCISE_DAY = 'postExerciseDay',
   POST_EXERCISE_NAME = 'postExerciseName',
-  POST_EXERCISE_REPS = 'postExerciseReps', POST_EXERCISE_VERIFICATION = 'postExerciseVerification'
+  POST_EXERCISE_REPS = 'postExerciseReps',
+  POST_EXERCISE_VERIFICATION = 'postExerciseVerification'
 }
 
 export enum userStagePutExercise {
@@ -51,8 +60,164 @@ export enum userStageDeleteExercise {
   DELETE_CONFIRMATION = 'deleteConfirmation'
 }
 
+interface Initial {
+  nickname?: string
+  password?: string
+}
+
+export namespace BotStage {
+  export enum Auth {
+    NICKNAME = 'LOGIN_NICKAME',
+    PASSWORD = 'LOGIN_PASSWORD'
+  }
+  export enum Register {
+    NICKNAME = 'SIGN_UP_NICKNAME',
+    PASSWORD = 'SIGN_UP_PASSWORD',
+    EMAIL = 'SIGN_UP_EMAIL'
+  }
+  export enum Exercise {
+    CREATE_NAME = 'EXERCISE_CREATE_NAME',
+    CREATE_REPS = 'EXERCISE_CREATE_REPS',
+    CREATE_WEIGHT = 'EXERCISE_CREATE_WEIGHT',
+    UPDATE_REPS = 'EXERCISE_UPDATE_REPS',
+    UPDATE_WEIGHT = 'EXERCISE_UPDATE_WEIGHT',
+    GET_NAME = 'EXERCISE_GET_NAME'
+  }
+  export enum PostFamily {
+    NAME = 'POST_FAMILY_NAME',
+    PASSWORD = 'POST_FAMILY_PASSWORD'
+  }
+}
+
+interface UserCredentials {
+  nickname?: string,
+  password?: string
+  email?: string
+}
+
+interface UserProfile {
+  name?: string,
+  lastName?: string
+}
+
+export interface Exercise {
+  month?: string
+  day?: string,
+  week?: number
+  name?: string,
+  reps?: number[]
+  weight?: number,
+}
+
+export interface UpdateExercise {
+  weight?: number,
+  reps?: number[]
+}
+
+export interface Message {
+  messageId?: number[]
+}
+
+export interface SelectedExercises {
+  exercisesId?: number[]
+}
+
+interface UserState {
+  stage: BotStage.Auth | BotStage.Register | BotStage.Exercise | BotStage.PostFamily
+  data: {
+    credentials: Partial<UserCredentials>,
+    profile: Partial<UserProfile>,
+    exercise: Partial<Exercise>,
+    updateExercise: Partial<UpdateExercise>,
+    message: Partial<Message>,
+    selectedExercises: Partial<SelectedExercises>
+  }
+}
+
+type UserStateUpdate = Partial<{
+  stage: UserState['stage'],
+  data: Partial<UserState['data']>
+}>
+
+export function updateUserState(
+  userId: number,
+  updates: UserStateUpdate)
+  : void {
+  userState[userId] = {
+    ...userState[userId],
+    ...updates,
+    data: {
+      ...userState[userId]?.data,
+      credentials: {
+        ...userState[userId]?.data?.credentials,
+        ...updates.data?.credentials
+      },
+      profile: {
+        ...userState[userId]?.data?.profile,
+        ...updates.data?.profile
+      },
+      exercise: {
+        ...userState[userId]?.data?.exercise,
+        ...updates.data?.exercise
+      },
+      updateExercise: {
+        ...userState[userId]?.data?.updateExercise,
+        ...updates.data?.updateExercise
+      },
+      message: {
+        ...userState[userId]?.data?.message,
+        ...updates.data?.message
+      },
+      selectedExercises: {
+        ...userState[userId]?.data?.selectedExercises,
+        ...updates.data?.selectedExercises
+      }
+    }
+  }
+}
+
+export function updateUserStage(
+  userId: number,
+  stage: UserState['stage']
+): void {
+  userState[userId] = {
+    ...userState[userId],
+    stage
+  }
+}
+
+export function getUserCredentials(
+  userId: number
+): Required<UserCredentials> {
+  return userState[userId].data.credentials
+}
+
+export function getUserExercise(
+  userId: number
+): Required<Exercise> {
+  return userState[userId].data.exercise
+}
+
+export function getUserUpdateExercise(
+  userId: number
+): Required<UpdateExercise> {
+  return userState[userId].data.updateExercise
+}
+
+export function getUserSelectedMessagesId
+  (userId: number
+  ): Required<Message> {
+  return userState[userId].data.message
+}
+
+export function getUserSelectedExercisesId
+  (userId: number
+  ): Required<SelectedExercises> {
+  return userState[userId].data.selectedExercises
+}
 
 export interface UpdateUserStateOptions {
+  Login?: Initial
   month?: string,
   day?: string;
   name?: string;
@@ -72,7 +237,6 @@ export interface UpdateUserStateOptions {
   familyPassword?: string,
   familyMemberId?: number,
   familyMemberNickname?: string
-
 }
 
 export const botMessageTest: { [userId: number]: number } = {}

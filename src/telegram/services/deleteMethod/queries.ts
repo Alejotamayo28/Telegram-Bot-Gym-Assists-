@@ -20,7 +20,6 @@ export class ExerciseQueryDelete {
         [exercisesId, ctx.from!.id])
       return response
     })
-    console.log(`Ejercicios a eliminar: `, response.rows)
     return response.rows
   }
 }

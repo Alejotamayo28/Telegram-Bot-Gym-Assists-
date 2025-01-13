@@ -1,7 +1,7 @@
 import { Context, Markup, Telegraf } from "telegraf";
 import { MessageTemplate } from "../../../template/message";
 import { UserData } from "../../../model/client";
-import { userState } from "../../../userState";
+import { getUserCredentials, userState } from "../../../userState";
 import { verifySignUpOutput } from "../utils";
 import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram";
 import { ExerciseVerificationCallbacks, ExerciseVerificationLabels } from "../addMethod/models";
@@ -16,7 +16,7 @@ export class SignUpVerificationHandler extends MessageTemplate {
   }
   userData: UserData = userState[this.ctx.from!.id]
   protected prepareMessage() {
-    const { nickname, password, email } = this.userData
+    const { nickname, password, email } = getUserCredentials(this.ctx.from!.id)
     const message = verifySignUpOutput({ nickname, password, email })
     const keyboard: InlineKeyboardMarkup = {
       inline_keyboard: [

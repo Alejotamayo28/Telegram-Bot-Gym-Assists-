@@ -1,5 +1,5 @@
 import { Context, Telegraf } from "telegraf"
-import { deleteUserMessage, saveBotMessage, userStageSignUp, userState, userStateUpdateEmail, userStateUpdateNickname, userStateUpdatePassword, userStateUpdateStage } from "../../../userState"
+import { BotStage, deleteUserMessage, getUserState, saveBotMessage, updateUserState, userStageSignUp, userState, userStateUpdateEmail, userStateUpdateNickname, userStateUpdatePassword, userStateUpdateStage } from "../../../userState"
 import { encrypt } from "../../../middlewares/jsonWebToken/enCryptHelper"
 import { signUpVerificationController } from "."
 import { botMessages } from "../../messages"
@@ -112,18 +112,38 @@ export class RegisterHandler {
       await this.handleRegistrationError(ctx, "invalidNickname")
       return
     }
-    userStateUpdateNickname(ctx, userMessage, userStageSignUp.SIGN_UP_PASSWORD)
+    updateUserState(ctx.from!.id, {
+      stage: BotStage.Register.PASSWORD,
+      data: {
+        credentials: {
+          nickname: userMessage
+        }
+      }
+    })
     await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.register.password)
   }
   static async registerPassword(ctx: Context, userMessage: string): Promise<void> {
     await deleteUserMessage(ctx)
-    userStateUpdatePassword(ctx, userMessage, userStageSignUp.SIGN_UP_EMAIL)
+    updateUserState(ctx.from!.id, {
+      stage: BotStage.Register.EMAIL,
+      data: {
+        credentials: {
+          password: userMessage
+        }
+      }
+    })
     await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.register.email)
   }
   static async registerEmail(ctx: Context, bot: Telegraf, userMessage: string): Promise<void> {
     await deleteUserMessage(ctx)
-    userStateUpdateEmail(ctx, userMessage)
-    const password = userState[ctx.from!.id].password
+    updateUserState(ctx.from!.id, {
+      data: {
+        credentials: {
+          email: userMessage
+        }
+      }
+    })
+    const password = userState[ctx.from!.id].data.credentials.password
     const passwordHash = await encrypt(password)
     await signUpVerificationController(ctx, bot, passwordHash)
   }
