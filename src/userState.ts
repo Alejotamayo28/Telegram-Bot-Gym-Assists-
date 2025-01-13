@@ -35,7 +35,6 @@ export enum userStagePostExercise {
   POST_EXERCISE_REPS = 'postExerciseReps',
   POST_EXERCISE_VERIFICATION = 'postExerciseVerification'
 }
-
 export enum userStagePutExercise {
   PUT_EXERCISE_DAY = 'putExerciseDay',
   PUT_EXERCISE_NAME = 'putExerciseName',
@@ -117,7 +116,6 @@ export interface UpdateExercise {
 export interface Message {
   messageId?: number[]
 }
-
 export interface SelectedExercises {
   exercisesId?: number[]
 }
