@@ -1,8 +1,8 @@
 import { Context, Telegraf } from "telegraf";
 import { MessageTemplate } from "../../../template/message";
-import { BotStage, getUserExercise, updateUserStage, UpdateUserStateOptions, userState, userStateUpdateExercisesId, userStateUpdateMessagesId } from "../../../userState";
+import { BotStage, getUserExercise, updateUserState } from "../../../userState";
 import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram";
-import { Exercise, PartialWorkout } from "../../../model/workout";
+import { Exercise } from "../../../model/workout";
 import { ExerciseVerificationCallbacks, ExerciseVerificationLabels } from "../addMethod/models";
 import { exercisesMethod, groupedButtonsFunction, verifyExerciseOutput } from "../utils";
 import { onTransaction } from "../../../database/dataAccessLayer";
@@ -34,21 +34,19 @@ export class ExerciseInlineKeybaord extends MessageTemplate {
     this.data.forEach(exercise => {
       handlers[exercise.id] = async () => {
         const message = await ctx.reply(
-          `Has seleccionado el ejercicio: ${exercise.name}, con el id: ${exercise.id}`)
+          `✅ *Has seleccionado el ejercicio:* _${exercise.name}_\n🆔 *ID del ejercicio:* _${exercise.id}_\n`, {
+          parse_mode: "Markdown"
+        })
         messagesId.push(message.message_id)
         response.push(exercise.id)
-        userStateUpdateMessagesId(ctx, messagesId)
-        userStateUpdateExercisesId(ctx, response)
       }
     })
     if (action == `continuar`) {
-      const { messagesId }: UpdateUserStateOptions = userState[ctx.from!.id]
-      messagesId?.forEach(async (i: number) => {
+      messagesId.forEach(async (i: number) => {
         await ctx.deleteMessage(i)
       })
-      userState[ctx.from!.id].messagesId = []
       await ctx.deleteMessage(message.message_id)
-      return this.options[this.method](ctx,bot)
+      return this.options[this.method](ctx, bot)
     }
     if (handlers[action]) {
       return handlers[action]()
@@ -56,22 +54,51 @@ export class ExerciseInlineKeybaord extends MessageTemplate {
   }
   private options: { [key in keyof typeof exercisesMethod]: (ctx: Context, bot: Telegraf) => Promise<void> } = {
     deleteMethod: async (ctx: Context, bot: Telegraf): Promise<void> => {
-      // falta el boton cancelar
       const data = await ExerciseQueryDelete.DeleteSelectedExercises(ctx)
       const mappedData = await ExerciseDeleteHandler.getDeletedExercisesMap(ctx, data)
       await BotUtils.sendBotMessage(ctx, mappedData)
-      return await redirectToMainMenuWithTaskDone(ctx, bot, botMessages.inputRequest.prompts.deleteMethod.successfull)
+      return await redirectToMainMenuWithTaskDone(ctx, bot,
+        botMessages.inputRequest.prompts.deleteMethod.successfull)
     },
     getMethod: async (): Promise<void> => {
 
     },
     updateMethod: async (ctx: Context): Promise<void> => {
-      console.log('entro')
-      updateUserStage(ctx.from!.id, BotStage.Exercise.UPDATE_REPS)
-      await ctx.reply('digita las nuevas repeticiones ejemplo:\n\n10 10 10')
+      updateUserState(ctx.from!.id, {
+        stage: BotStage.Exercise.UPDATE_REPS,
+        data: {
+          message: {
+            messageId: messagesId
+          },
+          selectedExercises: {
+            exercisesId: response
+          }
+        }
+      })
+      await ctx.reply(
+        `✏️ *Digita las nuevas repeticiones*\n\nPor favor, escribe las repeticiones que deseas asignar al ejercicio.\n\n📋 *Ejemplo:*\n\`\`\`10 10 10\`\`\` *(una repetición para cada serie)*\n\n✅ Asegúrate de separarlas con espacios`, {
+        parse_mode: "Markdown",
+      })
     }
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 export class ExerciseUpdateVerificationHandler extends MessageTemplate {
   constructor(private ctx: Context) {

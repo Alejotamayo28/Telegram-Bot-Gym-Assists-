@@ -3,7 +3,7 @@ import { Exercise, PartialWorkout } from "../../model/workout"
 import { Context, Telegraf } from "telegraf"
 import { InlineKeyboardButton, Message } from "telegraf/typings/core/types/typegram"
 import { CallbackData } from "../../template/message"
-import { Exercise as newExercise } from "../../userState"
+import { Exercise as newExercise, saveBotMessage } from "../../userState"
 
 export enum FamilyType {
   MEMBER = 'member',
@@ -38,12 +38,12 @@ export const setUpKeyboardIteration = async (
   options: KeyboardHandlerOptionsTest
 ) => {
   const message = await keyboard.sendCompleteMessage(ctx)
+  await saveBotMessage(ctx, message.message_id)
   const pattern = options.callbackPattern ||
     (options.callbackManualPattern ? new RegExp(`^${options.callbackManualPattern}_.*`)
       : /.*/)
   bot.action(pattern, async (actionCtx) => {
     const action = actionCtx.match[0]
-    console.log('Action: ', action)
  /*  if (!options.callbackPattern) {
       if (!isValidPattern(action)) {
         throw new Error(`Invalid pattern: ${action}`)

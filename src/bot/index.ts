@@ -1,4 +1,4 @@
-import { BotStage, deleteBotMessage, deleteUserMessage, saveUserMessage, updateUserState, userStageCreateFamily, userStageGetExercise, userStagePostExercise, userStagePutExercise, userState, userStateUpdateFamilyPassword, userStateUpdateName } from "../userState";
+import { BotStage, deleteBotMessage, deleteUserMessage, getUserSelectedExercisesId, getUserState, getUserUpdateExercise, saveUserMessage, UpdateExercise, updateUserState, userStageCreateFamily, userStageGetExercise, userStagePutExercise, userState, userStateUpdateFamilyPassword, userStateUpdateName } from "../userState";
 import { bot } from "../telegram/bot";
 import { handleError } from "../errors";
 import { BotUtils, RegisterHandler, testingDataStructures } from "../telegram/services/singUp/functions";
@@ -6,10 +6,9 @@ import { ExercisePostHandler } from "../telegram/services/addMethod/functions";
 import { message } from 'telegraf/filters'
 import { NarrowedContext, Context } from "telegraf";
 import { Update, Message } from "telegraf/typings/core/types/typegram";
-import { handleUpdateExerciseDay, handleUpdateExerciseName, handlerUpdateExerciseReps, handlerUpdateExerciseKg, findExerciseByDayName, handleExerciseNotFound } from "../telegram/services/updateMethod/functions";
+import { handleUpdateExerciseDay, handleUpdateExerciseName, handlerUpdateExerciseReps, findExerciseByDayName, handleExerciseNotFound } from "../telegram/services/updateMethod/functions";
 import { LoginHandler } from "../telegram/services/login/functions";
 import { deleteLastMessage } from "../telegram/services/utils";
-import { parseInt } from "lodash";
 import { PostExerciseVerificationController } from "../telegram/services/addMethod";
 import { DataValidator } from "../validators/dataValidator";
 import { ExerciseGetUtils } from "../telegram/services/getMethod/functions";
@@ -123,17 +122,24 @@ bot.on(message("text"), async ctx => {
           await deleteLastMessage(ctx)
           saveUserMessage(ctx)
           try {
+            await deleteUserMessage(ctx)
             if (await (DataValidator.validateReps(ctx, userMessage))) break
             const reps = userMessage.split(" ").map(Number)
             updateUserState(userId, {
               stage: BotStage.Exercise.UPDATE_WEIGHT,
               data: {
-                exercise: {
+                updateExercise: {
                   reps: reps
                 }
               }
             })
-            await BotUtils.sendBotMessage(ctx, 'Digita el nuevo peso a actualizar')
+            await BotUtils.sendBotMessage(
+              ctx,
+              `🏋️‍♂️ *Actualización de peso*\n\n` +
+              `Por favor, digita el nuevo peso que deseas registrar para este ejercicio. Ejemplo:\n` +
+              `\`\`\`\n85\n\`\`\`\n` +
+              `✅ Asegúrate de incluir solo el números.`
+            );
           } catch (error) {
             console.error('Error ', error)
           }
@@ -144,52 +150,32 @@ bot.on(message("text"), async ctx => {
           await deleteLastMessage(ctx)
           saveUserMessage(ctx)
           try {
+            await deleteUserMessage(ctx)
             if (await (DataValidator.validateWeight(ctx, userMessage))) break
-            const weight = Number(userMessage)
+            const weightNumber = Number(userMessage)
             updateUserState(userId, {
               data: {
-                exercise: {
-                  weight: weight
+                updateExercise: {
+                  weight: weightNumber
                 }
               }
             })
-            //CODIGO PARA LA QUERY
-            await ctx.reply('working...')
+            const { reps, weight }: UpdateExercise = getUserUpdateExercise(userId)
+            console.log({ reps, weight })
+            const { exercisesId } = getUserSelectedExercisesId(userId)
+            await onTransaction(async (clientTransaction) => {
+              await clientTransaction.query(
+                'UPDATE workout SET kg = $1, reps = $2  WHERE user_id = $3 AND id = ANY($4)',
+                [weight, reps, userId, exercisesId])
+            })
+            return await mainMenuPage(ctx, bot,
+              `✅ *¡Ejercicio(s) actualizado(s) exitosamente!*\n\n🎉 Los cambios se han guardado correctamente.`);
           } catch (error) {
             console.error('Error: ', error)
           }
           break;
 
-        case userStagePutExercise.PUT_EXERCISE_DAY:
-          console.log(userStagePutExercise.PUT_EXERCISE_DAY)
-          await deleteLastMessage(ctx)
-          saveUserMessage(ctx)
-          try {
-            if (await (DataValidator.validateDay(ctx, userMessage))) break
-            await handleUpdateExerciseDay(ctx, userMessage)
-          } catch (error) {
-            await handleError(error, userState[userId].stage, ctx)
-          }
-          break
 
-        case userStagePutExercise.PUT_EXERCISE_NAME:
-          console.log(userStagePutExercise.PUT_EXERCISE_NAME)
-          await deleteLastMessage(ctx)
-          saveUserMessage(ctx)
-          try {
-            if (await (DataValidator.validateExercise(ctx, userMessage))) break
-            userStateUpdateName(ctx, userMessage)
-            const exercise = await findExerciseByDayName(userId, userState[userId])
-            if (!exercise) {
-              await saveUserMessage(ctx)
-              await handleExerciseNotFound(ctx)
-              return
-            }
-            await handleUpdateExerciseName(ctx, userMessage)
-          } catch (error) {
-            await handleError(error, userState[userId].stage, ctx)
-          }
-          break
 
         case userStagePutExercise.PUT_EXERCISE_REPS:
           console.log(userStagePutExercise.PUT_EXERCISE_REPS)

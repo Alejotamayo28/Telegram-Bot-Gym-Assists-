@@ -112,7 +112,6 @@ export class ExerciseQueryFetcher {
                   WHERE EXTRACT(MONTH from date) = $1 AND day = $2 AND week = $3 AND user_id = $4`,
         [monthNumber, data.day, data.week, userId])
     })
-    console.log(response.rows)
     return response.rows
   }
   static async ExerciseByIdAndDayAndMonth(userId: number, day: string, month: string): Promise<Exercise[]> {

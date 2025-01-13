@@ -106,7 +106,20 @@ export interface Exercise {
   week?: number
   name?: string,
   reps?: number[]
-  weight?: number
+  weight?: number,
+}
+
+export interface UpdateExercise {
+  weight?: number,
+  reps?: number[]
+}
+
+export interface Message {
+  messageId?: number[]
+}
+
+export interface SelectedExercises {
+  exercisesId?: number[]
 }
 
 interface UserState {
@@ -114,7 +127,10 @@ interface UserState {
   data: {
     credentials: Partial<UserCredentials>,
     profile: Partial<UserProfile>,
-    exercise: Exercise
+    exercise: Partial<Exercise>,
+    updateExercise: Partial<UpdateExercise>,
+    message: Partial<Message>,
+    selectedExercises: Partial<SelectedExercises>
   }
 }
 
@@ -143,6 +159,18 @@ export function updateUserState(
       exercise: {
         ...userState[userId]?.data?.exercise,
         ...updates.data?.exercise
+      },
+      updateExercise: {
+        ...userState[userId]?.data?.updateExercise,
+        ...updates.data?.updateExercise
+      },
+      message: {
+        ...userState[userId]?.data?.message,
+        ...updates.data?.message
+      },
+      selectedExercises: {
+        ...userState[userId]?.data?.selectedExercises,
+        ...updates.data?.selectedExercises
       }
     }
   }
@@ -170,7 +198,23 @@ export function getUserExercise(
   return userState[userId].data.exercise
 }
 
+export function getUserUpdateExercise(
+  userId: number
+): Required<UpdateExercise> {
+  return userState[userId].data.updateExercise
+}
 
+export function getUserSelectedMessagesId
+  (userId: number
+  ): Required<Message> {
+  return userState[userId].data.message
+}
+
+export function getUserSelectedExercisesId
+  (userId: number
+  ): Required<SelectedExercises> {
+  return userState[userId].data.selectedExercises
+}
 
 export interface UpdateUserStateOptions {
   Login?: Initial
