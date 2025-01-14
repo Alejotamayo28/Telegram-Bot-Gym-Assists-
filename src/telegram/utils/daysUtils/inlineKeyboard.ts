@@ -1,6 +1,6 @@
 import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram"
 import { MessageTemplate } from "../../../template/message"
-import { deleteBotMessage, updateUserState, userStateUpdateDay } from "../../../userState"
+import { deleteBotMessage, updateUserState} from "../../../userState"
 import { Context, Telegraf } from "telegraf"
 import { DaysCallbacks } from "./models"
 

@@ -2,7 +2,7 @@ import { Context, Telegraf } from "telegraf";
 import { regexPattern, setUpKeyboardIteration, tryCatch } from "../utils";
 import { ExercisePostVerificationHandler } from "./inlineKeyboard";
 import { ExerciseVerificationCallbacks } from "./models";
-import { BotStage, saveBotMessage, updateUserStage, userStagePostExercise, userStateUpdateStage } from "../../../userState";
+import { BotStage, saveBotMessage, updateUserStage } from "../../../userState";
 import { DaysInlineKeyboard } from "../../utils/daysUtils/inlineKeyboard";
 import { botMessages } from "../../messages";
 import { DaysCallbacks } from "../../utils/daysUtils/models";
@@ -26,11 +26,16 @@ export const exercisePostFlow = async (ctx: Context, bot: Telegraf) => {
   try {
     const daysKeyboard = new DaysInlineKeyboard(
       botMessages.inputRequest.prompts.postMethod.exerciseDay)
+
     const postExerciseController = async (): Promise<void> => {
       await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.postMethod.exerciseName)
       return updateUserStage(ctx.from!.id, BotStage.Exercise.CREATE_NAME)
     }
-    await setUpKeyboardIteration(ctx, daysKeyboard, bot, { callbackPattern: regexPattern(DaysCallbacks), nextStep: async () => await postExerciseController() })
+
+    await setUpKeyboardIteration(ctx, daysKeyboard, bot, {
+      callbackPattern: regexPattern(DaysCallbacks), nextStep: async () =>
+        await postExerciseController()
+    })
   } catch (error) {
     console.error(`Error: `, error)
   }

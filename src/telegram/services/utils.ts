@@ -1,9 +1,8 @@
 import { UserCredentials, UserProfile } from "../../model/client"
-import { Exercise, PartialWorkout } from "../../model/workout"
 import { Context, Telegraf } from "telegraf"
 import { InlineKeyboardButton, Message } from "telegraf/typings/core/types/typegram"
 import { CallbackData } from "../../template/message"
-import { Exercise as newExercise, saveBotMessage } from "../../userState"
+import { Exercise, saveBotMessage } from "../../userState"
 
 export enum FamilyType {
   MEMBER = 'member',
@@ -44,12 +43,13 @@ export const setUpKeyboardIteration = async (
       : /.*/)
   bot.action(pattern, async (actionCtx) => {
     const action = actionCtx.match[0]
- /*  if (!options.callbackPattern) {
-      if (!isValidPattern(action)) {
-        throw new Error(`Invalid pattern: ${action}`)
-      }
-    }
-    */
+    console.log('Action: ', action)
+    /*  if (!options.callbackPattern) {
+         if (!isValidPattern(action)) {
+           throw new Error(`Invalid pattern: ${action}`)
+         }
+       }
+       */
     await tryCatch(() => keyboard.handleOptions(ctx, message, action, bot), ctx);
     if (options.nextStep) {
       await options.nextStep()
@@ -175,8 +175,8 @@ export class UserSession {
   }
 }
 
-export const verifyExerciseOutput = (workout: newExercise) => {
-  
+export const verifyExerciseOutput = (workout: Exercise) => {
+
   return `*Confirmación de ejercicio:*
 
 🗓 *Día:* ${workout.day}
@@ -197,7 +197,7 @@ export const verifySignUpOutput = (data: UserProfile) => {
 _Escoge alguna de las siguientes opciones para continuar!_`
 }
 
-export const verifyDeleteExercise = (data: PartialWorkout) => {
+export const verifyDeleteExercise = (data: Exercise) => {
   return `*Confirmar eliminacion:*
 
 🗓 *Dia:* ${data.day}

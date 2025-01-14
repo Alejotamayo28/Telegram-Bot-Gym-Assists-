@@ -1,28 +1,30 @@
-import { Context, Markup, Telegraf } from "telegraf";
+import { Context, Telegraf } from "telegraf";
 import { MessageTemplate } from "../../../template/message";
-import { UserData } from "../../../model/client";
-import { getUserCredentials, userState } from "../../../userState";
+import { getUserCredentials } from "../../../userState";
 import { verifySignUpOutput } from "../utils";
 import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram";
 import { ExerciseVerificationCallbacks, ExerciseVerificationLabels } from "../addMethod/models";
 import { onTransaction } from "../../../database/dataAccessLayer";
 import { insertClientQuery } from "./queries";
-import { redirectToMainMenuWithTaskDone } from "../../mainMenu";
 import { commandStart } from "../../commands/start";
 
 export class SignUpVerificationHandler extends MessageTemplate {
   constructor(private ctx: Context, private passwordHash: string) {
     super()
   }
-  userData: UserData = userState[this.ctx.from!.id]
+  userData = getUserCredentials(this.ctx.from!.id)
   protected prepareMessage() {
     const { nickname, password, email } = getUserCredentials(this.ctx.from!.id)
     const message = verifySignUpOutput({ nickname, password, email })
     const keyboard: InlineKeyboardMarkup = {
       inline_keyboard: [
         [
-          this.createButton(ExerciseVerificationLabels.YES, { action: ExerciseVerificationCallbacks.YES }),
-          this.createButton(ExerciseVerificationLabels.NO, { action: ExerciseVerificationCallbacks.NO })
+          this.createButton(ExerciseVerificationLabels.YES, {
+            action: ExerciseVerificationCallbacks.YES
+          }),
+          this.createButton(ExerciseVerificationLabels.NO, {
+            action: ExerciseVerificationCallbacks.NO
+          })
         ]
       ]
     }

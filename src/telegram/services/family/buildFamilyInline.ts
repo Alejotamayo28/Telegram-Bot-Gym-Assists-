@@ -1,39 +1,51 @@
 import { InlineKeyboardButton } from "telegraf/typings/core/types/typegram";
-import { familyInterface } from "../../../model/family";
-import { createButton} from "../utils";
-import { ClientCredentialsAndFamily } from "../../../model/client";
+import { UserFamilyMemberResponse, UserFamilyResponse } from "../../../userState";
+import { createButton } from "../utils";
 
-const familiesBuildInline = {
+//Validate methods
+const familyMethod = {
   viewFamilies: 'ViewFamilies',
   viewFamiliesMember: 'ViewFamiliesMember'
 }
 
-interface familiesQueryData {
-  viewFamilies: familyInterface[]
-  viewFamiiles: ClientCredentialsAndFamily[]
+//Validate QueryResultReponses inside a interface
+export interface FamilyResponse {
+  userFamilyResponse: UserFamilyResponse[]
+  userFamilyMemberResponse: UserFamilyMemberResponse[]
 }
 
+/*
+Somehow it work's, just creat InlineKeybaord, got two methods.
+-1. View the familes the use belongs to
+-2. View the members of a selected family
+*/
 export class BuildFamilyInline {
-  constructor(method: keyof typeof familiesBuildInline) { }
-  static optionsBuild: { [key in keyof typeof familiesBuildInline]: (options: {
+  static optionsBuild: { [key in keyof typeof familyMethod]: (options: {
     nickname?: string,
-    name?: string,
-    id?: number,
+    family_name?: string,
+    family_id?: number,
   }) => InlineKeyboardButton } = {
-      viewFamiliesMember: function({ ...options }): InlineKeyboardButton {
-        const button = createButton(`• ${options.nickname!.toUpperCase()}`, { action: `member_${options.nickname}` });
+      viewFamilies: function({ ...options }): InlineKeyboardButton {
+        const button = createButton(`• Nombre: ${options.family_name!}`,
+          { action: `family_${options.family_id}` });
         return button
       },
-      viewFamilies: function({ ...options }): InlineKeyboardButton {
-        const button = createButton(`• Nombre: ${options.name!.toUpperCase()}`, { action: `family_${options.id}` });
+      viewFamiliesMember: function({ ...options }): InlineKeyboardButton {
+        const button = createButton(`• ${options.nickname!.toUpperCase()}`,
+          { action: `member_${options.nickname}` });
         return button
       }
     }
-  static createInlineKeyboard<T extends keyof familiesQueryData>(
-    method: keyof typeof familiesBuildInline,
-    data: familiesQueryData[T]) {
-    const response = data.reduce((rows: InlineKeyboardButton[][], family: any, index: number) => {
-      const button = this.optionsBuild[method]({ nickname: family.nickname, name: family.name, id: family.id })
+  static createInlineKeyboard<T>(
+    method: keyof typeof familyMethod,
+    data: T[]) {
+    const response = data.reduce((rows: InlineKeyboardButton[][],
+      family: any, index: number) => {
+      const button = this.optionsBuild[method]({
+        nickname: family.nickname,
+        family_name: family.family_name,
+        family_id: family.family_id
+      })
       if (index % 2 === 0) {
         rows.push([button]);
       } else {

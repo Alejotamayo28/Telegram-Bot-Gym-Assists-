@@ -1,10 +1,16 @@
-import { Context, Markup, Telegraf } from "telegraf";
-import { SIGN_UP_BUTTON, SIGN_UP_CALLBACK, SIGN_UP_EXAMPLE_BUTTON, SIGN_UP_EXAMPLE_CALLBACK } from "../services/singUp/buttons";
-import { LOGIN_BUTTON, LOGIN_CALLBACK, LOGIN_EXAMPLE_BUTTON, LOGIN_EXAMPLE_CALLBACK } from "../services/login/buttons";
+import { Context, Markup } from "telegraf";
+import {
+  SIGN_UP_BUTTON, SIGN_UP_CALLBACK,
+  SIGN_UP_EXAMPLE_BUTTON, SIGN_UP_EXAMPLE_CALLBACK
+} from "../services/singUp/buttons";
+import {
+  LOGIN_BUTTON, LOGIN_CALLBACK, LOGIN_EXAMPLE_BUTTON,
+  LOGIN_EXAMPLE_CALLBACK
+} from "../services/login/buttons";
 import { MessageTemplate } from "../../template/message";
 import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram";
 import { welcomeMessage } from "../messages/welcomeMessage";
-import { BotStage, deleteBotMessage, updateUserStage, userStage, userStageSignUp, userStateUpdateStage } from "../../userState";
+import { BotStage, deleteBotMessage, updateUserStage } from "../../userState";
 import { botMessages } from "../messages";
 import { BotUtils } from "../services/singUp/functions";
 

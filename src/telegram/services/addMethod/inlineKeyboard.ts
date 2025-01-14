@@ -2,18 +2,17 @@ import { Context, Telegraf } from "telegraf";
 import { MessageTemplate } from "../../../template/message";
 import { verifyExerciseOutput } from "../utils";
 import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram";
-import { PartialWorkout } from "../../../model/workout";
-import { deleteBotMessage, deleteUserMessage, getUserExercise, userState } from "../../../userState"; import { onTransaction } from "../../../database/dataAccessLayer";
+import { deleteBotMessage, getUserExercise } from "../../../userState";
+import { onTransaction } from "../../../database/dataAccessLayer";
 import { ExerciseVerificationCallbacks, ExerciseVerificationLabels } from "./models";
 import { ExerciseQueryPost } from "./queries";
-import { redirectToMainMenuWithTaskDone } from "../../mainMenu";
+import { mainMenuPage} from "../../mainMenu";
 import { botMessages } from "../../messages";
 
 export class ExercisePostVerificationHandler extends MessageTemplate {
   constructor(private ctx: Context) {
     super()
   }
-  //
   workoutData = getUserExercise(this.ctx.from!.id)
   protected prepareMessage() {
     const message = verifyExerciseOutput(this.workoutData)
@@ -39,20 +38,22 @@ export class ExercisePostVerificationHandler extends MessageTemplate {
   }
   private async handleResponseCallback(bot: Telegraf, message: string) {
     try {
-      await redirectToMainMenuWithTaskDone(this.ctx, bot, message)
+      return await mainMenuPage(this.ctx, bot, message)
     } catch (error) {
       console.error(`Error: `, error)
     }
   }
   private async handleYesCallback(bot: Telegraf) {
-    const workoutData=getUserExercise(this.ctx.from!.id)
+    const workoutData = getUserExercise(this.ctx.from!.id)
     await onTransaction(async (transactionWorkout) => {
       await ExerciseQueryPost.ExercisePost(workoutData, this.ctx, transactionWorkout);
     });
-    await this.handleResponseCallback(bot, botMessages.inputRequest.prompts.postMethod.successful)
+    return await this.handleResponseCallback(bot,
+      botMessages.inputRequest.prompts.postMethod.successful)
   }
   private async handleNoCallback(bot: Telegraf) {
-    await this.handleResponseCallback(bot, botMessages.inputRequest.prompts.postMethod.notSuccessful)
+    return await this.handleResponseCallback(bot,
+      botMessages.inputRequest.prompts.postMethod.notSuccessful)
   }
 }
 

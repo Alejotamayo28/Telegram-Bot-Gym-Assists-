@@ -3,7 +3,7 @@ import { graphic } from "./functions";
 import { regexPattern, tryCatch } from "../utils";
 import { ExerciseFetchGraphTextOptions, ExerciseViewOption } from "./models";
 import { ExerciseFetchHandler, ExerciseFetchHandlerOptions } from "./inlineKeyboard";
-import { redirectToMainMenuWithTaskDone } from "../../mainMenu";
+import { mainMenuPage} from "../../mainMenu";
 import { deleteUserMessage, saveBotMessage } from "../../../userState";
 
 export const handleGetDailyExercisesGraphic = async (ctx: Context, day: string, bot: Telegraf) => {
@@ -16,7 +16,7 @@ export const handleGetDailyExercisesGraphic = async (ctx: Context, day: string, 
       caption: `_Gráfico de ejercicios del dia ${day}._`,
       parse_mode: "Markdown"
     });
-    await redirectToMainMenuWithTaskDone(ctx, bot)
+    await mainMenuPage(ctx, bot)
   } catch (error) {
     console.error(`Error: `, error)
   }

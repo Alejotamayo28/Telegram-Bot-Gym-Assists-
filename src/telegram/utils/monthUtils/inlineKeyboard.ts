@@ -1,7 +1,7 @@
 import { botMessages } from "../../messages"
 import { MonthCallbacks } from "./models"
 import { Context, Telegraf } from "telegraf"
-import { deleteBotMessage, updateUserState, userState, userStateUpdateMonth } from "../../../userState"
+import { deleteBotMessage, updateUserState } from "../../../userState"
 import { MessageTemplate } from "../../../template/message"
 import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram"
 
@@ -43,7 +43,6 @@ export class MonthInlineKeybord extends MessageTemplate {
         }
       }
     })
-    userStateUpdateMonth(ctx, action)
   }
 }
 

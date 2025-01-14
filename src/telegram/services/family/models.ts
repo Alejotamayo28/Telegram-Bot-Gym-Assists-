@@ -1,10 +1,11 @@
 export enum FamilyInlinekeyboardAction {
   viewFamily = `viewFamily`,
-  createFamily = `createFamily`
+  createFamily = `createFamily`,
+  joinFamily = 'joinFamily'
 }
 
 export enum ViewFamilyMemberCallback {
-HistorialEjercicios = 'historialEjercicios',
-EjerciciosSemanaPasada = 'ejerciciosSemanaPasada',
-Perfil = 'perfil'
+  HistorialEjercicios = 'historialEjercicios',
+  EjerciciosSemanaPasada = 'ejerciciosSemanaPasada',
+  Perfil = 'perfil'
 }
