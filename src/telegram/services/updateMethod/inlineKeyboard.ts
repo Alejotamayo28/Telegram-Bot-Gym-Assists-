@@ -1,13 +1,12 @@
 import { Context, Telegraf } from "telegraf";
 import { MessageTemplate } from "../../../template/message";
-import { BotStage, getUserExercise, updateUserState } from "../../../userState";
+import { BotStage, Exercise, getUserExercise, updateUserStage, updateUserState } from "../../../userState";
 import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram";
-import { Exercise } from "../../../model/workout";
 import { ExerciseVerificationCallbacks, ExerciseVerificationLabels } from "../addMethod/models";
 import { exercisesMethod, groupedButtonsFunction, verifyExerciseOutput } from "../utils";
 import { onTransaction } from "../../../database/dataAccessLayer";
 import { workoutUpdateQuery } from "./queries";
-import { redirectToMainMenuWithTaskDone } from "../../mainMenu";
+import { mainMenuPage } from "../../mainMenu";
 import { ExerciseQueryDelete } from "../deleteMethod/queries";
 import { ExerciseDeleteHandler } from "../deleteMethod/functions";
 import { BotUtils } from "../singUp/functions";
@@ -54,10 +53,17 @@ export class ExerciseInlineKeybaord extends MessageTemplate {
   }
   private options: { [key in keyof typeof exercisesMethod]: (ctx: Context, bot: Telegraf) => Promise<void> } = {
     deleteMethod: async (ctx: Context, bot: Telegraf): Promise<void> => {
+      updateUserState(ctx.from!.id, {
+        data: {
+          selectedExercises: {
+            exercisesId: response
+          }
+        }
+      })
       const data = await ExerciseQueryDelete.DeleteSelectedExercises(ctx)
       const mappedData = await ExerciseDeleteHandler.getDeletedExercisesMap(ctx, data)
       await BotUtils.sendBotMessage(ctx, mappedData)
-      return await redirectToMainMenuWithTaskDone(ctx, bot,
+      return await mainMenuPage(ctx, bot,
         botMessages.inputRequest.prompts.deleteMethod.successfull)
     },
     getMethod: async (): Promise<void> => {
@@ -128,7 +134,7 @@ export class ExerciseUpdateVerificationHandler extends MessageTemplate {
     }
   }
   private async handleResponseCallback(bot: Telegraf, message: string) {
-    await redirectToMainMenuWithTaskDone(this.ctx, bot, message)
+    return await mainMenuPage(this.ctx, bot, message)
   }
   private async handleYesCallback(ctx: Context, bot: Telegraf) {
     await onTransaction(async (clientTransaction) => {

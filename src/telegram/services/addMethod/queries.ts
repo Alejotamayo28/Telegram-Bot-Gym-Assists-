@@ -1,5 +1,4 @@
 import { PoolClient } from "pg";
-import { PartialWorkout } from "../../../model/workout";
 import { Context } from "telegraf";
 import { Exercise } from "../../../userState";
 
@@ -13,15 +12,15 @@ export class ExerciseQueryPost {
       if (day >= 15 && day <= 21) return 3
       return 4
     }
-    await client.query(`INSERT INTO workout(user_id, date, day, name, reps, kg, week) VALUES($1, $2, $3, $4, $5, $6, $7)`,
+    await client.query(`INSERT INTO workout(user_id, date, day, name, reps, weight, week) VALUES($1, $2, $3, $4, $5, $6, $7)`,
       [ctx.from!.id, date, workoutData.day, workoutData.name, workoutData.reps, workoutData.weight, weekDay(date)])
   }
-  static async ExercisePostTesting(workoutData: PartialWorkout, ctx: Context, client: PoolClient): Promise<void> {
+  static async ExercisePostTesting(workoutData: Exercise, ctx: Context, client: PoolClient): Promise<void> {
     await client.query(
-      `INSERT INTO ejercicios (usuario_id, dia, fecha, nombre, reps, kg, semana)
+      `INSERT INTO ejercicios (usuario_id, dia, fecha, nombre, reps, weight, semana)
     VALUES ($1, $2, CURRENT_DATE, $3, $4, $5, 
     EXTRACT(WEEK FROM CURRENT_DATE) - EXTRACT(WEEK FROM CURRENT_DATE - interval '21 days'))`,
-      [ctx.from!.id, workoutData.day, workoutData.name, workoutData.reps, workoutData.kg])
+      [ctx.from!.id, workoutData.day, workoutData.name, workoutData.reps, workoutData.weight])
   }
 }
 

@@ -1,12 +1,12 @@
 import { Context, Telegraf } from "telegraf";
-import { deleteBotMessage, userStageGetExercise, userStateUpdateStage } from "../../../userState";
+import { BotStage, deleteBotMessage, updateUserStage } from "../../../userState";
 import { EXERCISE_VIEW_LABELS, ExerciseFetchGraphTextLabels, ExerciseFetchGraphTextOptions, ExerciseViewOption } from "./models";
 import { msgExerciseViewOptionsMD } from "./messages";
 import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram";
 import { handleGetDailyExercisesGraphic } from ".";
 import { ExerciseQueryFetcher } from "./queries";
 import { MessageTemplate } from "../../../template/message";
-import { redirectToMainMenuWithTaskDone } from "../../mainMenu";
+import { mainMenuPage } from "../../mainMenu";
 import { ExerciseGetHandler, ExerciseGetUtils } from "./functions";
 import { BotUtils } from "../singUp/functions";
 import { botMessages } from "../../messages";
@@ -37,23 +37,27 @@ export class ExerciseFetchHandler extends MessageTemplate {
       return handlers[action]();
     }
   }
+
   private async handleLastWeek(ctx: Context, bot: Telegraf) {
     const data = await ExerciseQueryFetcher.ExcerciseLastWeekById(ctx)
     if (!data.length) {
-      return await redirectToMainMenuWithTaskDone(ctx, bot, `No se han encontrado ejercicios en base a tus selecciones.`)
+      return await mainMenuPage(ctx, bot,
+        botMessages.inputRequest.prompts.getMethod.errors.exerciseEmptyData)
     }
     const mappedData = ExerciseGetUtils.mapExercisesByDay(data, "getMethod")
     await BotUtils.sendBotMessage(ctx, mappedData)
-    return await redirectToMainMenuWithTaskDone(ctx, bot, botMessages.inputRequest.prompts.getMethod.succesfull)
+    return await mainMenuPage(ctx, bot, botMessages.inputRequest.prompts.getMethod.succesfull)
   }
+
   //Flow: Mes -> nombre ejercicio
   private async handleOneRecord(ctx: Context, bot: Telegraf) {
     const monthKeyboard = new MonthInlineKeybord(
       botMessages.inputRequest.prompts.getMethod.exerciseMonth)
     const getRecordController = async () => {
       await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.getMethod.exerciseRecord)
-      userStateUpdateStage(ctx, userStageGetExercise.GET_EXERCISE_RECORD)
+      return updateUserStage(ctx.from!.id, BotStage.Exercise.GET_ONE_EXERCISE_RECORD)
     }
+
     await setUpKeyboardIteration(ctx, monthKeyboard, bot, {
       callbackPattern: regexPattern(MonthCallbacks),
       nextStep: async () => await getRecordController()

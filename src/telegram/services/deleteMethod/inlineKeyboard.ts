@@ -1,19 +1,18 @@
 import { Context, Telegraf } from "telegraf";
-import { PartialWorkout } from "../../../model/workout";
-import { deleteBotMessage, userState } from "../../../userState";
+import { deleteBotMessage, Exercise, getUserExercise } from "../../../userState";
 import { verifyDeleteExercise } from "../utils";
 import { InlineKeyboardMarkup, Message } from "telegraf/typings/core/types/typegram";
 import { MessageTemplate } from "../../../template/message";
 import { ExerciseVerificationCallbacks, ExerciseVerificationLabels } from "../addMethod/models";
 import { onTransaction } from "../../../database/dataAccessLayer";
 import { ExerciseQueryDelete } from "./queries";
-import { redirectToMainMenuWithTaskDone } from "../../mainMenu";
+import { mainMenuPage } from "../../mainMenu";
 
 export class ExerciseDeleteVerificationHandler extends MessageTemplate {
   constructor(private ctx: Context) {
     super()
   }
-  workoutData: PartialWorkout = userState[this.ctx.from!.id]
+  workoutData: Exercise = getUserExercise(this.ctx.from!.id)
   protected prepareMessage() {
     const message = verifyDeleteExercise(this.workoutData)
     const keyboard: InlineKeyboardMarkup = {
@@ -37,11 +36,11 @@ export class ExerciseDeleteVerificationHandler extends MessageTemplate {
     }
   }
   private async handleResponeCallback(bot: Telegraf, message: string) {
-    await redirectToMainMenuWithTaskDone(this.ctx, bot, message)
+    await mainMenuPage(this.ctx, bot, message)
   }
   private async handleYesCallback(bot: Telegraf) {
     await onTransaction(async (transactionWorkout) => {
-      await ExerciseQueryDelete.ExerciseDelete(this.ctx, userState[this.ctx.from!.id], transactionWorkout)
+      await ExerciseQueryDelete.ExerciseDelete(this.ctx, transactionWorkout)
     })
     await this.handleResponeCallback(bot,
       `*Ejercicio eliminado* ❌ \n\n_El ejercicio ha sido agregado exitosamente._`)

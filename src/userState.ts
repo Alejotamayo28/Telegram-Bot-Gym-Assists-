@@ -1,11 +1,7 @@
 import { Context } from "telegraf"
-export let userState: { [key: number]: any } = {}
+import { Client } from "pg"
 
-export enum SignUpStage {
-  NICKNAME = 'SIGN_UP_NICKNAME',
-  PASSWORD = 'SIGN_UP_PASSWORD',
-  EMAIL = 'SIGN_UP_EMAIL'
-}
+export let userState: { [key: number]: any } = {}
 
 export function getUserState(userId: number) {
   return userState[userId]
@@ -14,54 +10,6 @@ export function getUserState(userId: number) {
 export enum userStageCreateFamily {
   POST_FAMILY_NAME = 'postFamilyName',
   POST_FAMILY_PASSWORD = 'postFamilyPassword'
-}
-
-export enum userStage {
-  LOGIN_NICKNAME = 'loginNicknameStage',
-  LOGIN_PASSWORD = 'loginPasswordStage',
-  LOGIN_EXAMPLE = 'loginExampleStage'
-}
-
-export enum userStageSignUp {
-  SIGN_UP_NICKNAME = 'signUpNicknameStage',
-  SIGN_UP_PASSWORD = 'signUpPasswordStage',
-  SIGN_UP_EMAIL = 'signUpEmailStage',
-  SIGN_UP_EXAMPLE = 'signUpExample'
-}
-
-export enum userStagePostExercise {
-  POST_EXERCISE_DAY = 'postExerciseDay',
-  POST_EXERCISE_NAME = 'postExerciseName',
-  POST_EXERCISE_REPS = 'postExerciseReps',
-  POST_EXERCISE_VERIFICATION = 'postExerciseVerification'
-}
-export enum userStagePutExercise {
-  PUT_EXERCISE_DAY = 'putExerciseDay',
-  PUT_EXERCISE_NAME = 'putExerciseName',
-  PUT_EXERCISE_REPS = 'putExerciseReps',
-  PUT_EXERCISE_WEIGHT = 'putExerciseWeight'
-}
-
-export enum userStageGetExercise {
-  GET_EXERCISE_OPTIONS = 'getExerciseOptions',
-  GET_EXERCISE_MONTH = 'getExerciseMonth',
-  GET_EXERCISE_DAY = 'getExerciseDay',
-  GET_EXERCISE_MONTH_STAGE = 'getExerciseMonthStage',
-  GET_EXERCISE_RECORD = `getExerciseRecord`
-
-}
-
-export enum userStageDeleteExercise {
-  DELETE_EXERCISE_MONTH = 'deleteExerciseMonth',
-  DELETE_EXERCISE_DAY = 'deleteExerciseDay',
-  DELETE_EXERCISE_NAME = 'deleteExerciseName',
-  DELETE_EXERCISE_WEEK = 'deleteExerciseWeek',
-  DELETE_CONFIRMATION = 'deleteConfirmation'
-}
-
-interface Initial {
-  nickname?: string
-  password?: string
 }
 
 export namespace BotStage {
@@ -80,11 +28,14 @@ export namespace BotStage {
     CREATE_WEIGHT = 'EXERCISE_CREATE_WEIGHT',
     UPDATE_REPS = 'EXERCISE_UPDATE_REPS',
     UPDATE_WEIGHT = 'EXERCISE_UPDATE_WEIGHT',
-    GET_NAME = 'EXERCISE_GET_NAME'
+    GET_NAME = 'EXERCISE_GET_NAME',
+    GET_ONE_EXERCISE_RECORD = 'EXERCISE_ONE_RECORD'
   }
   export enum PostFamily {
     NAME = 'POST_FAMILY_NAME',
-    PASSWORD = 'POST_FAMILY_PASSWORD'
+    PASSWORD = 'POST_FAMILY_PASSWORD',
+    JOIN_FAMILY_NAME = 'JOIN_FAMILY_NAME',
+    JOIN_FAMILY_PASSWORD = 'JOIN_FAMILY_PASSWORD'
   }
 }
 
@@ -100,12 +51,15 @@ interface UserProfile {
 }
 
 export interface Exercise {
-  month?: string
-  day?: string,
-  week?: number
-  name?: string,
-  reps?: number[]
-  weight?: number,
+  id: number
+  date: Date
+  year: number
+  month: string
+  day: string,
+  week: number
+  name: string,
+  reps: number[]
+  weight: number,
 }
 
 export interface UpdateExercise {
@@ -120,6 +74,43 @@ export interface SelectedExercises {
   exercisesId?: number[]
 }
 
+export type FamilyRole = 'ADMIN' | 'MEMBER'
+
+
+export interface Family {
+  family_id: number,
+  family_name: string,
+  family_password: string,
+  created_at: Date,
+  max_members: number,
+  description: string,
+  members?: FamilyMember[]
+}
+
+export interface FamilyMember {
+  family_member_id: number,
+  family_id: number,
+  client_id: number,
+  role: FamilyRole,
+  joined_at: Date,
+  user?: Client
+}
+
+export interface UserFamilyResponse {
+  id: number,
+  nickname: string,
+  family_id: number,
+  family_name: string,
+  role: FamilyRole,
+  joined_at: Date
+}
+
+export interface UserFamilyMemberResponse {
+  id: number,
+  nickname: string
+}
+
+
 interface UserState {
   stage: BotStage.Auth | BotStage.Register | BotStage.Exercise | BotStage.PostFamily
   data: {
@@ -128,7 +119,10 @@ interface UserState {
     exercise: Partial<Exercise>,
     updateExercise: Partial<UpdateExercise>,
     message: Partial<Message>,
-    selectedExercises: Partial<SelectedExercises>
+    selectedExercises: Partial<SelectedExercises>,
+    family: Partial<Family>,
+    familyMember: Partial<FamilyMember>,
+    selectedFamilyMember: Partial<UserFamilyMemberResponse>
   }
 }
 
@@ -153,6 +147,7 @@ export function updateUserState(
       profile: {
         ...userState[userId]?.data?.profile,
         ...updates.data?.profile
+
       },
       exercise: {
         ...userState[userId]?.data?.exercise,
@@ -169,6 +164,18 @@ export function updateUserState(
       selectedExercises: {
         ...userState[userId]?.data?.selectedExercises,
         ...updates.data?.selectedExercises
+      },
+      family: {
+        ...userState[userId]?.data?.family,
+        ...updates.data?.family
+      },
+      familyMember: {
+        ...userState[userId]?.data?.familyMember,
+        ...updates.data?.familyMember
+      },
+      selectedFamilyMember: {
+        ...userState[userId]?.data?.selectedFamilyMember,
+        ...updates.data?.selectedFamilyMember
       }
     }
   }
@@ -196,6 +203,18 @@ export function getUserExercise(
   return userState[userId].data.exercise
 }
 
+export function getUserFamily(
+  userId: number
+): Required<Family> {
+  return userState[userId].data.family
+}
+
+export function getFamilyMember(
+  userId: number
+): Required<FamilyMember> {
+  return userState[userId].data.familyMember
+}
+
 export function getUserUpdateExercise(
   userId: number
 ): Required<UpdateExercise> {
@@ -214,27 +233,10 @@ export function getUserSelectedExercisesId
   return userState[userId].data.selectedExercises
 }
 
-export interface UpdateUserStateOptions {
-  Login?: Initial
-  month?: string,
-  day?: string;
-  name?: string;
-  reps?: number[];
-  kg?: number;
-  week?: number,
-  interval?: number,
-  stage?: string;
-  nickname?: string,
-  password?: string,
-  email?: string,
-  exercisesId?: number[],
-  messagesId?: number[],
-  selectionDone?: boolean,
-  familyId?: number,
-  familyName?: string,
-  familyPassword?: string,
-  familyMemberId?: number,
-  familyMemberNickname?: string
+export function getUserSelectedMember(
+  userId: number
+): Required<UserFamilyMemberResponse> {
+  return userState[userId].data.selectedFamilyMember
 }
 
 export const botMessageTest: { [userId: number]: number } = {}
@@ -263,85 +265,6 @@ export const deleteUserMessage = async (ctx: Context) => {
   }
 }
 
-export const updateUserStateExample = (ctx: Context, updates: UpdateUserStateOptions) => {
-  userState[ctx.from!.id] = {
-    ...userState[ctx.from!.id],
-    ...updates
-  }
-}
-export const userStateUpdataFamilyMemberNickname = (ctx: Context, familyMemberNickname: string) => {
-  updateUserStateExample(ctx, { familyMemberNickname })
-}
-
-export const userStateUpdateFamilyMemberId = (ctx: Context, familyMemberId: number) => {
-  updateUserStateExample(ctx, { familyMemberId })
-}
-
-export const userStateUpdateFamilyId = (ctx: Context, familyId: number) => {
-  updateUserStateExample(ctx, { familyId })
-}
-
-export const userStateUpdateFamilyName = (ctx: Context, familyName: string) => {
-  updateUserStateExample(ctx, { familyName })
-}
-
-export const userStateUpdateFamilyPassword = (ctx: Context, familyPassword: string) => {
-  updateUserStateExample(ctx, { familyPassword })
-}
 
 
-export const userStateUpdateSelectionDone = (ctx: Context, selectionDone: boolean) => {
-  updateUserStateExample(ctx, { selectionDone })
-}
-export const userStateUpdateMessagesId = (ctx: Context, messagesId: number[]) => {
-  updateUserStateExample(ctx, { messagesId })
-}
 
-export const userStateUpdateExercisesId = (ctx: Context, exercisesId: number[]) => {
-  updateUserStateExample(ctx, { exercisesId })
-}
-
-export const userStateUpdateStage = (ctx: Context, stage: string) => {
-  updateUserStateExample(ctx, { stage })
-}
-
-export const userStateUpdateDay = (ctx: Context, day: string, stage?: string) => {
-  updateUserStateExample(ctx, { day, stage })
-}
-
-export const userStateUpdateMonth = (ctx: Context, month: string, stage?: string) => {
-  updateUserStateExample(ctx, { month, stage })
-}
-
-export const userStateUpdateName = (ctx: Context, name: string, stage?: string) => {
-  updateUserStateExample(ctx, { name, stage })
-}
-
-export const userStateUpdateReps = (ctx: Context, reps: number[], stage?: string) => {
-  updateUserStateExample(ctx, { reps, stage })
-}
-
-export const userStateUpdateKg = (ctx: Context, kg: number, stage?: string) => {
-  updateUserStateExample(ctx, { kg, stage })
-}
-
-
-export const userStateUpdateWeek = (ctx: Context, week: number, stage?: string) => {
-  updateUserStateExample(ctx, { week, stage })
-}
-
-export const userStateUpdateNickname = (ctx: Context, nickname: string, stage?: string) => {
-  updateUserStateExample(ctx, { nickname, stage })
-}
-
-export const userStateUpdatePassword = (ctx: Context, password: string, stage?: string) => {
-  updateUserStateExample(ctx, { password, stage })
-}
-
-export const userStateUpdateEmail = (ctx: Context, email: string, stage?: string) => {
-  updateUserStateExample(ctx, { email, stage })
-}
-
-export const userStateUpdateInterval = (ctx: Context, interval: number, stage?: string) => {
-  updateUserStateExample(ctx, { interval, stage })
-}

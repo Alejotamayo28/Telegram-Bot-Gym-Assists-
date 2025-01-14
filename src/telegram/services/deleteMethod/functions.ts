@@ -1,39 +1,28 @@
 import { Context, Telegraf } from "telegraf";
-import { deleteUserMessage, saveBotMessage, userStageDeleteExercise, userState, userStateUpdateDay, userStateUpdateMonth, userStateUpdateName, userStateUpdateWeek } from "../../../userState";
+import { deleteUserMessage, Exercise, saveBotMessage, updateUserState } from "../../../userState";
 import { parseInt } from "lodash";
 import { ExerciseQueryFetcher } from "../getMethod/queries";
 import { deleteExerciseVerificationController } from ".";
 import { botMessages } from "../../messages";
 import { BotUtils } from "../singUp/functions";
 import { ExerciseGetUtils } from "../getMethod/functions";
-import { Exercise } from "../../../model/workout";
 
 export class ExerciseDeleteHandler {
   private static async handleDeleteExerciseError(ctx: Context, errorType: keyof typeof botMessages.inputRequest.prompts.getMethod.errors) {
     const errorMessage = botMessages.inputRequest.prompts.getMethod.errors[errorType]
     await BotUtils.sendBotMessage(ctx, errorMessage)
   }
-  static async exerciseMonth(ctx: Context, month: string, bot: Telegraf): Promise<void> {
-    //REWORKING
-    await deleteUserMessage(ctx)
-    userStateUpdateMonth(ctx, month)
-  }
-  static async exerciseDay(ctx: Context, day: string): Promise<void> {
-    // SHOULD NOT ENTER HERE
-    await deleteUserMessage(ctx)
-    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.deleteMethod.exerciseName)
-    userStateUpdateDay(ctx, day, userStageDeleteExercise.DELETE_EXERCISE_NAME)
-  }
-  static async exerciseName(ctx: Context, name: string): Promise<void> {
-    await deleteUserMessage(ctx)
-    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.deleteMethod.exerciseWeek)
-    userStateUpdateName(ctx, name, userStageDeleteExercise.DELETE_EXERCISE_WEEK)
-  }
   static async exerciseWeekAndConfirmation(ctx: Context, bot: Telegraf, week: string): Promise<void> {
     await deleteUserMessage(ctx)
     const weekNumber = parseInt(week)
-    userStateUpdateWeek(ctx, weekNumber)
-    const exercise = await ExerciseQueryFetcher.ExerciseByMonthDayWeekAndId(ctx.from!.id, userState[ctx.from!.id])
+    updateUserState(ctx.from!.id, {
+      data: {
+        exercise: {
+          week: weekNumber
+        }
+      }
+    })
+    const exercise = await ExerciseQueryFetcher.ExerciseByMonthDayWeekAndId(ctx.from!.id)
     if (!exercise) {
       await this.handleDeleteExerciseError(ctx, "exerciseNotFound")
       return
@@ -56,7 +45,7 @@ export class ExerciseDeleteHandler {
       result += `\n========================\n📅 *${name.toUpperCase()}*
 ----------------------------------\n`
       groupedData[name].forEach((exercise: Exercise) => {
-        result += `     • _ID_: ${exercise.id}  |  _Reps_:  ${exercise.reps.join(', ')}  |  _Peso:_  ${exercise.kg}\n`
+        result += `     • _ID_: ${exercise.id}  |  _Reps_:  ${exercise.reps.join(', ')}  |  _Peso:_  ${exercise.weight}\n`
       })
     }
     return result.trim()

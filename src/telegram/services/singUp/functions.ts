@@ -1,5 +1,8 @@
 import { Context, Telegraf } from "telegraf"
-import { BotStage, deleteUserMessage, getUserState, saveBotMessage, updateUserState, userStageSignUp, userState, userStateUpdateEmail, userStateUpdateNickname, userStateUpdatePassword, userStateUpdateStage } from "../../../userState"
+import {
+  BotStage, deleteUserMessage, getUserCredentials, saveBotMessage,
+  updateUserStage, updateUserState, userState
+} from "../../../userState"
 import { encrypt } from "../../../middlewares/jsonWebToken/enCryptHelper"
 import { signUpVerificationController } from "."
 import { botMessages } from "../../messages"
@@ -91,10 +94,7 @@ export const testingDataStructures = async (ctx: Context, word: string) => {
   } else {
     const sugerencias = trie.suggest(inputUser.split(" ")[0])
     if (sugerencias.length > 0) {
-      await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.postMethod.outPut.exerciseSuggestions(sugerencias))
-    }
-    else {
-      console.log(`ejericicio no encotrado`)
+     return await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.postMethod.outPut.exerciseSuggestions(sugerencias))
     }
   }
 }
@@ -103,11 +103,11 @@ export class RegisterHandler {
   private static async handleRegistrationError(ctx: Context, errorType: keyof typeof botMessages.inputRequest.register.errors): Promise<void> {
     const errorMessage = botMessages.inputRequest.register.errors[errorType]
     await BotUtils.sendBotMessage(ctx, errorMessage)
-    userStateUpdateStage(ctx, userStageSignUp.SIGN_UP_NICKNAME)
+    updateUserStage(ctx.from!.id, BotStage.Register.NICKNAME)
   }
-  static async registerNickname(ctx: Context, userMessage: string): Promise<void> {
+  static async registerNickname(ctx: Context, nicknameInput: string): Promise<void> {
     await deleteUserMessage(ctx)
-    const user = await UserQueryFetcher.userNicknamePasswordByNickname(userMessage.toLowerCase())
+    const user = await UserQueryFetcher.userNicknamePasswordByNickname(nicknameInput.toLowerCase())
     if (user) {
       await this.handleRegistrationError(ctx, "invalidNickname")
       return
@@ -116,34 +116,34 @@ export class RegisterHandler {
       stage: BotStage.Register.PASSWORD,
       data: {
         credentials: {
-          nickname: userMessage
+          nickname: nicknameInput
         }
       }
     })
     await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.register.password)
   }
-  static async registerPassword(ctx: Context, userMessage: string): Promise<void> {
+  static async registerPassword(ctx: Context, inputPassword: string): Promise<void> {
     await deleteUserMessage(ctx)
     updateUserState(ctx.from!.id, {
       stage: BotStage.Register.EMAIL,
       data: {
         credentials: {
-          password: userMessage
+          password: inputPassword
         }
       }
     })
     await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.register.email)
   }
-  static async registerEmail(ctx: Context, bot: Telegraf, userMessage: string): Promise<void> {
+  static async registerEmail(ctx: Context, bot: Telegraf, inputEmail: string): Promise<void> {
     await deleteUserMessage(ctx)
     updateUserState(ctx.from!.id, {
       data: {
         credentials: {
-          email: userMessage
+          email: inputEmail
         }
       }
     })
-    const password = userState[ctx.from!.id].data.credentials.password
+    const { password } = getUserCredentials(ctx.from!.id)
     const passwordHash = await encrypt(password)
     await signUpVerificationController(ctx, bot, passwordHash)
   }

@@ -1,32 +1,28 @@
-import { Exercise, PartialWorkout } from "../../../model/workout";
 import { ChartData, ChartConfiguration } from "chart.js";
 import { ChartJSNodeCanvas } from "chartjs-node-canvas";
 import { ExerciseQueryFetcher } from "./queries";
 import { validateExercises, validateMonths } from "../../../validators/allowedValues";
 import { Context, Telegraf } from "telegraf";
-import { deleteUserMessage, getUserState, userStageGetExercise, userState, userStateUpdateMonth, Exercise as newExercise, getUserExercise } from "../../../userState";
+import { deleteUserMessage, userState, Exercise as newExercise, getUserExercise } from "../../../userState";
 import { botMessages } from "../../messages";
 import { BotUtils } from "../singUp/functions";
-import { redirectToMainMenuWithTaskDone } from "../../mainMenu";
+import { mainMenuPage } from "../../mainMenu";
 import { exercisesMethod } from "../utils";
 
 export class ExerciseGetHandler {
-  static async exerciseMonth(ctx: Context, userMessage: string): Promise<void> {
-    await deleteUserMessage(ctx)
-    const month = userMessage.toLowerCase()
-    userStateUpdateMonth(ctx, month, userStageGetExercise.GET_EXERCISE_DAY)
-    await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.getMethod.exerciseDay)
-  }
   static async getMonthlyExerciseText(ctx: Context, month: string, bot: Telegraf): Promise<void> {
     await deleteUserMessage(ctx)
     try {
       const exercise = await ExerciseQueryFetcher.ExerciseByIdAndMonth(ctx.from!.id, month)
-      if (!exercise.length) return await redirectToMainMenuWithTaskDone(ctx, bot, botMessages.inputRequest.prompts.getMethod.errors.exerciseEmptyData)
+      if (!exercise.length) return await mainMenuPage(ctx, bot,
+        botMessages.inputRequest.prompts.getMethod.errors.exerciseEmptyData)
       const formattedOutput = ExerciseGetUtils.mapExercisesByNameAndWeek(exercise)
       const formattedMonth = month.toUpperCase()
       const date = new Date()
-      await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.getMethod.outPut.Monthly(formattedMonth, date, formattedOutput))
-      return await redirectToMainMenuWithTaskDone(ctx, bot, botMessages.inputRequest.prompts.getMethod.succesfull)
+      await BotUtils.sendBotMessage(ctx,
+        botMessages.inputRequest.prompts.getMethod.outPut.Monthly(formattedMonth, date, formattedOutput))
+      return await mainMenuPage(ctx, bot,
+        botMessages.inputRequest.prompts.getMethod.succesfull)
     } catch (error) {
       console.error(`Error: `, error)
     }
@@ -36,12 +32,18 @@ export class ExerciseGetHandler {
     try {
       const { month } = userState[ctx.from!.id]
       const exercise = await ExerciseQueryFetcher.ExerciseByIdAndDayAndMonth(ctx.from!.id, day, month)
-      if (!exercise.length) return await redirectToMainMenuWithTaskDone(ctx, bot, botMessages.inputRequest.prompts.getMethod.errors.exerciseEmptyData)
+      if (!exercise.length) {
+        return await mainMenuPage(ctx, bot,
+          botMessages.inputRequest.prompts.getMethod.errors.exerciseEmptyData)
+      }
       const formattedOutput = ExerciseGetUtils.mapExercisesByNameAndWeek(exercise)
       const formattedDay = day.toUpperCase()
       const date = new Date()
-      await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.getMethod.outPut.Daily(month, formattedDay, date, formattedOutput))
-      return await redirectToMainMenuWithTaskDone(ctx, bot, botMessages.inputRequest.prompts.getMethod.succesfull)
+      await BotUtils.sendBotMessage(ctx,
+        botMessages.inputRequest.prompts.getMethod.outPut.Daily(
+          month, formattedDay, date, formattedOutput))
+      return await mainMenuPage(ctx, bot,
+        botMessages.inputRequest.prompts.getMethod.succesfull)
     } catch (error) {
       console.error(`Error: `, error)
     }
@@ -50,11 +52,17 @@ export class ExerciseGetHandler {
     await deleteUserMessage(ctx)
     try {
       const exercise = await ExerciseQueryFetcher.ExerciseById(ctx.from!.id)
-      if (!exercise.length) return await redirectToMainMenuWithTaskDone(ctx, bot, botMessages.inputRequest.prompts.getMethod.errors.exerciseEmptyData)
+      if (!exercise.length) {
+        return await mainMenuPage(ctx, bot,
+          botMessages.inputRequest.prompts.getMethod.errors.exerciseEmptyData)
+      }
       const formattedExercises = ExerciseGetUtils.mapAllTimeExercises(exercise)
       const date = new Date()
-      await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.prompts.getMethod.outPut.Alltime(date, formattedExercises))
-      return await redirectToMainMenuWithTaskDone(ctx, bot, botMessages.inputRequest.prompts.getMethod.succesfull)
+      await BotUtils.sendBotMessage(ctx,
+        botMessages.inputRequest.prompts.getMethod.outPut.Alltime(
+          date, formattedExercises))
+      return await mainMenuPage(ctx, bot,
+        botMessages.inputRequest.prompts.getMethod.succesfull)
     } catch (error) {
       console.error(`Error: `, error)
     }
@@ -62,9 +70,19 @@ export class ExerciseGetHandler {
 }
 
 export class ExerciseGetUtils {
-  static mapAllTimeExercises(data: Exercise[]): string {
-    const groupedData: { [year: number]: { [mes: string]: { [day: string]: { [exercise: string]: { [week: number]: Exercise[] } } } } } = {}
-    data.forEach((exercise: Exercise) => {
+  static mapAllTimeExercises(data: newExercise[]): string {
+    const groupedData: {
+      [year: number]: {
+        [mes: string]: {
+          [day: string]: {
+            [exercise: string]: {
+              [week: number]: newExercise[]
+            }
+          }
+        }
+      }
+    } = {}
+    data.forEach((exercise: newExercise) => {
       const month = validateMonths[exercise.date.getMonth()]
       const year = exercise.date.getFullYear()
       if (!groupedData[year]) {
@@ -94,8 +112,8 @@ export class ExerciseGetUtils {
             result += `💪 Ejercicio: _${exercise.toUpperCase()}\n_`;
             for (const week in groupedData[year][month][day][exercise]) {
               result += `   🔢 Semana _${week}:_\n`;
-              groupedData[year][month][day][exercise][week].forEach((exercise: Exercise) => {
-                result += `      • _Reps:_ ${exercise.reps.join(', ')} | _Peso:_ ${exercise.kg} kg\n`;
+              groupedData[year][month][day][exercise][week].forEach((exercise: newExercise) => {
+                result += `      • _Reps:_ ${exercise.reps.join(', ')} | _Peso:_ ${exercise.weight} kg\n`;
               })
             }
           }
@@ -104,11 +122,11 @@ export class ExerciseGetUtils {
     }
     return result.trim()
   }
-  static mapExerciseByNameDayWeekTESTING(data: Exercise[], ctx: Context,
+  static mapExerciseByNameDayWeekTESTING(data: newExercise[], ctx: Context,
     method: keyof typeof exercisesMethod): string {
     const workoutData: Required<newExercise> = getUserExercise(ctx.from!.id)
-    const groupedData: { [year: number]: { [name: string]: Exercise[] } } = {}
-    data.forEach((exercise: Exercise) => {
+    const groupedData: { [year: number]: { [name: string]: newExercise[] } } = {}
+    data.forEach((exercise: newExercise) => {
       groupedData[exercise.year] ??= {}
       groupedData[exercise.year][exercise.name] ??= []
       groupedData[exercise.year][exercise.name].push(exercise)
@@ -121,16 +139,16 @@ export class ExerciseGetUtils {
 🔄 Semana: _${workoutData.week} _\n----------------------------------\n`
       for (const name in groupedData[year]) {
         result += `  🔢 _Ejercicio: ${name.toUpperCase()}: _\n`
-        groupedData[year][name].forEach((exercise: Exercise) => {
-          result += `     • id: ${exercise.id}  | _Reps_:  ${exercise.reps.join(', ')}  | _Peso:_  ${exercise.kg} \n`
+        groupedData[year][name].forEach((exercise: newExercise) => {
+          result += `     • id: ${exercise.id}  | _Reps_:  ${exercise.reps.join(', ')}  | _Peso:_  ${exercise.weight} \n`
         })
       }
     }
     return result.trim()
   }
-  static mapExercisesByDay(data: Exercise[], method: keyof typeof exercisesMethod): string {
-    const groupedData: { [day: string]: Exercise[] } = {}
-    data.forEach((exercise: Exercise) => {
+  static mapExercisesByDay(data: newExercise[], method: keyof typeof exercisesMethod): string {
+    const groupedData: { [day: string]: newExercise[] } = {}
+    data.forEach((exercise: newExercise) => {
       groupedData[exercise.day] ??= []
       groupedData[exercise.day].push(exercise)
     })
@@ -138,15 +156,15 @@ export class ExerciseGetUtils {
     let result = `*Registro ejercicios - Fecha ${date.toLocaleDateString()}*\n\n_Se encontraron los siguientes ejercicios:_\nMetodo: ${exercisesMethod[method]}`
     for (const day in groupedData) {
       result += `\n========================\n📅 * ${day.toUpperCase()}*\n----------------------------------\n`
-      groupedData[day].forEach((exercise: Exercise) => {
-        result += `     •  ${exercise.name}  |  _Reps_:  ${exercise.reps.join(', ')}  | _Peso:_  ${exercise.kg} \n`
+      groupedData[day].forEach((exercise: newExercise) => {
+        result += `     •  ${exercise.name}  |  _Reps_:  ${exercise.reps.join(', ')}  | _Peso:_  ${exercise.weight} \n`
       })
     }
     return result.trim()
   }
-  static mapExercisesByNameAndWeek(data: Exercise[]): string {
-    const groupedData: { [exercise: string]: { [week: number]: Exercise[] } } = {}
-    data.forEach((exercise: Exercise) => {
+  static mapExercisesByNameAndWeek(data: newExercise[]): string {
+    const groupedData: { [exercise: string]: { [week: number]: newExercise[] } } = {}
+    data.forEach((exercise: newExercise) => {
       if (validateExercises.includes(exercise.name)) {
         if (!groupedData[exercise.name]) {
           groupedData[exercise.name] = {};
@@ -163,7 +181,7 @@ export class ExerciseGetUtils {
       for (const week in groupedData[exerciseName]) {
         result += `🔄 Semana ${week}: \n`
         groupedData[exerciseName][week].forEach((exercise) => {
-          result += `    - Reps: ${exercise.reps.join(' ')} | Peso: ${exercise.kg} \n`
+          result += `    - Reps: ${exercise.reps.join(' ')} | Peso: ${exercise.weight} \n`
         })
       }
     }
@@ -173,7 +191,7 @@ export class ExerciseGetUtils {
 
 export const graphic = async (userId: number, day: string) => {
   const result = await ExerciseQueryFetcher.ExerciseByIdAndDay(userId, day)
-  const ejercicios = result.map(row => row.name + `\n${row.kg} kg`)
+  const ejercicios = result.map(row => row.name + `\n${row.weight} kg`)
   const serie1 = result.map(row => row.reps[0] || 0)
   const serie2 = result.map(row => row.reps[1] || 0)
   const serie3 = result.map(row => row.reps[2] || 0)

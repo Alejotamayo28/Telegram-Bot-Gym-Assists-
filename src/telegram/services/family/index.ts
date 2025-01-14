@@ -1,7 +1,7 @@
 import { Context, Telegraf } from "telegraf"
 import { saveBotMessage } from "../../../userState"
 import { regexPattern, setUpKeyboardIteration, tryCatch } from "../utils"
-import { FamilyInlineKeyboard } from "./inlineKeyboard"
+import { FamilyInlineKeyboard } from "./keyboards/familyKeyboard"
 import { FamilyInlinekeyboardAction } from "./models"
 import { FamilyQueries } from "./queries"
 

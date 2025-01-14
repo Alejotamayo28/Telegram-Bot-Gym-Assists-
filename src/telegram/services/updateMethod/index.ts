@@ -34,9 +34,9 @@ export const exerciseUpdateFlow = async (ctx: Context, bot: Telegraf) => {
       botMessages.inputRequest.prompts.updateMethod.exerciseDay)
     const weekKeyboard = new WeekInlineKeybaord(
       botMessages.inputRequest.prompts.updateMethod.exerciseWeek)
-    //Controller
+
     const updateExerciseController = async () => {
-      const data = await ExerciseQueryFetcher.ExerciseByMonthDayWeekAndId(ctx.from!.id, userState[ctx.from!.id])
+      const data = await ExerciseQueryFetcher.ExerciseByMonthDayWeekAndId(ctx.from!.id)
       await ctx.reply(ExerciseGetUtils.mapExerciseByNameDayWeekTESTING(data, ctx, "updateMethod"), {
         parse_mode: "Markdown"
       })
@@ -44,7 +44,7 @@ export const exerciseUpdateFlow = async (ctx: Context, bot: Telegraf) => {
         'Escoge el ejercicio que vas a actualizar de acuerdo a tus selecciones: ', data)
       await setUpKeyboardIteration(ctx, exerciseKeyboard, bot, {})
     }
-    //ChainFlow
+
     return await setUpKeyboardIteration(ctx, monthKeyboard, bot, {
       callbackPattern: regexPattern(MonthCallbacks),
       nextStep: async () => await setUpKeyboardIteration(ctx, daysKeyboard, bot, {

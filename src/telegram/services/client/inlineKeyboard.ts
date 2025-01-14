@@ -11,9 +11,7 @@ import { ClientDataMapped } from "./functions";
 import { BotUtils } from "../singUp/functions";
 import { botMessages } from "../../messages";
 import { mainMenuPage } from "../../mainMenu";
-import { FamilyType, regexPattern, setUpKeyboardIteration } from "../utils";
-import { TelegramEvents } from "node-telegram-bot-api";
-import { isMap } from "lodash";
+import {  regexPattern, setUpKeyboardIteration } from "../utils";
 
 export enum ClientProfileCallbacks {
   FETCH_PROFILE = 'FETCH_PROFILE',
@@ -44,6 +42,7 @@ export class ClientProfileInlineKeyboard extends MessageTemplate {
     }
   }
   private async handleFetchProfile(ctx: Context, bot: Telegraf): Promise<void> {
+    console.log('hola')
     const response = await ClientQueries.handleProfileUser(ctx.from!.id)
     const data = ClientDataMapped.ClientInfo(response)
     await BotUtils.sendBotMessage(ctx, data)

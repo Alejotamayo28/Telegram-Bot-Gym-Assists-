@@ -1,13 +1,14 @@
 import { compare } from "bcryptjs"
 import { Context, Telegraf } from "telegraf"
-import { BotStage, deleteUserMessage, getUserState, updateUserState, userStage, userState, userStateUpdatePassword } from "../../../userState"
+import { BotStage, deleteUserMessage, getUserCredentials, updateUserState } from "../../../userState"
 import { mainMenuPage } from "../../mainMenu"
 import { botMessages } from "../../messages"
 import { BotUtils } from "../singUp/functions"
 import { UserQueryFetcher } from "./queries"
 
 export class LoginHandler {
-  private static async handleLoginError(ctx: Context, errorType: keyof typeof botMessages.inputRequest.auth.errors): Promise<void> {
+  private static async handleLoginError(ctx: Context,
+    errorType: keyof typeof botMessages.inputRequest.auth.errors): Promise<void> {
     const errorMessage = botMessages.inputRequest.auth.errors[errorType]
     await BotUtils.sendBotMessage(ctx, errorMessage)
   }
@@ -32,10 +33,10 @@ export class LoginHandler {
     })
     await BotUtils.sendBotMessage(ctx, botMessages.inputRequest.auth.password)
   }
-  static async loginPassword(ctx: Context, bot: Telegraf, userMessage: string): Promise<void> {
+  static async loginPassword(ctx: Context, bot: Telegraf, inputPassword: string): Promise<void> {
     await deleteUserMessage(ctx)
-    const isPasswordValid = await this.verifyPassword(userMessage,
-      userState[ctx.from!.id].data.credentials.password)
+    const { password } = getUserCredentials(ctx.from!.id)
+    const isPasswordValid = await this.verifyPassword(inputPassword, password)
     if (!isPasswordValid) {
       await this.handleLoginError(ctx, "invalidPassword")
       return
