@@ -1,9 +1,8 @@
-import { Telegraf } from "telegraf"
-import dotenv from 'dotenv'
-import {  setUpHolaCommand} from "./commands/start"
+import { Telegraf } from "telegraf";
+import dotenv from "dotenv";
+import { setUpHolaCommand } from "./commands/start";
 
-dotenv.config()
+dotenv.config();
 
-export const bot = new Telegraf(process.env.TELEGRAM_TOKEN!)
-setUpHolaCommand(bot)
-
+export const bot = new Telegraf(process.env.TELEGRAM_TOKEN!);
+setUpHolaCommand(bot);

@@ -1,19 +1,19 @@
 export const DaysLabels = {
   LUNES: `Lunes`,
-  MARTES: 'Martes',
+  MARTES: "Martes",
   MIERCOLES: `Miercoles`,
   JUEVES: `Jueves`,
   VIERNES: `Viernes`,
   SABADO: `Sabado`,
-  DOMINGO: `Domingo`
-}
+  DOMINGO: `Domingo`,
+};
 
 export enum DaysCallbacks {
   LUNES = `Lunes`,
-  MARTES = 'Martes',
+  MARTES = "Martes",
   MIERCOLES = `Miercoles`,
   JUEVES = `Jueves`,
   VIERNES = `Viernes`,
   SABADO = `Sabado`,
-  DOMINGO = `Domingo`
+  DOMINGO = `Domingo`,
 }
