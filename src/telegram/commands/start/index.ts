@@ -1,8 +1,8 @@
 import { Context, Telegraf } from "telegraf";
 import { regexPattern, tryCatch } from "../../services/utils";
 import { saveBotMessage } from "../../../userState";
-import { StartCommandHadler } from "./inlineKeyboard";
 import { CommandStartCallbacks } from "./models";
+import { StartCommandHadler } from "./startInlineKeyboard";
 
 export const commandStart = async (ctx: Context, bot: Telegraf) => {
   const response = new StartCommandHadler();

@@ -1,7 +1,7 @@
 import { Context } from "telegraf";
 import { Exercise } from "../userState";
 import { botMessages } from "../telegram/messages";
-import { BotUtils } from "../telegram/services/clientSignUpService/functions";
+import { BotUtils } from "../utils/botUtils";
 
 export class ExerciseDeleteFormatter {
   private static async handleDeleteExerciseError(
@@ -22,13 +22,19 @@ export class ExerciseDeleteFormatter {
       groupedData[exercise.name].push(exercise);
     });
     const date = new Date();
-    let result = `* Registro ejercicios - Fecha ${date.toLocaleDateString()}*\n\n_Ejercicios eliminados_: \n`;
+    let result = `*🗑️ Registro de ejercicios eliminados - Fecha ${date.toLocaleDateString()}*\n\n`;
+    result += `_Ejercicios eliminados:_\n`;
     for (const name in groupedData) {
-      result += `\n========================\n📅 *${name.toUpperCase()}*
-----------------------------------\n`;
+      // Inicia el bloque de código para el ejercicio actual
+      result += `\n========================\n`;
+      result += `📅 *${name.toUpperCase()}*\n`;
+      // Encabezados de la tabla
+      result += `ID       Reps           Peso (kg)\n`;
+      // Datos del ejercicio
       groupedData[name].forEach((exercise: Exercise) => {
-        result += `     • _ID_: ${exercise.id}  |  _Reps_:  ${exercise.reps.join(", ")}  |  _Peso:_  ${exercise.weight}\n`;
+        result += `${exercise.id.toString().padEnd(8)} ${exercise.reps.join(", ").padEnd(12)} ${exercise.weight}\n`;
       });
+      result += `\`\`\`\n`;
     }
     return result.trim();
   }

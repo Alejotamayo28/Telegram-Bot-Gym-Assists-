@@ -4,12 +4,11 @@ import {
   deleteUserMessage,
   getUserCredentials,
   updateUserState,
-  UserState,
 } from "../../userState";
-import { BotUtils } from "../../telegram/services/clientSignUpService/functions";
+import { BotUtils } from "../../utils/botUtils";
 import { botMessages } from "../../telegram/messages";
 import { compare } from "bcryptjs";
-import { mainMenuPage } from "../../telegram/services/menus/mainMenuHandler";
+import { mainMenuPage } from "../../telegram/services/menus/mainMenuHandler/mainMenuController";
 import { ClientQueryFetcher } from "../../database/queries/clientQueries";
 
 export interface TelegramContext {

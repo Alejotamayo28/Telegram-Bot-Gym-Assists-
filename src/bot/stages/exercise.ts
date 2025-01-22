@@ -1,6 +1,6 @@
 import { Context } from "telegraf";
 import { botMessages } from "../../telegram/messages";
-import { BotUtils } from "../../telegram/services/clientSignUpService/functions";
+import { BotUtils } from "../../utils/botUtils";
 import {
   BotStage,
   deleteUserMessage,
@@ -11,10 +11,10 @@ import {
 } from "../../userState";
 import { TelegramContext } from "./login";
 import { onTransaction } from "../../database/dataAccessLayer";
-import { mainMenuPage } from "../../telegram/services/menus/mainMenuHandler";
 import { validateMonths } from "../../validators/allowedValues";
 import { WorkoutQueryFetcher } from "../../database/queries/exerciseQueries";
 import { ExerciseFetchFormatter } from "../../data-formatter.ts/exercise-fetch-formatter";
+import { dataLenghtEmpty } from "../../utils/responseUtils";
 
 interface MessageResult {
   success: boolean;
@@ -63,6 +63,7 @@ export async function handleMessageAndResponse(
 }
 
 export class TelegramExerciseHandler {
+
   static stage: {
     [key in keyof typeof BotStage.Exercise]: (
       stageParams: TelegramContext,
@@ -130,7 +131,7 @@ export class TelegramExerciseHandler {
           },
         });
       },
-      UPDATE_WEIGHT: async function ({ ctx, userMessage, bot }): Promise<void> {
+      UPDATE_WEIGHT: async function ({ ctx, userMessage }): Promise<void> {
         updateUserState(ctx.from!.id, {
           data: {
             updateExercise: {
@@ -139,7 +140,6 @@ export class TelegramExerciseHandler {
           },
         });
         const { reps, weight } = getUserUpdateExercise(ctx.from!.id);
-        console.log({ reps, weight });
         const { exercisesId } = getUserSelectedExercisesId(ctx.from!.id);
         return await onTransaction(async (clientTransaction) => {
           await clientTransaction.query(
@@ -168,13 +168,8 @@ export class TelegramExerciseHandler {
           ctx,
           monthNumber,
         );
-        if (!data.length) {
-          return await mainMenuPage(
-            ctx,
-            bot!,
-            botMessages.inputRequest.prompts.getMethod.errors.exerciseEmptyData,
-          );
-        }
+        if (!data.length)
+          return await dataLenghtEmpty(ctx, bot!);
         const mappedData = ExerciseFetchFormatter.formatExerciseByDay(
           data,
           "getMethod",

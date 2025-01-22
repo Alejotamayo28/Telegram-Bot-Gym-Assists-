@@ -1,8 +1,7 @@
 import { ClientQueryFetcher } from "../../database/queries/clientQueries";
 import { encrypt } from "../../middlewares/jsonWebToken/enCryptHelper";
 import { botMessages } from "../../telegram/messages";
-import { signUpVerificationController } from "../../telegram/services/clientSignUpService";
-import { BotUtils } from "../../telegram/services/clientSignUpService/functions";
+import { BotUtils } from "../../utils/botUtils";
 import {
   BotStage,
   deleteUserMessage,
@@ -10,6 +9,7 @@ import {
   updateUserState,
 } from "../../userState";
 import { TelegramContext } from "./login";
+import { signUpVerificationController } from "../../telegram/services/clientSignUpService/clientRegisterController";
 
 export class TelegramSignUpHandler {
   static stageRegister: {

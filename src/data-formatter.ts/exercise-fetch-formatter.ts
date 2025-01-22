@@ -3,7 +3,6 @@ import { exercisesMethod } from "../telegram/services/utils";
 import { Exercise, getUserExercise } from "../userState";
 import { validateMonths, validateExercises } from "../validators/allowedValues";
 
-
 export class ExerciseFetchFormatter {
   static formatClientExercises(data: Exercise[]): string {
     const groupedData: {
@@ -42,22 +41,27 @@ export class ExerciseFetchFormatter {
         exercise,
       );
     });
-    let result = `*Registro ejercicios* `;
+    let result = `*🏋️ Registro de ejercicios 🏋️*\n`; // Título principal
     for (const year in groupedData) {
       for (const month in groupedData[year]) {
-        result += `\n========================\n📅 *${month.toUpperCase()}* _${year}_ \n`;
+        result += `\n📅 *${month.toUpperCase()} ${year}*\n`;
+        result += `═══════════════════\n`;
         for (const day in groupedData[year][month]) {
-          result += `🔄 Día: _${day.toUpperCase()}_\n----------------------------------\n`;
+          result += `📆 Día: *${day}*\n`;
+          //result += `----------------------------------\n`;
           for (const exercise in groupedData[year][month][day]) {
-            result += `💪 Ejercicio: _${exercise.toUpperCase()}\n_`;
+            // Inicia el bloque de código para el ejercicio actual
+            result += `💪 *${exercise.toUpperCase()}*\n\`\`\`\n`;
+            // Crear una tabla sin bordes para el ejercicio actual
+            result += `Semana   Reps           Peso (kg)\n`;
             for (const week in groupedData[year][month][day][exercise]) {
-              result += `   🔢 Semana _${week}:_\n`;
               groupedData[year][month][day][exercise][week].forEach(
                 (exercise: Exercise) => {
-                  result += `      • _Reps:_ ${exercise.reps.join(", ")} | _Peso:_ ${exercise.weight} kg\n`;
+                  result += `${week}       ${exercise.reps.join(", ")}         ${exercise.weight}\n`;
                 },
               );
             }
+            result += `\`\`\`\n`;
           }
         }
       }
@@ -77,16 +81,27 @@ export class ExerciseFetchFormatter {
       groupedData[exercise.year][exercise.name].push(exercise);
     });
     const date = new Date();
-    let result = `*Registro ejercicios - Fecha ${date.toLocaleDateString()}*\n\n_Se encontraron los siguientes ejercicios:_\nMetodo: ${exercisesMethod[method]}`;
+    let result = `*🏋️ Registro de ejercicios - Fecha ${date.toLocaleDateString()}*\n\n`;
+    result += `_Se encontraron los siguientes ejercicios:_\n`;
+    result += `Método: ${exercisesMethod[method]}\n`;
     for (const year in groupedData) {
-      result += `\n========================\n📅 * ${workoutData.month!.toUpperCase()}* _${year} _
-📅 Dia: _${workoutData.day?.toUpperCase()} _
-🔄 Semana: _${workoutData.week} _\n----------------------------------\n`;
+      result += `\n========================\n`;
+      result += `📅 *${workoutData.month!.toUpperCase()}* _${year}_\n`;
+      result += `📅 Día: _${workoutData.day?.toUpperCase()}_\n`;
+      result += `🔄 Semana: _${workoutData.week}_\n`;
+      result += `----------------------------------\n`;
       for (const name in groupedData[year]) {
-        result += `  🔢 _Ejercicio: ${name.toUpperCase()}: _\n`;
+        // Inicia el bloque de código para el ejercicio actual
+        result += `💪 *${name.toUpperCase()}*\n\`\`\`\n`;
+        // Encabezados de la tabla
+        result += `ID       Reps           Peso (kg)\n`;
+        result += `------   ------------   ---------\n`;
+        // Datos del ejercicio
         groupedData[year][name].forEach((exercise: Exercise) => {
-          result += `     • id: ${exercise.id}  | _Reps_:  ${exercise.reps.join(", ")}  | _Peso:_  ${exercise.weight} \n`;
+          result += `${exercise.id}       ${exercise.reps.join(", ")}         ${exercise.weight}\n`;
         });
+        // Cierra el bloque de código para el ejercicio actual
+        result += `\`\`\`\n`;
       }
     }
     return result.trim();
@@ -101,12 +116,22 @@ export class ExerciseFetchFormatter {
       groupedData[exercise.day].push(exercise);
     });
     const date = new Date();
-    let result = `*Registro ejercicios - Fecha ${date.toLocaleDateString()}*\n\n_Se encontraron los siguientes ejercicios:_\nMetodo: ${exercisesMethod[method]}`;
+    let result = `*🏋️ Registro de ejercicios - Fecha ${date.toLocaleDateString()}*\n\n`;
+    result += `_Se encontraron los siguientes ejercicios:_\n`;
+    result += `Método: ${exercisesMethod[method]}\n`;
     for (const day in groupedData) {
-      result += `\n========================\n📅 * ${day.toUpperCase()}*\n----------------------------------\n`;
+      // Inicia el bloque de código para el día actual
+      result += `═══════════════════\n`;
+      result += `📅 *${day.toUpperCase()}*\n`;
+      result += `\`\`\`\n`;
+      // Encabezados de la tabla
+      result += `Ejercicio           Reps           Peso (kg)\n`;
+      // Datos del día
       groupedData[day].forEach((exercise: Exercise) => {
-        result += `     •  ${exercise.name}  |  _Reps_:  ${exercise.reps.join(", ")}  | _Peso:_  ${exercise.weight} \n`;
+        result += `${exercise.name}       ${exercise.reps.join(", ")}         ${exercise.weight}\n`;
       });
+      // Cierra el bloque de código para el día actual
+      result += `\`\`\`\n`;
     }
     return result.trim();
   }
@@ -124,15 +149,18 @@ export class ExerciseFetchFormatter {
         groupedData[exercise.name][exercise.week].push(exercise);
       }
     });
-    let result = "";
+    let result = `*🏋️ Registro de ejercicios 🏋️*\n`; // Título principal
     for (const exerciseName in groupedData) {
-      result += `\n💪 Ejercicio: ${exerciseName.toUpperCase()} \n\n`;
+      // Inicia el bloque de código para el ejercicio actual
+      result += `\n💪 *${exerciseName.toUpperCase()}*\n\`\`\`\n`;
       for (const week in groupedData[exerciseName]) {
-        result += `🔄 Semana ${week}: \n`;
+        result += `🔄 Semana ${week}:\n`;
         groupedData[exerciseName][week].forEach((exercise) => {
-          result += `    - Reps: ${exercise.reps.join(" ")} | Peso: ${exercise.weight} \n`;
+          result += `   • Reps: ${exercise.reps.join(", ")} | Peso: ${exercise.weight} kg\n`;
         });
       }
+      // Cierra el bloque de código para el ejercicio actual
+      result += `\`\`\`\n`;
     }
     return result.trim();
   }

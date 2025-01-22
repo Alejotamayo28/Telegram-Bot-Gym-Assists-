@@ -1,1 +1,0 @@
-import { familyInterface } from "./family";

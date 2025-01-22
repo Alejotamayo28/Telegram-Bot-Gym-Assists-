@@ -11,7 +11,7 @@ export interface UserCredentials {
 
 export interface UserProfile extends UserCredentials {
   name?: string;
-  lastName?: string;
+  lastname?: string;
   age?: number;
   weight?: number;
   height?: number;
@@ -107,6 +107,24 @@ export namespace BotStage {
     JOIN_FAMILY_NAME = "JOIN_FAMILY_NAME",
     JOIN_FAMILY_PASSWORD = "JOIN_FAMILY_PASSWORD",
   }
+  export enum EditProfile {
+    NICKNAME = "nickname",
+    PASSWORD = "password",
+    EMAIL = "email",
+    NAME = "name",
+    LASTNAME = "lastName",
+    AGE = "age",
+    WEIGHT = "weight",
+    HEIGHT = "height",
+    TESTING = "testing",
+  }
+}
+
+type Table = "client" | "client_info";
+
+export interface EditProfile {
+  action: string;
+  table: Table
 }
 
 export interface Message {
@@ -118,10 +136,11 @@ export interface SelectedExercises {
 
 export interface UserState {
   stage:
-    | BotStage.Auth
-    | BotStage.Register
-    | BotStage.Exercise
-    | BotStage.PostFamily;
+  | BotStage.EditProfile
+  | BotStage.Auth
+  | BotStage.Register
+  | BotStage.Exercise
+  | BotStage.PostFamily;
   data: {
     credentials: Partial<UserCredentials>;
     profile: Partial<UserProfile>;
@@ -132,6 +151,7 @@ export interface UserState {
     family: Partial<Family>;
     familyMember: Partial<FamilyMember>;
     selectedFamilyMember: Partial<UserFamilyMemberResponse>;
+    editProfile: Partial<EditProfile>;
   };
 }
 
@@ -185,6 +205,10 @@ export function updateUserState(
         ...userState[userId]?.data?.selectedFamilyMember,
         ...updates.data?.selectedFamilyMember,
       },
+      editProfile: {
+        ...userState[userId]?.data?.editProfile,
+        ...updates.data?.editProfile,
+      },
     },
   };
 }
@@ -235,6 +259,10 @@ export function getUserSelectedMember(
   userId: number,
 ): Required<UserFamilyMemberResponse> {
   return userState[userId].data.selectedFamilyMember;
+}
+
+export function getUserEditProfile(userId: number): Required<EditProfile> {
+  return userState[userId].data.editProfile;
 }
 
 export const botMessageTest: { [userId: number]: number } = {};

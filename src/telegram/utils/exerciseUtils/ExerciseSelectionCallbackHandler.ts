@@ -1,7 +1,7 @@
 import { Context, Telegraf } from "telegraf";
 import { botMessages } from "../../messages";
-import { mainMenuPage } from "../../services/menus/mainMenuHandler";
-import { BotUtils } from "../../services/clientSignUpService/functions";
+import { mainMenuPage } from "../../services/menus/mainMenuHandler/mainMenuController";
+import { BotUtils } from "../../../utils/botUtils";
 import { ExerciseDeleteFormatter } from "../../../data-formatter.ts/exercise-delete-formatter";
 import { WorkoutQueryDelete } from "../../../database/queries/exerciseQueries";
 import { BotStage, updateUserState } from "../../../userState";

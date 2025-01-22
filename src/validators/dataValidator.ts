@@ -7,7 +7,7 @@ import {
 import { isNaN, parseInt } from "lodash";
 import { deleteUserMessage } from "../userState";
 import { botMessages } from "../telegram/messages";
-import { BotUtils } from "../telegram/services/clientSignUpService/functions";
+import { BotUtils } from "../utils/botUtils";
 
 export class DataValidator {
   private static async handleDataValidatorError(

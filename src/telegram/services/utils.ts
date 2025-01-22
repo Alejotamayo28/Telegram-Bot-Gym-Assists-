@@ -77,36 +77,7 @@ export const familiesMethod = {
   getMethod: "Obtener",
 };
 
-export const createButton = (
-  text: string,
-  callbackData: CallbackData,
-): InlineKeyboardButton => {
-  return {
-    text,
-    callback_data: callbackData.action,
-  };
-};
 
-export const lastButton = createButton(`• Continuar`, { action: `continuar` });
-
-export const groupedButtonsFunction = (data: Exercise[]) => {
-  const response = data.reduce(
-    (rows: InlineKeyboardButton[][], exercise: Exercise, index: number) => {
-      const button = createButton(`• Id: ${exercise.id} | ${exercise.name}`, {
-        action: `${exercise.id}`,
-      });
-      if (index % 2 === 0) {
-        rows.push([button]);
-      } else {
-        rows[rows.length - 1].push(button);
-      }
-      return rows;
-    },
-    [],
-  );
-  response.push([lastButton]);
-  return response;
-};
 
 // regetPattern para las acciones del usuario, parametro = enum
 export const regexPattern = <T extends { [key: string]: string }>(
@@ -189,40 +160,6 @@ export const deleteLastMessage = async (ctx: Context) => {
   }
 };
 
-export const verifyExerciseOutput = (workout: Exercise) => {
-  return `*Confirmación de ejercicio:*
 
-🗓 *Día:* ${workout.day}
-💪 *Nombre:* ${workout.name}
-🔢 *Repeticiones:* ${workout.reps!.toString()}
-⚖️ *Peso:* ${workout.weight!.toString()} kg
 
-_Escoge alguna de las siguientes opciones para continuar\\!_`;
-};
 
-export const verifySignUpOutput = (data: UserCredentials) => {
-  return `*Confirmación de cuenta:*
-
-🗓 *Nickname:* ${data.nickname}
-💪 *Contrasena:* ${data.password}
-🔢 *Email:* ${data.email}
-
-_Escoge alguna de las siguientes opciones para continuar!_`;
-};
-
-export const verifyDeleteExercise = (data: Exercise) => {
-  return `*Confirmar eliminacion:*
-
-🗓 *Dia:* ${data.day}
-💪 *Nombre:* ${data.name}
-🔢 *Semana:* ${data.week}
-
-_Escoge alguna de las siguientes opciones para continuar!_`;
-};
-export const errorMessage = (userStage: string) => {
-  return `Error during ${userStage} process: `;
-};
-
-export function escapeMarkdown(text: string): string {
-  return text.replace(/[_*[\]()~`>#+\-=|{}.!]/g, "\\$&");
-}

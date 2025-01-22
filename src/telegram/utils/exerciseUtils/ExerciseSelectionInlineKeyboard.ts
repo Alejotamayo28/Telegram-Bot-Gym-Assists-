@@ -5,8 +5,9 @@ import {
   InlineKeyboardMarkup,
   Message,
 } from "telegraf/typings/core/types/typegram";
-import { exercisesMethod, groupedButtonsFunction } from "../../services/utils";
+import { exercisesMethod} from "../../services/utils";
 import { ExerciseSelectionCallackHandler } from "./ExerciseSelectionCallbackHandler";
+import { groupedButtonsFunction } from "../../../utils/buildExerciseInline";
 
 let response: number[] = [];
 let messagesId: number[] = [];
