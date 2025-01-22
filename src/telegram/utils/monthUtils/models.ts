@@ -10,8 +10,8 @@ export const MonthLabels = {
   SEPTIEMBRE: `septiembre`,
   OCTUBRE: `octubre`,
   NOVIEMBRE: `noviembre`,
-  DICIEMBRE: `diciembre`
-}
+  DICIEMBRE: `diciembre`,
+};
 
 export enum MonthCallbacks {
   ENERO = `enero`,
@@ -25,5 +25,5 @@ export enum MonthCallbacks {
   SEPTIEMBRE = `septiembre`,
   OCTUBRE = `octubre`,
   NOVIMEBRE = `noviembre`,
-  DICIEMBRE = `diciembre`
+  DICIEMBRE = `diciembre`,
 }
