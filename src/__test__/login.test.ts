@@ -1,59 +1,130 @@
-jest.mock(`../bot/functions/index`, () => ({
-  deleteLastMessage: jest.fn(),
+import { TelegramLoginHandler } from "../bot/stages/login";
+import { ClientQueryFetcher } from "../database/queries/clientQueries";
+import { BotUtils } from "../utils/botUtils";
+import { BotStage, getUserCredentials, updateUserState } from "../userState";
+import { Context, Telegraf } from "telegraf";
+import { Update } from "telegraf/typings/core/types/typegram";
+import { botMessages } from "../telegram/messages";
+import { compare } from "bcryptjs";
+import { mainMenuPage } from "../telegram/services/menus/mainMenuHandler/mainMenuController";
+
+jest.mock("../database/queries/clientQueries", () => ({
+  ClientQueryFetcher: {
+    getClientCredentialsByNickname: jest.fn(), // Simula el método estático
+  },
 }));
 
-jest.mock(`../userState`, () => ({
+jest.mock("../utils/botUtils", () => ({
+  BotUtils: {
+    sendBotMessage: jest.fn(),
+  },
+}));
+
+jest.mock("../userState", () => ({
+  deleteUserMessage: jest.fn(),
   updateUserState: jest.fn(),
-  UserStateManager: {
-    updateData: jest.fn(),
+  // Simuala el namespace con su repectivo Enum
+  BotStage: {
+    Auth: {
+      PASSWORD: "LOGIN_PASSWORD",
+    },
   },
-  userSession: {
-    setPassword: jest.fn(),
-  },
+  getUserCredentials: jest.fn(),
 }));
 
-import { mockContext } from "../__helpers__";
-import { deleteLastMessage } from "../telegram/services/utils";
-import * as loginModule from "../telegram/services/clientLoginService/functions";
-import { updateUserState, userSession } from "../userState";
+jest.mock("bcryptjs", () => ({
+  compare: jest.fn(),
+}));
 
-jest.spyOn(loginModule, `findUserByNickname`);
-jest.spyOn(loginModule, `handleUserNotFound`);
+jest.mock(
+  "../telegram/services/menus/mainMenuHandler/mainMenuController",
+  () => ({
+    mainMenuPage: jest.fn(),
+  }),
+);
 
-describe(`HANDLE LOGIN`, () => {
+//Simula el ctx de forma parcial
+const mockCtx: Partial<Context<Update>> = {
+  from: { id: 123, is_bot: false, first_name: "Test" },
+  reply: jest.fn(),
+};
+
+const mockBot = {};
+
+describe("Login", () => {
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
-  it(`should handle a valid user and prompt for password`, async () => {
-    (loginModule.findUserByNickname as jest.Mock).mockResolvedValueOnce(
-      mockContext,
-    );
-
-    await loginModule.handleLoginNickname(mockContext);
-    expect(deleteLastMessage).toHaveBeenCalledWith(mockContext);
-    expect(loginModule.findUserByNickname).toHaveBeenCalledWith("Test message");
-    expect(userSession.setPassword).toHaveBeenCalledWith(undefined);
-    expect(updateUserState).toHaveBeenCalledWith(mockContext.from!.id, {
-      stage: `login_password`,
+  it("Should send an error message if the nickname does not exists", async () => {
+    (
+      ClientQueryFetcher.getClientCredentialsByNickname as jest.Mock
+    ).mockResolvedValue(null);
+    await TelegramLoginHandler.stageRegister.NICKNAME({
+      ctx: mockCtx as Context<Update>,
+      userMessage: "unknown",
     });
-    expect(mockContext.deleteMessage).toHaveBeenCalledWith();
-    expect(mockContext.reply).toHaveBeenCalledWith(
-      "Por favor, proporciona tu contraseña",
+    expect(BotUtils.sendBotMessage).toHaveBeenCalledWith(
+      mockCtx,
+      botMessages.inputRequest.auth.errors.invalidNickname,
     );
+    expect(updateUserState).not.toHaveBeenCalled();
   });
-  it(`should handle user not found`, async () => {
-    (loginModule.findUserByNickname as jest.Mock).mockResolvedValueOnce(null);
 
-    await loginModule.handleLoginNickname(mockContext);
-    expect(deleteLastMessage).toHaveBeenCalledWith(mockContext);
-    expect(loginModule.findUserByNickname).toHaveBeenCalledWith("Test message");
-    expect(loginModule.handleUserNotFound).toHaveBeenCalledWith(mockContext);
-    expect(mockContext.deleteMessage).toHaveBeenCalled();
-    expect(mockContext.reply).toHaveBeenCalledWith(
-      `Usuario no encontrado, vuelve a escribir tu nickname: .`,
-    );
-    expect(updateUserState).toHaveBeenCalledWith(mockContext.from!.id, {
-      stage: `login_nickname`,
+  it("Should request the password and update the user state if the nickname exists", async () => {
+    (
+      ClientQueryFetcher.getClientCredentialsByNickname as jest.Mock
+    ).mockResolvedValue({
+      nickname: "alice",
+      password: "123",
     });
+    await TelegramLoginHandler.stageRegister.NICKNAME({
+      ctx: mockCtx as Context<Update>,
+      userMessage: "alice",
+    });
+    expect(BotUtils.sendBotMessage).toHaveBeenCalledWith(
+      mockCtx,
+      botMessages.inputRequest.auth.password,
+    );
+    expect(updateUserState).toHaveBeenCalledWith(123, {
+      stage: BotStage.Auth.PASSWORD,
+      data: {
+        credentials: {
+          nickname: "alice",
+          password: "123",
+        },
+      },
+    });
+  });
+
+  it("should send the main menu if the password is correct", async () => {
+    (getUserCredentials as jest.Mock).mockResolvedValue({ password: "123" });
+    (compare as jest.Mock).mockResolvedValue(true);
+
+    await TelegramLoginHandler.stageRegister.PASSWORD({
+      ctx: mockCtx as Context<Update>,
+      userMessage: "123",
+      bot: mockBot as Telegraf<Context<Update>>,
+    });
+
+    expect(mainMenuPage).toHaveBeenCalledWith(mockCtx, mockBot);
+  });
+
+  it("should send an error message if the password is incorrect", async () => {
+    (getUserCredentials as jest.Mock).mockReturnValue({ password: "1111" });
+    (compare as jest.Mock).mockResolvedValue(false);
+
+    await TelegramLoginHandler.stageRegister.PASSWORD({
+      ctx: mockCtx as Context<Update>,
+      userMessage: "wrongpassword",
+      bot: mockBot as Telegraf<Context<Update>>,
+    });
+
+    expect(getUserCredentials).toHaveBeenCalledWith(mockCtx.from!.id);
+    expect(compare).toHaveBeenCalledWith("wrongpassword", "1111");
+    expect(BotUtils.sendBotMessage).toHaveBeenCalledWith(
+      mockCtx,
+      botMessages.inputRequest.auth.errors.invalidPassword,
+    );
+    expect(mainMenuPage).not.toHaveBeenCalled();
   });
 });
