@@ -17,57 +17,65 @@ export interface TelegramContext {
   bot?: Telegraf;
 }
 
+export async function validateNickname(nickname: string) {
+  const response =
+    await ClientQueryFetcher.getClientCredentialsByNickname(nickname);
+  if (!response) return false;
+  return true;
+}
+
 export class TelegramLoginHandler {
   static stageRegister: {
     [key in keyof typeof BotStage.Auth]: (
       stageParams: TelegramContext,
     ) => Promise<void>;
   } = {
-      NICKNAME: async function ({ ctx, userMessage }): Promise<void> {
-        try {
-          await deleteUserMessage(ctx);
-          const userResponse =
-            await ClientQueryFetcher.getClientCredentialsByNickname(userMessage);
-          if (!userResponse) {
-            await BotUtils.sendBotMessage(
-              ctx,
-              botMessages.inputRequest.auth.errors.invalidNickname,
-            );
-            return;
-          }
+    NICKNAME: async function ({ ctx, userMessage }): Promise<void> {
+      try {
+        await deleteUserMessage(ctx);
+        const userResponse =
+          await ClientQueryFetcher.getClientCredentialsByNickname(userMessage);
+        if (!userResponse) {
           await BotUtils.sendBotMessage(
             ctx,
-            botMessages.inputRequest.auth.password,
+            botMessages.inputRequest.auth.errors.invalidNickname,
           );
-          updateUserState(ctx.from!.id, {
-            stage: BotStage.Auth.PASSWORD,
-            data: {
-              credentials: {
-                nickname: userResponse.nickname,
-                password: userResponse.password,
-              },
+          return;
+        }
+        await BotUtils.sendBotMessage(
+          ctx,
+          botMessages.inputRequest.auth.password,
+        );
+        return updateUserState(ctx.from!.id, {
+          stage: BotStage.Auth.PASSWORD,
+          data: {
+            credentials: {
+              nickname: userResponse.nickname,
+              password: userResponse.password,
             },
-          });
-        } catch (error) {
-          console.error("Error: ", error);
+          },
+        });
+      } catch (error) {
+        console.error("Error: ", error);
+      }
+    },
+    PASSWORD: async function ({ ctx, userMessage, bot }): Promise<void> {
+      try {
+        await deleteUserMessage(ctx);
+        const { password } = getUserCredentials(ctx.from!.id);
+        const isPasswordValid = await compare(userMessage, password);
+        if (!isPasswordValid) {
+          await BotUtils.sendBotMessage(
+            ctx,
+            botMessages.inputRequest.auth.errors.invalidPassword,
+          );
+          return;
         }
-      },
-      PASSWORD: async function ({ ctx, userMessage, bot }): Promise<void> {
-        try {
-          await deleteUserMessage(ctx);
-          const { password } = getUserCredentials(ctx.from!.id);
-          const isPasswordValid = await compare(userMessage, password);
-          if (!isPasswordValid) {
-            await BotUtils.sendBotMessage(
-              ctx,
-              botMessages.inputRequest.auth.errors.invalidPassword,
-            );
-            return;
-          }
-          return await mainMenuPage(ctx, bot!);
-        } catch (error) {
-          console.error("Error: ", error);
-        }
-      },
-    };
+        //This is a inlineKeyboard
+        return await mainMenuPage(ctx, bot!);
+      } catch (error) {
+        console.error("Error: ", error);
+      }
+    },
+  };
 }
